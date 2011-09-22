@@ -1,6 +1,8 @@
 cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
+lib/filter/doctrine/base/
+lib/form/doctrine/base/
 lib/model/doctrine/base/
 log/
 web/uploads/
