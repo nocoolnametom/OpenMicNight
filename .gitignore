@@ -1,0 +1,5 @@
+cache/
+config/databases.yml
+config/ProjectConfiguration.class.php
+log/
+web/uploads/
