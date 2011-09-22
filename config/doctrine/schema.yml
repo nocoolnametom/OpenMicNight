@@ -1,0 +1,148 @@
+Subreddit:
+  actAs: { Timestampable: ~ }
+  columns:
+    name: { type: string(255), notnull: true }
+    domain: { type: string(127) }
+    is_active: { type: boolean, default: 0 }
+    create_new_episodes_cron_formatted: { type: string(32), notnull: true }
+    episode_schedule_cron_formatted: { type: string(32), notnull: true }
+
+AuthorType:
+  actAs: { Timestampable: ~ }
+  columns:
+    type: { type: string(255), notnull: true }
+    description: { type: string(127) }
+    
+Profile:
+  actAs: { Timestampable: ~ }
+  columns:
+    email_address: { type: string(255), notnull: true }
+    email_validation_code: { type: string(127), notnull: true }
+    username: { type: string(255), notnull: true }
+    password: { type: string(127), notnull: true }
+    is_validated: { type: boolean, default: 0 }
+    reddit_username: { type: string(127) }
+    last_logged_in: { type: timestamp }
+    display_reddit_username: { type: boolean, default: 1 }
+    full_name: { type: string(127) }
+    preferred_name: { type: string(127) }
+    website: { type: string(255) }
+    twitter_account: { type: string(127) }
+    avatar: { type: string(255) }
+    short_bio: { type: string(4000) }
+    prefer_html: { type: boolean, default: 0 }
+    address_line_1: { type: string(127) }
+    address_line_2: { type: string(127) }
+    city: { type: string(127) }
+    state: { type: string(127) }
+    zip_code: { type: string(63) }
+    country: { type: string(127) }
+    display_location: { type: boolean, default: 0 }
+    receive_private_messages_from_profile_page: { type: boolean, default: 1 }
+    receive_notification_of_private_messages: { type: boolean, default: 1 }
+    receive_notification_of_newly_opened_episodes: { type: boolean, default: 1 }
+    receive_notification_of_episode_approval_pending: { type: boolean, default: 1 }
+    is_super_admin: { type: boolean, default: 0 }
+
+Membership:
+  actAs: { Timestampable: ~ }
+  columns:
+    type: { type: string(255), notnull: true }
+    description: { type: string(127) }
+
+Application:
+  actAs: { Timestampable: ~ }
+  columns:
+    author_type_id: { type: integer, notnull: true }
+    subreddit_id: { type: integer, notnull: true }
+    restricted_until_previous_misses_deadline: { type: boolean, default: 0 }
+  relations:
+    AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Applications }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Applications }
+  indexes:
+    oneOfEachAuthorTypePerSubreddit:
+      fields: { author_type_id, subreddit_id }
+      type: unique
+
+Deadline:
+  actAs: { Timestampable: ~ }
+  columns:
+    author_type_id: { type: integer, notnull: true }
+    subreddit_id: { type: integer, notnull: true }
+    seconds: { type: integer, notnull = true }
+  relations:
+    AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Deadlines }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Deadlines }
+  indexes:
+    oneOfEachAuthorTypePerSubreddit:
+      fields: { author_type_id, subreddit_id }
+      type: unique
+
+Message:
+  actAs: { Timestampable: ~ }
+  columns:
+    recipient_id: { type: integer, notnull: true }
+    sender_id: { type: integer }
+    previous_message_id: { type: integer }
+    text: { type: string(4000) }
+  relations:
+    Profile: { onDelete: CASCADE, local: recipient_id, foreign: id, foreignAlias: ReceivedMessages }
+    Profile: { onDelete: CASCADE, local: sender_id, foreign: id, foreignAlias: SentMessages }
+    Message: { onDelete: SET NULL, local: previous_message_id, foreign: id, foreignAlias: Replies }
+
+ProfileSubredditMembership:
+  actAs: { Timestampable: ~ }
+  columns:
+    profile_id: { type: integer, notnull: true }
+    subreddit_id: { type: integer, notnull: true }
+    membership_id: { type: integer, notnull: true }
+    display_membersship: { type: boolean, default: 0 }
+  relations:
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: SubredditMemberships }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: ProfileMemberships }
+    Membership: { onDelete: CASCADE, local: membership_id, foreign: id, foreignAlias: SubredditProfiles }
+  indexes:
+    oneProfileMembershipPerSubreddit:
+      fields: { profile_id, subreddit_id }
+      type: unique
+
+Episode:
+  actAs: { Timestampable: ~ }
+  columns:
+    profile_id: { type: integer, notnull: true }
+    subreddit_id: { type: integer, notnull: true }
+    approved_by: { type: integer }
+    release_date: { type: timestamp, notnull: true }
+    audio_file: { type: string(255) }
+    nice_filename: { type: string(255) }
+    graphic_file: { type: string(255) }
+    is_nsfw: { type: boolean, default: 0 }
+    description: { type: string(4000) }
+    is_submitted: { type: boolean, default: 0 }
+    submitted_at: { type: timestamp }
+    is_approved: { type: boolean, default: 0 }
+    approved_at: { type: timestamp }
+    reddit_post_url: { type: string(255) }
+  relations:
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: Episodes }
+    Profile: { onDelete: SET NULL, local: approved_by, foreign: id, foreignAlias: Episodes }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Episodes }
+
+EpisodeAssignment:
+  actAs: { Timestampable: ~ }
+  columns:
+    author_type_id: { type: integer, notnull: true }
+    profile_id: { type: integer, notnull: true }
+    episode_id: { type: integer, notnull: true }
+    missed_deadline: { type: boolean, default: 0 }
+  relations:
+    AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: EpisodeAssignments }
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: EpisodeAssignments }
+    Episode: { onDelete: CASCADE, local: episode_id, foreign: id, foreignAlias: EpisodeAssignments }
+  indexes:
+    noMultipleProfileAssignmentsPerEpisode:
+      fields: { profile_id, subreddit_id }
+      type: unique
+    noMultipleAuthorTypeAssignmentsPerEpisode:
+      fields: { author_type_id, subreddit_id }
+      type: unique
