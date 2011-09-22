@@ -24,4 +24,4 @@ Membership:
     description: Moderator
   admin:
     type: admin
-    description: ADministrator
+    description: Administrator
