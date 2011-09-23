@@ -1,0 +1,56 @@
+generator:
+  class: sfDoctrineGenerator
+  param:
+    model_class:           Episode
+    theme:                 admin
+    non_verbose_templates: true
+    with_show:             false
+    singular:              ~
+    plural:                ~
+    route_prefix:          episode
+    with_doctrine_route:   true
+    actions_base_class:    sfActions
+
+    config:
+      actions: ~
+      fields:
+        is_nsfw:
+          label: NSFW?
+          help: Please mark if the post contains content that is not work-appropriate
+        audio_file:
+          help: Upload your audio file here if it is not already present
+        nice_filename:
+          label: Audio Filename
+          help: Your audio file needs a nicely-formatted name, please give us one
+        graphic_file:
+          help: An optional graphic to accompany your episode (please remember to mark the episode as NSFW if this graphic is NSFW)
+        title:
+          help: The title of your episode
+        description:
+          help: A short description of your episode
+        reddit_post_url:
+          label: Reddit Post URL
+          help: If you've posted about your episode, feel free to link back to that post by putting the link here
+      list:
+        display: [ title, release_date, is_nsfw, reddit_post_url ]
+      filter:
+        display: [ release_date, is_nsfw, title ]
+      form:    ~
+      edit:
+        display: [ audio_file, nice_filename, graphic_file, is_nsfw, title, description, reddit_post_url ]
+        actions:
+          _list: ~
+          submit:
+            name: Submit for Approval
+            action: submit
+            params: confirm=Are you sure?
+          approve:
+            name: Approve
+            action: approve
+            credentials: [moderator, admin]
+          _save: ~
+      new:
+        display: [ audio_file, nice_filename, graphic_file, is_nsfw, title, description]
+        actions:
+          _list: ~
+          _save: ~

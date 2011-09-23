@@ -12,4 +12,8 @@
  */
 class AuthorType extends BaseAuthorType
 {
+    public function __toString()
+    {
+        return $this->getDescription();
+    }
 }

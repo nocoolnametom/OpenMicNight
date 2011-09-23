@@ -12,18 +12,18 @@ AuthorType:
   columns:
     type: { type: string(255), notnull: true }
     description: { type: string(127) }
-    
+
+Validation:
+  columns:
+    type: { type: string(255), notnull: true }
+
 Profile:
   actAs: { Timestampable: ~ }
   columns:
     email_address: { type: string(255), notnull: true }
-    email_validation_code: { type: string(127), notnull: true }
+    validation_key: { type: string(127), notnull: true }
     username: { type: string(255), notnull: true }
     password: { type: string(127), notnull: true }
-    is_validated: { type: boolean, default: 0 }
-    reddit_username: { type: string(127) }
-    last_logged_in: { type: timestamp }
-    display_reddit_username: { type: boolean, default: 1 }
     full_name: { type: string(127) }
     preferred_name: { type: string(127) }
     website: { type: string(255) }
@@ -31,8 +31,8 @@ Profile:
     avatar: { type: string(255) }
     short_bio: { type: string(4000) }
     prefer_html: { type: boolean, default: 0 }
-    address_line_1: { type: string(127) }
-    address_line_2: { type: string(127) }
+    address_line_one: { type: string(127) }
+    address_line_two: { type: string(127) }
     city: { type: string(127) }
     state: { type: string(127) }
     zip_code: { type: string(63) }
@@ -42,6 +42,8 @@ Profile:
     receive_notification_of_private_messages: { type: boolean, default: 1 }
     receive_notification_of_newly_opened_episodes: { type: boolean, default: 1 }
     receive_notification_of_episode_approval_pending: { type: boolean, default: 1 }
+    last_logged_in: { type: timestamp }
+    is_validated: { type: boolean, default: 0 }
     is_super_admin: { type: boolean, default: 0 }
 
 Membership:
@@ -117,6 +119,7 @@ Episode:
     nice_filename: { type: string(255) }
     graphic_file: { type: string(255) }
     is_nsfw: { type: boolean, default: 0 }
+    title: { type: string(255) }
     description: { type: string(4000) }
     is_submitted: { type: boolean, default: 0 }
     submitted_at: { type: timestamp }

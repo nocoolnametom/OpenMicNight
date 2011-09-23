@@ -12,4 +12,8 @@
  */
 class Membership extends BaseMembership
 {
+    public function __toString()
+    {
+        return $this->getDescription();
+    }
 }

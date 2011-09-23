@@ -1,17 +1,24 @@
 Subreddit:
   rexmo:
-    name: exmormon
+    name:                  exmormon
     create_new_episodes_cron_formatted: "0 0 1 * *"
     episode_schedule_cron_formatted: "0 22 * * 1,3,5"
 
 Profile:
   nocoolnametom:
-    email_address: webmaster@nocoolnametom.com
-    email_validation_code: thisIsAFakeCode
-    username: nocoolnametom
-    password: test
-    is_validated: true
-    reddit_username: nocoolnametom
-    full_name: Tom Doggett
-    preferred_name: Tom
-    website: nocoolnametom.com
+    email_address:         webmaster@nocoolnametom.com
+    validation_key:        thisIsAFakeCode
+    username:              nocoolnametom
+    password:              test
+    is_validated:          true
+    full_name:             Tom Doggett
+    preferred_name:        Tom
+    website:               nocoolnametom.com
+
+Episode:
+  episode_one:
+    Subreddit:             rexmo
+    release_date:          '2011-01-01'
+    is_nsfw:               false
+    title:                 Epsiode One
+    description:           This is a test.

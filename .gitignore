@@ -6,4 +6,8 @@ lib/form/doctrine/base/
 lib/model/doctrine/base/
 log/
 web/sf
+web/sfDoctrinePlugin
+web/sfFormExtraPlugin
 web/uploads/
+/plugins/.registry/
+/plugins/.channels/

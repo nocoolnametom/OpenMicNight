@@ -1,3 +1,30 @@
+message:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Message
+    module:               message
+    prefix_path:          /message
+    column:               id
+    with_wildcard_routes: true
+
+profile:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Profile
+    module:               profile
+    prefix_path:          /profile
+    column:               id
+    with_wildcard_routes: true
+
+episode:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Episode
+    module:               episode
+    prefix_path:          /episode
+    column:               id
+    with_wildcard_routes: true
+
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/10-Routing
 

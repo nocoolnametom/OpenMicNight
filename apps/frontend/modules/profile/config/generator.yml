@@ -1,0 +1,36 @@
+generator:
+  class: sfDoctrineGenerator
+  param:
+    model_class:           Profile
+    theme:                 admin
+    non_verbose_templates: true
+    with_show:             false
+    singular:              ~
+    plural:                ~
+    route_prefix:          profile
+    with_doctrine_route:   true
+    actions_base_class:    sfActions
+
+    config:
+      actions: ~
+      fields: ~
+      list:
+        display: [ username, avatar ]
+        object_actions:
+          _edit: ~
+          show:
+            action: show
+        batch_actions: []
+        actions: []
+      filter:
+        display: [ username ]
+      form:    ~
+      edit:
+        actions:
+          _list: ~
+          _save: ~
+      new:
+        display: [ email_address, username, password ]
+        actions:
+          _list: ~
+          _save: ~

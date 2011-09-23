@@ -12,4 +12,8 @@
  */
 class Deadline extends BaseDeadline
 {
+    public function __toString()
+    {
+        return $this->getSeconds();
+    }
 }

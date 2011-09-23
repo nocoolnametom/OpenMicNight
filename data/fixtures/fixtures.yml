@@ -1,27 +1,27 @@
 AuthorType:
   first:
-    type: first
+    type:        first
     description: First Pick
   understudy:
-    type: understudy
+    type:        understudy
     description: Understudy
   dark_horse:
-    type: dark_horse
+    type:        dark_horse
     description: Dark Horse
 
 Membership:
   pending:
-    type: pending
+    type:        pending
     description: Pending
   blocked:
-    type: blocked
+    type:        blocked
     description: Blocked
   user:
-    type: user
+    type:        user
     description: Member
   moderator:
-    type: moderator
+    type:        moderator
     description: Moderator
   admin:
-    type: admin
+    type:        admin
     description: Administrator

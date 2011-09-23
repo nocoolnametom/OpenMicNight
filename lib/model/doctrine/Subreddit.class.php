@@ -12,4 +12,10 @@
  */
 class Subreddit extends BaseSubreddit
 {
+    public function __toString()
+    {
+        return $this->getName();
+    }
+    
+    
 }
