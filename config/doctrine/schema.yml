@@ -1,41 +1,28 @@
 Subreddit:
   actAs: { Timestampable: ~ }
   columns:
-    name: { type: string(255), notnull: true, unique: true }
-    domain: { type: string(127), unique: true }
+    name: { type: string(255), notnull: true }
+    domain: { type: string(127) }
     is_active: { type: boolean, default: 0 }
     create_new_episodes_cron_formatted: { type: string(32), notnull: true }
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
 
 AuthorType:
   actAs: { Timestampable: ~ }
-  options:
-    symfony: { filter: false }
   columns:
-    type: { type: string(255), notnull: true, unique: true }
+    type: { type: string(255), notnull: true }
     description: { type: string(127) }
 
-RedditValidationKeys:
-  options:
-    symfony: { filter: false, form: false }
+Validation:
   columns:
     type: { type: string(255), notnull: true }
 
-Membership:
-  actAs: { Timestampable: ~ }
-  options:
-    symfony: { fitler: false }
-  columns:
-    type: { type: string(255), notnull: true, unique: true }
-    description: { type: string(127) }
-
-User:
+Profile:
   actAs: { Timestampable: ~ }
   columns:
-    email: { type: string(255), notnull: true, unique: true }
-    reddit_validation_key: { type: string(127), notnull: true }
-    username: { type: string(255), notnull: true, unique: true }
-    salt: { type: string(255) }
+    email_address: { type: string(255), notnull: true }
+    validation_key: { type: string(127), notnull: true }
+    username: { type: string(255), notnull: true }
     password: { type: string(127), notnull: true }
     full_name: { type: string(127) }
     preferred_name: { type: string(127) }
@@ -51,29 +38,22 @@ User:
     zip_code: { type: string(63) }
     country: { type: string(127) }
     display_location: { type: boolean, default: 0 }
-    receive_private_messages_from_user_page: { type: boolean, default: 1 }
+    receive_private_messages_from_profile_page: { type: boolean, default: 1 }
     receive_notification_of_private_messages: { type: boolean, default: 1 }
     receive_notification_of_newly_opened_episodes: { type: boolean, default: 1 }
     receive_notification_of_episode_approval_pending: { type: boolean, default: 1 }
-    last_login: { type: timestamp }
+    last_logged_in: { type: timestamp }
     is_validated: { type: boolean, default: 0 }
-    is_active: { type: boolean, default: 0 }
     is_super_admin: { type: boolean, default: 0 }
 
-UserActivationCode:
+Membership:
   actAs: { Timestampable: ~ }
-  options:
-    symfony: { form: false, filter: false }
   columns:
-    user_id: { type: integer, notnull: true }
-    code: { type: string(127) }
-  relations:
-    User: { onDelete: CASCADE, local: user_id, foreign: id, foreignAlias: ActivationCodes }
+    type: { type: string(255), notnull: true }
+    description: { type: string(127) }
 
 Application:
   actAs: { Timestampable: ~ }
-  options: 
-    symfony: { filter: false }
   columns:
     author_type_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -88,8 +68,6 @@ Application:
 
 Deadline:
   actAs: { Timestampable: ~ }
-  options:
-    symfony: { filter: false }
   columns:
     author_type_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -104,38 +82,36 @@ Deadline:
 
 Message:
   actAs: { Timestampable: ~ }
-  options:
-    symfony: { filter: false }
   columns:
     recipient_id: { type: integer, notnull: true }
     sender_id: { type: integer }
-    previous_message_id: { type: integer, unique: true }
+    previous_message_id: { type: integer }
     text: { type: string(4000) }
   relations:
-    User: { onDelete: CASCADE, local: recipient_id, foreign: id, foreignAlias: ReceivedMessages }
-    User: { onDelete: CASCADE, local: sender_id, foreign: id, foreignAlias: SentMessages }
+    Profile: { onDelete: CASCADE, local: recipient_id, foreign: id, foreignAlias: ReceivedMessages }
+    Profile: { onDelete: CASCADE, local: sender_id, foreign: id, foreignAlias: SentMessages }
     Message: { onDelete: SET NULL, local: previous_message_id, foreign: id, foreignAlias: Replies }
 
-UserSubredditMembership:
+ProfileSubredditMembership:
   actAs: { Timestampable: ~ }
   columns:
-    user_id: { type: integer, notnull: true }
+    profile_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
     membership_id: { type: integer, notnull: true }
     display_membersship: { type: boolean, default: 0 }
   relations:
-    User: { onDelete: CASCADE, local: user_id, foreign: id, foreignAlias: SubredditMemberships }
-    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: UserMemberships }
-    Membership: { onDelete: CASCADE, local: membership_id, foreign: id, foreignAlias: SubredditUsers }
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: SubredditMemberships }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: ProfileMemberships }
+    Membership: { onDelete: CASCADE, local: membership_id, foreign: id, foreignAlias: SubredditProfiles }
   indexes:
-    oneUserMembershipPerSubreddit:
-      fields: { user_id, subreddit_id }
+    oneProfileMembershipPerSubreddit:
+      fields: { profile_id, subreddit_id }
       type: unique
 
 Episode:
   actAs: { Timestampable: ~ }
   columns:
-    user_id: { type: integer, notnull: true }
+    profile_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
     approved_by: { type: integer }
     release_date: { type: timestamp, notnull: true }
@@ -151,24 +127,24 @@ Episode:
     approved_at: { type: timestamp }
     reddit_post_url: { type: string(255) }
   relations:
-    User: { onDelete: CASCADE, local: user_id, foreign: id, foreignAlias: SubmittedEpisodes }
-    User: { onDelete: SET NULL, local: approved_by, foreign: id, foreignAlias: ApprovedEpisodes }
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: Episodes }
+    Profile: { onDelete: SET NULL, local: approved_by, foreign: id, foreignAlias: Episodes }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Episodes }
 
 EpisodeAssignment:
   actAs: { Timestampable: ~ }
   columns:
     author_type_id: { type: integer, notnull: true }
-    user_id: { type: integer, notnull: true }
+    profile_id: { type: integer, notnull: true }
     episode_id: { type: integer, notnull: true }
     missed_deadline: { type: boolean, default: 0 }
   relations:
     AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: EpisodeAssignments }
-    User: { onDelete: CASCADE, local: user_id, foreign: id, foreignAlias: EpisodeAssignments }
+    Profile: { onDelete: CASCADE, local: profile_id, foreign: id, foreignAlias: EpisodeAssignments }
     Episode: { onDelete: CASCADE, local: episode_id, foreign: id, foreignAlias: EpisodeAssignments }
   indexes:
-    noMultipleUserAssignmentsPerEpisode:
-      fields: { user_id, episode_id }
+    noMultipleProfileAssignmentsPerEpisode:
+      fields: { profile_id, episode_id }
       type: unique
     noMultipleAuthorTypeAssignmentsPerEpisode:
       fields: { author_type_id, episode_id }

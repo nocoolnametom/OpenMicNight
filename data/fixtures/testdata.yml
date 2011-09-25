@@ -4,9 +4,10 @@ Subreddit:
     create_new_episodes_cron_formatted: "0 0 1 * *"
     episode_schedule_cron_formatted: "0 22 * * 1,3,5"
 
-User:
+Profile:
   nocoolnametom:
-    email:         webmaster@nocoolnametom.com
+    email_address:         webmaster@nocoolnametom.com
+    validation_key:        thisIsAFakeCode
     username:              nocoolnametom
     password:              test
     is_validated:          true

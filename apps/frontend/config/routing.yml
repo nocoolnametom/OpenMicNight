@@ -1,12 +1,3 @@
-user:
-  class: sfDoctrineRouteCollection
-  options:
-    model:                User
-    module:               profile
-    prefix_path:          /profile
-    column:               id
-    with_wildcard_routes: true
-
 message:
   class: sfDoctrineRouteCollection
   options:
@@ -16,14 +7,14 @@ message:
     column:               id
     with_wildcard_routes: true
 
-#profile:
-#  class: sfDoctrineRouteCollection
-#  options:
-#    model:                Profile
-#    module:               profile
-#    prefix_path:          /profile
-#    column:               id
-#    with_wildcard_routes: true
+profile:
+  class: sfDoctrineRouteCollection
+  options:
+    model:                Profile
+    module:               profile
+    prefix_path:          /profile
+    column:               id
+    with_wildcard_routes: true
 
 episode:
   class: sfDoctrineRouteCollection
@@ -40,7 +31,7 @@ episode:
 # default rules
 homepage:
   url:   /
-  param: { module: episode, action: index }
+  param: { module: default, action: index }
 
 # generic rules
 # please, remove them by adding more specific rules

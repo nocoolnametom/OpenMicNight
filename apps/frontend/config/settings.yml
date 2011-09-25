@@ -24,20 +24,12 @@ test:
 
 all:
   .settings:
-    enabled_modules:        [ default, baseAuth ]
-
     # Form security secret (CSRF protection)
     csrf_secret:            aa87cbb195e8095043c012c8a8690b5a72e2924e
 
     # Output escaping settings
     escaping_strategy:      true
     escaping_method:        ESC_SPECIALCHARS
-
-    login_module:           baseAuth
-    login_action:           signin
-
-    secure_module:          baseAuth
-    secure_action:          secure
 
     # Enable the database manager
     use_database:           true
