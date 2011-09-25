@@ -1,9 +1,13 @@
 cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
+data/sql/
 lib/filter/doctrine/base/
 lib/form/doctrine/base/
 lib/model/doctrine/base/
+lib/filter/doctrine/sfDoctrineGuardPlugin/base/
+lib/form/doctrine/sfDoctrineGuardPlugin/base/
+lib/model/doctrine/sfDoctrineGuardPlugin/base/
 log/
 web/sf
 web/sfDoctrinePlugin
