@@ -4,16 +4,14 @@ Subreddit:
     create_new_episodes_cron_formatted: "0 0 1 * *"
     episode_schedule_cron_formatted: "0 22 * * 1,3,5"
 
-Profile:
+sfGuardUser:
   nocoolnametom:
-    email_address:         webmaster@nocoolnametom.com
-    validation_key:        thisIsAFakeCode
-    username:              nocoolnametom
-    password:              test
-    is_validated:          true
-    full_name:             Tom Doggett
-    preferred_name:        Tom
-    website:               nocoolnametom.com
+    first_name:     Tom
+    last_name:      Doggett
+    email_address:  nocoolnametom@gmail.com
+    username:       admin
+    password:       admin
+    is_super_admin: true
 
 Episode:
   episode_one:
@@ -21,4 +19,4 @@ Episode:
     release_date:          '2011-01-01'
     is_nsfw:               false
     title:                 Epsiode One
-    description:           This is a test.
+    description:           This is a test

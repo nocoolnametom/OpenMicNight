@@ -12,6 +12,7 @@ log/
 web/sf
 web/sfDoctrinePlugin
 web/sfFormExtraPlugin
+web/sfAdminThemejRollerPlugin
 web/uploads/
 /plugins/.registry/
 /plugins/.channels/
