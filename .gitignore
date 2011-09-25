@@ -2,9 +2,15 @@ cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
 lib/filter/doctrine/base/
+lib/filter/doctrine/doAuthPlugin/base/
 lib/form/doctrine/base/
+lib/form/doctrine/doAuthPlugin/base
 lib/model/doctrine/base/
+lib/model/doctrine/doAuthPlugin/base
 log/
+plugins/doAuthPlugin/lib/filter/doctrine/base
+plugins/doAuthPlugin/lib/form/doctrine/base
+plugins/doAuthPlugin/lib/model/doctrine/base
 web/sf
 web/sfDoctrinePlugin
 web/sfFormExtraPlugin
