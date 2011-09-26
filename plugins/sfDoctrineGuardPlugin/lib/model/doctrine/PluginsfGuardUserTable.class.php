@@ -27,6 +27,24 @@ abstract class PluginsfGuardUserTable extends Doctrine_Table
 
     return $query->fetchOne();
   }
+  
+  /**
+   * Retrieves a sfGuardUser object by email_address and is_active flag.
+   *
+   * @param  string  $emailAddress The email address
+   * @param  boolean $isActive     The user's status
+   *
+   * @return sfGuardUser
+   */
+  public function retrieveByEmailAddress($emailAddress, $isActive = true)
+  {
+    $query = Doctrine_Core::getTable('sfGuardUser')->createQuery('u')
+      ->where('u.email_address = ?', $emailAddress)
+      ->addWhere('u.is_active = ?', $isActive)
+    ;
+
+    return $query->fetchOne();
+  }
 
   /**
    * Retrieves a sfGuardUser object by username or email_address and is_active flag.

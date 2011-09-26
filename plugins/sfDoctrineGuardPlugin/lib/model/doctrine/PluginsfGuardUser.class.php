@@ -49,7 +49,7 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
 
     if (!$salt = $this->getSalt())
     {
-      $salt = md5(rand(100000, 999999).$this->getUsername());
+      $salt = md5(rand(100000, 999999).$this->getEmailAddress());
       $this->setSalt($salt);
     }
     $modified = $this->getModified();

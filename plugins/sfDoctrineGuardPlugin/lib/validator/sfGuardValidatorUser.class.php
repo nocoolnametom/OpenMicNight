@@ -17,53 +17,66 @@
  */
 class sfGuardValidatorUser extends sfValidatorBase
 {
-  public function configure($options = array(), $messages = array())
-  {
-    $this->addOption('username_field', 'username');
-    $this->addOption('password_field', 'password');
-    $this->addOption('throw_global_error', false);
 
-    $this->setMessage('invalid', 'The username and/or password is invalid.');
-  }
-
-  protected function doClean($values)
-  {
-    $username = isset($values[$this->getOption('username_field')]) ? $values[$this->getOption('username_field')] : '';
-    $password = isset($values[$this->getOption('password_field')]) ? $values[$this->getOption('password_field')] : '';
-
-    $allowEmail = sfConfig::get('app_sf_guard_plugin_allow_login_with_email', true);
-    $method = $allowEmail ? 'retrieveByUsernameOrEmailAddress' : 'retrieveByUsername';
-
-    // don't allow to sign in with an empty username
-    if ($username)
+    public function configure($options = array(), $messages = array())
     {
-       if ($callable = sfConfig::get('app_sf_guard_plugin_retrieve_by_username_callable'))
-       {
-           $user = call_user_func_array($callable, array($username));
-       } else {
-           $user = $this->getTable()->retrieveByUsername($username);
-       }
-        // user exists?
-       if($user)
-       {
-          // password is ok?
-          if ($user->getIsActive() && $user->checkPassword($password))
-          {
-            return array_merge($values, array('user' => $user));
-          }
-       }
+        $this->addOption('username_field', 'username');
+        $this->addOption('password_field', 'password');
+        $this->addOption('throw_global_error', false);
+
+        if (sfConfig::get('app_sf_guard_plugin_only_login_with_email', false)) {
+            $this->setMessage('invalid', 'The email and/or password is invalid.');
+        } elseif (sfConfig::get('app_sf_guard_plugin_allow_login_with_email',
+                                true)) {
+            $this->setMessage('invalid',
+                              'The username/email and/or password is invalid.');
+        } else {
+            $this->setMessage('invalid',
+                              'The username and/or password is invalid.');
+        }
     }
 
-    if ($this->getOption('throw_global_error'))
+    protected function doClean($values)
     {
-      throw new sfValidatorError($this, 'invalid');
+        $username = isset($values[$this->getOption('username_field')]) ? $values[$this->getOption('username_field')]
+                    : '';
+        $password = isset($values[$this->getOption('password_field')]) ? $values[$this->getOption('password_field')]
+                    : '';
+
+        $allowEmail = sfConfig::get('app_sf_guard_plugin_allow_login_with_email',
+                                    true);
+        $onlyEmail = sfConfig::get('app_sf_guard_plugin_only_login_with_email',
+                                   false);
+
+        $method = $onlyEmail ? 'retrieveByEmailAddress' : ($allowEmail ? 'retrieveByUsernameOrEmailAddress'
+                            : 'retrieveByUsername');
+
+        // don't allow to sign in with an empty username
+        if ($username) {
+            if ($callable = sfConfig::get('app_sf_guard_plugin_retrieve_by_username_callable')) {
+                $user = call_user_func_array($callable, array($username));
+            } else {
+                $user = call_user_func(array($this->getTable(), $method), array($username));
+            }
+            // user exists?
+            if ($user) {
+                // password is ok?
+                if ($user->getIsActive() && $user->checkPassword($password)) {
+                    return array_merge($values, array('user' => $user));
+                }
+            }
+        }
+
+        if ($this->getOption('throw_global_error')) {
+            throw new sfValidatorError($this, 'invalid');
+        }
+
+        throw new sfValidatorErrorSchema($this, array($this->getOption('username_field') => new sfValidatorError($this, 'invalid')));
     }
 
-    throw new sfValidatorErrorSchema($this, array($this->getOption('username_field') => new sfValidatorError($this, 'invalid')));
-  }
+    protected function getTable()
+    {
+        return Doctrine::getTable('sfGuardUser');
+    }
 
-  protected function getTable()
-  {
-    return Doctrine::getTable('sfGuardUser');
-  }
 }
