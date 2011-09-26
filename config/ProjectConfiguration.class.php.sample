@@ -11,8 +11,9 @@ class ProjectConfiguration extends sfProjectConfiguration
                 'sfDoctrinePlugin'
                 , 'sfDoctrineGuardPlugin'
                 , 'sfAdminThemejRollerPlugin'
+                , 'sfWidgetFormInputSWFUploadPlugin'
+                , 'sfJqueryFormValidationPlugin'
         );
-        $this->enablePlugins('sfAdminThemejRollerPlugin');
-    }
+  }
 }
 

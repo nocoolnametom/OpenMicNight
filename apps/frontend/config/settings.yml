@@ -27,7 +27,7 @@ all:
     # Form security secret (CSRF protection)
     csrf_secret:            aa87cbb195e8095043c012c8a8690b5a72e2924e
     
-    enabled_modules:        [ default, sfGuardAuth ]
+    enabled_modules:        [ default, sfGuardAuth, sfJqueryFormVal ]
     
     login_module:           sfGuardAuth
     login_action:           signin

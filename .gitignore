@@ -13,6 +13,7 @@ web/sf
 web/sfDoctrinePlugin
 web/sfFormExtraPlugin
 web/sfAdminThemejRollerPlugin
+web/sfWidgetFormInputSWFUploadPlugin
 web/uploads/
 /plugins/.registry/
 /plugins/.channels/
