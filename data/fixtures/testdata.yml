@@ -9,12 +9,10 @@ sfGuardUser:
     email_address:  nocoolnametom@gmail.com
     username:       admin
     password:       admin
+    is_validated: true
+    full_name: Tom Doggett
+    preferred_name: Tom
     is_super_admin: true
-    Profile:
-      is_validated: true
-      reddit_validation_key: laksdfhsdfljnasdlf
-      full_name: Tom Doggett
-      preferred_name: Tom
       
       
 

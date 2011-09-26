@@ -17,33 +17,6 @@ Validation:
   columns:
     type: { type: string(255), notnull: true }
 
-Profile:
-  actAs: { Timestampable: ~ }
-  columns:
-    sf_guard_user_id: { type: integer, notnull: true }
-    is_validated: { type: boolean, default: 0 }
-    reddit_validation_key: { type: string(127), notnull: true }
-    full_name: { type: string(127) }
-    preferred_name: { type: string(127) }
-    website: { type: string(255) }
-    twitter_account: { type: string(127) }
-    avatar: { type: string(255) }
-    short_bio: { type: string(4000) }
-    prefer_html: { type: boolean, default: 0 }
-    address_line_one: { type: string(127) }
-    address_line_two: { type: string(127) }
-    city: { type: string(127) }
-    state: { type: string(127) }
-    zip_code: { type: string(63) }
-    country: { type: string(127) }
-    display_location: { type: boolean, default: 0 }
-    receive_private_messages_from_profile_page: { type: boolean, default: 1 }
-    receive_notification_of_private_messages: { type: boolean, default: 1 }
-    receive_notification_of_newly_opened_episodes: { type: boolean, default: 1 }
-    receive_notification_of_episode_approval_pending: { type: boolean, default: 1 }
-  relations:
-    sfGuardUser: { foreignType: one }
-
 Membership:
   actAs: { Timestampable: ~ }
   columns:
