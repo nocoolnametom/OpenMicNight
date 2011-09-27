@@ -73,6 +73,7 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
         $this->_set('email_address', $emailAddress);
         $reddit_hash = $this->buildRedditValidationKeyHash();
         $this->setRedditValidationKey($reddit_hash);
+        $this->setIsValidated(false);
     }
 
     public function setUsername($username)
@@ -80,6 +81,7 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
         $this->_set('username', $username);
         $reddit_hash = $this->buildRedditValidationKeyHash();
         $this->setRedditValidationKey($reddit_hash);
+        $this->setIsValidated(false);
     }
 
     public function buildRedditValidationKeyHash()
