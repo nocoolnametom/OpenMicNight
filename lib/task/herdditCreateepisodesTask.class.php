@@ -35,18 +35,8 @@ EOF;
         $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
 
         // add your code here
-        set_include_path(sfConfig::get('sf_lib_dir').'/vendor'.PATH_SEPARATOR.get_include_path());
-        require_once 'Cron/FieldInterface.php';
-        require_once 'Cron/AbstractField.php';
-        require_once 'Cron/CronExpression.php';
-        require_once 'Cron/DayOfMonthField.php';
-        require_once 'Cron/DayOfWeekField.php';
-        require_once 'Cron/FieldFactory.php';
-        require_once 'Cron/HoursField.php';
-        require_once 'Cron/MinutesField.php';
-        require_once 'Cron/MonthField.php';
-        require_once 'Cron/YearField.php';
-
+        ProjectConfiguration::registerCron();
+        
         $subreddit_name = $arguments['subreddit'] != "" ? $arguments['subreddit']
                     : '%';
 

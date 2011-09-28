@@ -1,10 +1,34 @@
 <?php
 
-require_once '/usr/share/symfony/lib/autoload/sfCoreAutoload.class.php';
+require_once '/opt/symfony/symfony14/lib/autoload/sfCoreAutoload.class.php';
 sfCoreAutoload::register();
 
 class ProjectConfiguration extends sfProjectConfiguration
 {
+
+    static protected $cronLoaded = false;
+
+    static public function registerCron()
+    {
+        if (self::$cronLoaded) {
+            return;
+        }
+
+        set_include_path(sfConfig::get('sf_lib_dir') . '/vendor' . PATH_SEPARATOR . get_include_path());
+        require_once 'Cron/FieldInterface.php';
+        require_once 'Cron/AbstractField.php';
+        require_once 'Cron/CronExpression.php';
+        require_once 'Cron/DayOfMonthField.php';
+        require_once 'Cron/DayOfWeekField.php';
+        require_once 'Cron/FieldFactory.php';
+        require_once 'Cron/HoursField.php';
+        require_once 'Cron/MinutesField.php';
+        require_once 'Cron/MonthField.php';
+        require_once 'Cron/YearField.php';
+        
+        self::$cronLoaded = true;
+    }
+
     public function setup()
     {
         $this->enablePlugins(
@@ -14,6 +38,6 @@ class ProjectConfiguration extends sfProjectConfiguration
                 , 'sfWidgetFormInputSWFUploadPlugin'
                 , 'sfJqueryFormValidationPlugin'
         );
-  }
-}
+    }
 
+}
