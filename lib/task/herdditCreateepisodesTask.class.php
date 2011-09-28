@@ -24,7 +24,7 @@ class herdditCreateepisodesTask extends sfBaseTask
 The [herddit:create-episodes|INFO] task generates empty Episode objects for those Subreddits not having any future Episodes.  Calling with with a specific Subreddit name will generate Episode objects for only that Subreddit, assuming that it does not have future Episodes.
 Call it with:
 
-  [php symfony herddit:create-episodes|INFO]
+  [php symfony herddit:create-episodes ]
 EOF;
     }
 
@@ -35,7 +35,7 @@ EOF;
         $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
 
         // add your code here
-        include_once(sfConfig::get('sf_lib_dir') . '/vendor/cron.phar');
+        //include_once(sfConfig::get('sf_lib_dir') . '/vendor/cron.phar');
 
         $subreddit_name = $arguments['subreddit'] != "" ? $arguments['subreddit']
                     : '%';

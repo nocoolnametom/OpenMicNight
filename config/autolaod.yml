@@ -1,0 +1,4 @@
+autoload:
+    Cron:
+        path:      %SF_LIB_DIR%/vendor/Cron
+        recursive: false
