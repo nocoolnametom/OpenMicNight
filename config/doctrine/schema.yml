@@ -115,7 +115,7 @@ EpisodeAssignment:
     Episode: { onDelete: CASCADE, local: episode_id, foreign: id, foreignAlias: EpisodeAssignments }
   indexes:
     noMultipleProfileAssignmentsPerEpisode:
-      fields: { profile_id, episode_id }
+      fields: { sf_guard_user_id, episode_id }
       type: unique
     noMultipleAuthorTypeAssignmentsPerEpisode:
       fields: { author_type_id, episode_id }
