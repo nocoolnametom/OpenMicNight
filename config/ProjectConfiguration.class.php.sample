@@ -25,19 +25,21 @@ class ProjectConfiguration extends sfProjectConfiguration
         require_once 'Cron/MinutesField.php';
         require_once 'Cron/MonthField.php';
         require_once 'Cron/YearField.php';
-        
+
         self::$cronLoaded = true;
     }
 
     public function setup()
     {
-        $this->enablePlugins(
-                'sfDoctrinePlugin'
-                , 'sfDoctrineGuardPlugin'
-                , 'sfAdminThemejRollerPlugin'
-                , 'sfWidgetFormInputSWFUploadPlugin'
-                , 'sfJqueryFormValidationPlugin'
-        );
+        $this->enablePlugins(array(
+            'sfDoctrinePlugin',
+            'sfDoctrineGuardPlugin',
+            'sfAdminThemejRollerPlugin',
+            'sfWidgetFormInputSWFUploadPlugin',
+            'sfJqueryFormValidationPlugin',
+            'sfPhpunitPlugin',
+            'sfPhpunitNetbeansPlugin',
+        ));
     }
 
 }

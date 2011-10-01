@@ -6,6 +6,7 @@ Subreddit:
     is_active: { type: boolean, default: 0 }
     create_new_episodes_cron_formatted: { type: string(32), notnull: true }
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
+    schedule_iteration_length: { type: integer, notnull: true, default: 0 }
 
 AuthorType:
   actAs: { Timestampable: ~ }

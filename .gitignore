@@ -2,6 +2,7 @@ cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
 data/sql/
+plugins/sfPhpunitNetbeansPlugin/data/phpunit.xml
 lib/filter/doctrine/base/
 lib/form/doctrine/base/
 lib/model/doctrine/base/
