@@ -15,5 +15,6 @@ web/sfFormExtraPlugin
 web/sfAdminThemejRollerPlugin
 web/sfWidgetFormInputSWFUploadPlugin
 web/uploads/
-/plugins/.registry/
-/plugins/.channels/
+plugins/.filemap
+plugins/.registry/
+plugins/.channels/
