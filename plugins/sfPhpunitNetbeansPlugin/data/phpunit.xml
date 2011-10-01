@@ -11,5 +11,5 @@
 <phpunit
   colors="true"
   testSuiteLoaderClass="sfPhpunitNetbeansLoader"
-  testSuiteLoaderFile="%%plugin-root-dir%%/lib/sfPhpunitNetbeansLoader.php"
+  testSuiteLoaderFile="/Users/doggetto/Development/web/php/symfony1/OpenMicNight/plugins/sfPhpunitNetbeansPlugin/lib/sfPhpunitNetbeansLoader.php"
 />
