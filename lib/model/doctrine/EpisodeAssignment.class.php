@@ -12,4 +12,137 @@
  */
 class EpisodeAssignment extends BaseEpisodeAssignment
 {
+
+    public function save(Doctrine_Connection $conn = null)
+    {
+        /* If new and the user to be attached to this EpisodeAssignment is 
+         * banned, prevent saving the object.
+         */
+        if ($this->isNew()) {
+            $user_id = $this->getSfGuardUser();
+            $subreddit_id = $this->getEpisode()->getSubreddit();
+            $authortype_id = $this->getAuthorType();
+
+            $subreddit_membership = Doctrine::getTable('sfGuardUserSubredditMembership')
+                    ->createQuery()
+                    ->leftJoin('Membership')
+                    ->where('sfGuardUserSubredditMembership.sf_guard_user_id = ?',
+                            $user_id)
+                    ->andWhere('sfGuardUserSubredditMembership.subreddit_id = ?',
+                               $subreddit_id)
+                    ->andWhereIn('Membership.name',
+                                 array(
+                        'blocked',
+                    ))
+                    ->execute()
+                    ->getFirst();
+            if ($subreddit_membership) {
+                $this->delete();
+                throw new sfException("Cannot create EpisodeAssignment because "
+                        . "sfGuardUser $user_id has a blocked Membership within "
+                        . " Subreddit $subreddit_id.");
+                return;
+            }
+
+            /* Only one sfGuardUser can sign up for one Episode with the same
+             * AuthorType for each Application period.
+             */
+            $existing_episode_assignments = Doctrine::getTable('EpisodeAssignment')
+                    ->createQuery()
+                    ->leftJoin('Episode')
+                    ->where('EpisodeAssignment.author_type_id = ?',
+                            $authortype_id)
+                    ->andWhere('EpisodeAssignment.sf_guard_user_id = ?',
+                               $user_id)
+                    ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
+                    ->andWhere('Episode.release_date > NOW()');
+            if (count($existing_episode_assignments)) {
+                $this->delete();
+                throw new sfException("Cannot create EpisodeAssignment because "
+                        . "sfGuardUser $user_id has already registered with "
+                        . "AuthorType $authortype_id within Subreddit "
+                        . "$subreddit_id.");
+                return;
+            }
+
+            /* The EpisodeAssignment must be within the deadline for the
+             * AuthorType.
+             */
+            $deadline_seconds = Doctrine_Query::create()
+                    ->select('Deadline.seconds')
+                    ->from('Deadline')
+                    ->where('Deadline.author_type_id = ?', $authortype_id)
+                    ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
+                    ->execute()
+                    ->getFirst();
+            $episode_not_valid = Doctrine_Query::create()
+                    ->select('Episode.id')
+                    ->from('Episode')
+                    ->where('Episode.id = ?', $this->getEpisodeId())
+                    ->andWhere('TO_SECONDS(Episode.release_date - NOW()) < ?',
+                               $deadline_seconds)
+                    ->execute()
+                    ->getFirst();
+            if ($episode_not_valid) {
+                $this->delete();
+                throw new sfException("Cannot create EpisodeAssignment because "
+                        . "the deadline has already passed for AuthorType "
+                        . "$authortype_id within Subreddit $subreddit_id.");
+                return;
+            }
+
+            /* Even if the deadline has not yet passed, we may only sign up an 
+             * AuthorType if the AuthorType is allowed to register before the 
+             * previous AuthorType (meaning the AuthorType with the next-longest
+             * deadline).
+             */
+            $previous_author_type_id = Doctrine_Query::create()
+                    ->select('Deadline.author_type_id')
+                    ->from('Deadline')
+                    ->where('Deadline.subreddit_id = ?', $subreddit_id)
+                    ->andWhere('Deadline.seconds > ?', $deadline_seconds)
+                    ->orderBy('Deadline.seconds ASC')
+                    ->execute()
+                    ->getFirst();
+            if ($previous_author_type_id) {
+                $application_restricted = Doctrine_Query::create()
+                        ->select('Application.restricted_until_previous_misses_deadline')
+                        ->from('Application')
+                        ->where('Application.author_type_id = ?', $authortype_id)
+                        ->andWhere('Application.subreddit_id = ?', $subreddit_id)
+                        ->execute()
+                        ->getFirst();
+                if ($application_restricted) {
+                    $deadline_seconds = Doctrine_Query::create()
+                            ->select('Deadline.seconds')
+                            ->from('Deadline')
+                            ->where('Deadline.author_type_id = ?',
+                                    $previous_author_type_id)
+                            ->andWhere('Deadline.subreddit_id = ?',
+                                       $subreddit_id)
+                            ->execute()
+                            ->getFirst();
+                    $episode_valid = Doctrine_Query::create()
+                            ->select('Episode.id')
+                            ->from('Episode')
+                            ->where('Episode.id = ?', $this->getEpisodeId())
+                            ->andWhere('TO_SECONDS(Episode.release_date - NOW()) > ?',
+                                       $deadline_seconds)
+                            ->execute()
+                            ->getFirst();
+                    if ($episode_valid) {
+                        $this->delete();
+                        throw new sfException("Cannot create EpisodeAssignment because "
+                                . "the deadline has not yet passed for the "
+                                . "previous AuthorType $authortype_id within "
+                                . "Subreddit $subreddit_id.");
+                        return;
+                    }
+                }
+            }
+        }
+
+        parent::save($conn);
+    }
+
 }
