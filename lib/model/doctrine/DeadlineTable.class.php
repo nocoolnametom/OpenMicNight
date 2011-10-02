@@ -16,4 +16,15 @@ class DeadlineTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Deadline');
     }
+    
+    public function getSecondsByAuthorAndSubreddit($author_type_id, $subreddit_id)
+    {
+        $seconds = $this->createQuery()
+                    ->select('Deadline.seconds')
+                    ->where('Deadline.author_type_id = ?', $author_type_id)
+                    ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
+                    ->execute()
+                    ->getFirst();
+        return $seconds;
+    }
 }

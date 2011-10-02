@@ -7,6 +7,7 @@
  */
 class sfGuardUserSubredditMembershipTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,4 +17,20 @@ class sfGuardUserSubredditMembershipTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('sfGuardUserSubredditMembership');
     }
+
+    public function getFirstByUserSubredditAndMemberships($user_id, $subreddit_id,
+                                                    $memberships = array())
+    {
+        $subreddit_membership = $this->createQuery()
+                ->leftJoin('Membership')
+                ->where('sfGuardUserSubredditMembership.sf_guard_user_id = ?',
+                        $user_id)
+                ->andWhere('sfGuardUserSubredditMembership.subreddit_id = ?',
+                           $subreddit_id)
+                ->andWhereIn('Membership.name', $memberships)
+                ->execute()
+                ->getFirst();
+        return $subreddit_membership;
+    }
+
 }

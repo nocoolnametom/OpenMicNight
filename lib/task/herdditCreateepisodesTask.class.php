@@ -7,7 +7,7 @@ class herdditCreateepisodesTask extends sfBaseTask
     {
         // // add your own arguments here
         $this->addArguments(array(
-            new sfCommandArgument('subreddit', sfCommandArgument::OPTIONAL, 'The name of any specific subreddit'),
+            new sfCommandArgument('subreddit', sfCommandArgument::OPTIONAL, 'The name of any specific subreddit', '%'),
         ));
 
         $this->addOptions(array(
@@ -36,42 +36,12 @@ EOF;
 
         // add your code here
         ProjectConfiguration::registerCron();
-        
-        $subreddit_name = $arguments['subreddit'] != "" ? $arguments['subreddit']
-                    : '%';
 
-
-        $subquery = Doctrine_Query::create()
-                ->select('Subreddit.id')
-                ->from('Subreddit')
-                ->leftJoin('Episode')
-                ->groupBy('Episode.release_date')
-                ->having('Episode.release_date > NOW()');
-        $subreddits = @Doctrine_Query::create()
-                ->from('Subreddit')
-                ->where('Subreddit.name LIKE :name',
-                        array(':name' => $subreddit_name))
-                ->whereNotIn('Subreddit.id', $subquery)
-                ->execute();
-
+        $subreddits = Doctrine::getTable('Subreddit')
+                ->getSubredditsNeedingEpisodeGeneration($arguments['subreddit']);
 
         foreach ($subreddits as $subreddit) {
-            $episode_schedule = Cron\CronExpression::factory($subreddit->getEpisodeScheduleCronFormatted());
-
-            $creation_schedule = Cron\CronExpression::factory($subreddit->getCreateNewEpisodesCronFormatted());
-
-            $stop_creating = $creation_schedule->getNextRunDate();
-
-            $episode_date = new DateTime(date('Y-m-d H:i:s', time()));
-            while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
-            <= $stop_creating->getTimestamp()) {
-                $episode_date = $episode_schedule->getNextRunDate($episode_date);
-
-                $episode = new Episode();
-                $episode->setSubreddit($subreddit);
-                $episode->setReleaseDate($episode_date->format('Y-m-d H:i:s'));
-                $episode->save();
-            }
+            $subreddit->generateEpisodes();
         }
     }
 

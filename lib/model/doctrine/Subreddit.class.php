@@ -12,10 +12,32 @@
  */
 class Subreddit extends BaseSubreddit
 {
+
     public function __toString()
     {
         return $this->getName();
     }
-    
-    
+
+    public function generateEpisodes()
+    {
+        $episode_schedule = Cron\CronExpression::factory(
+                        $this->getEpisodeScheduleCronFormatted());
+
+        $creation_schedule = Cron\CronExpression::factory(
+                        $this->getCreateNewEpisodesCronFormatted());
+
+        $stop_creating = $creation_schedule->getNextRunDate();
+
+        $episode_date = new DateTime(date('Y-m-d H:i:s', time()));
+        while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
+        <= $stop_creating->getTimestamp()) {
+            $episode_date = $episode_schedule->getNextRunDate($episode_date);
+
+            $episode = new Episode();
+            $episode->setSubreddit($this);
+            $episode->setReleaseDate($episode_date->format('Y-m-d H:i:s'));
+            $episode->save();
+        }
+    }
+
 }

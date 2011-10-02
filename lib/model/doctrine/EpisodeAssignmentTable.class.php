@@ -7,6 +7,7 @@
  */
 class EpisodeAssignmentTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,4 +17,23 @@ class EpisodeAssignmentTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('EpisodeAssignment');
     }
+
+    public function getFirstByUserAuthorTypeAndSubreddit($author_type_id,
+                                                          $user_id,
+                                                          $subreddit_id)
+    {
+        $episode_assignments = $this->createQuery()
+                ->leftJoin('Episode')
+                ->where('EpisodeAssignment.author_type_id = ?',
+                        $author_type_id)
+                ->andWhere('EpisodeAssignment.sf_guard_user_id = ?',
+                           $user_id)
+                ->andWhere('Episode.subreddit_id = ?',
+                           $subreddit_id)
+                ->andWhere('Episode.release_date > NOW()')
+                ->execute()
+                ->getFirst();
+        return $episode_assignments;
+    }
+
 }

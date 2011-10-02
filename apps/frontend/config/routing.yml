@@ -45,6 +45,13 @@ homepage:
   url:   /
   param: { module: default, action: index }
 
+subreddit_index:
+  url:   /r/:subreddit_name/:module
+  param: { action: index }
+
+subreddit_default:
+  url:   /r/:subreddit_name/:module/:action/*
+
 # generic rules
 # please, remove them by adding more specific rules
 default_index:
