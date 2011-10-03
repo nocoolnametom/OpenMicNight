@@ -7,10 +7,23 @@
   
   <testsuites>
     <testsuite name="Unit Tests">
-      <directory>test/phpunit/unit/</directory>
-    </testsuite>
-     <testsuite name="Functional Tests">
-       <directory>test/phpunit/functional/</directory>
+      <directory>test/phpunit/unit/model/</directory>
     </testsuite>
   </testsuites>
+
+  <filter>
+    <blacklist>
+      <directory>apps</directory>
+      <directory>cache/</directory>
+      <directory>config/</directory>
+      <directory>plugins</directory>
+      <directory>lib/model/doctrine/base/</directory>
+      <directory>lib/model/doctrine/sfDoctrineGuardPlugin/base/</directory>
+      <exclude>
+        <directory>lib/model/doctrine/sfDoctrineGuardPlugin/</directory>
+        <directory>lib/model/doctrine/</directory>
+      </exclude>
+      <directory>lib/vendor/Cron/</directory>
+    </blacklist>
+  </filter>
 </phpunit>

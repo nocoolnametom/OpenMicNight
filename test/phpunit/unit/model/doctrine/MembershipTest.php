@@ -3,15 +3,12 @@ require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
 
 class MembershipTest extends sfPHPUnitBaseTestCase
 {
-  public function testDefault()
+  public function testCreate()
   {
-    $t = $this->getTest();
-
-    // lime-like assertions
-    //$t->diag('hello world');
-    //$t->ok(true, 'test something');
-		
-    // native assertions
-    //$this->assertTrue(true, 'test something')
+    $test_name = 'test_name';
+    $t = new Membership();
+    $t->setDescription($test_name);
+    $this->assertTrue($t instanceof Membership);
+    $this->assertEquals($t->__toString(), $test_name);
   }
 }

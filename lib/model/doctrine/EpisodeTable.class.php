@@ -22,8 +22,8 @@ class EpisodeTable extends Doctrine_Table
                                                        $episode_id = null)
     {
         $episode_assignments = $this->createQuery()
-                ->where('TO_SECONDS(Episode.release_date - NOW()) < ?',
-                           $deadline_seconds);
+                ->where('(Episode.release_date - NOW()) < ?',
+                           $seconds);
         if ($episode_id)
             $episode_assignments = $episode_assignments->andWhere('Episode.id = ?',
                                                                $episode_id);

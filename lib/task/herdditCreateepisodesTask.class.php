@@ -41,7 +41,11 @@ EOF;
                 ->getSubredditsNeedingEpisodeGeneration($arguments['subreddit']);
 
         foreach ($subreddits as $subreddit) {
-            $subreddit->generateEpisodes();
+            $episodes = $subreddit->collectGeneratedEpisodes();
+            foreach($episodes as $episode)
+            {
+                $episode->save();
+            }
         }
     }
 

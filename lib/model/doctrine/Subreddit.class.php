@@ -18,17 +18,46 @@ class Subreddit extends BaseSubreddit
         return $this->getName();
     }
 
-    public function generateEpisodes()
+    
+    public function getEpisodeScheduleAsCronExpression()
     {
-        $episode_schedule = Cron\CronExpression::factory(
-                        $this->getEpisodeScheduleCronFormatted());
+        ProjectConfiguration::registerCron();
+        return Cron\CronExpression::factory(parent::getEpisodeScheduleCronFormatted());
+    }
 
-        $creation_schedule = Cron\CronExpression::factory(
-                        $this->getCreateNewEpisodesCronFormatted());
+    public function getCreationScheduleAsCronExpression()
+    {
+        ProjectConfiguration::registerCron();
+        return Cron\CronExpression::factory(parent::getCreateNewEpisodesCronFormatted());
+    }
+
+    public function getEpisodeItervalAsDateInterval()
+    {
+        $next_creation = $this->getEpisodeScheduleAsCronExpression()->getNextRunDate();
+        $after_that = $this->getEpisodeScheduleAsCronExpression()->getNextRunDate($next_creation);
+        return $next_creation->diff($after_that);
+    }
+
+    public function getCreationIntervalAsDateInterval()
+    {
+        $next_creation = $this->getCreationScheduleAsCronExpression()->getNextRunDate();
+        $after_that = $this->getCreationScheduleAsCronExpression()->getNextRunDate($next_creation);
+        return $next_creation->diff($after_that);
+    }
+
+    public function collectGeneratedEpisodes()
+    {
+        ProjectConfiguration::registerCron();
+        
+        $episode_schedule = $this->getEpisodeScheduleAsCronExpression();
+
+        $creation_schedule = $this->getCreationScheduleAsCronExpression();
 
         $stop_creating = $creation_schedule->getNextRunDate();
 
         $episode_date = new DateTime(date('Y-m-d H:i:s', time()));
+
+        $new_episodes = array();
         while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
         <= $stop_creating->getTimestamp()) {
             $episode_date = $episode_schedule->getNextRunDate($episode_date);
@@ -36,8 +65,9 @@ class Subreddit extends BaseSubreddit
             $episode = new Episode();
             $episode->setSubreddit($this);
             $episode->setReleaseDate($episode_date->format('Y-m-d H:i:s'));
-            $episode->save();
+            $new_episodes[] = $episode;
         }
-    }
 
+        return $new_episodes;
+    }
 }

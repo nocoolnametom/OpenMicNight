@@ -20,14 +20,21 @@ class SubredditTable extends Doctrine_Table
     public function getSubredditsNeedingEpisodeGeneration($subreddit_name = '%')
     {
         $subquery = $this->createQuery()
-                ->select('Subreddit.id')
-                ->leftJoin('Episode')
-                ->groupBy('Episode.release_date')
-                ->having('Episode.release_date > NOW()');
+                ->select('E.subreddit_id')
+                ->from('Episode E')
+                ->leftJoin('Subreddit S')
+                ->groupBy('E.subreddit_id')
+                ->where('E.release_date > TIMESTAMPADD(SECOND, S.creation_interval, NOW())')
+                ->fetchArray();
+        $ids = array();
+        foreach($subquery as $entry)
+        {
+            $id[] = $entry['subreddit_id'];
+        }
         $subreddits = @$this->createQuery()
                 ->where('Subreddit.name LIKE :name',
                         array(':name' => $subreddit_name))
-                ->whereNotIn('Subreddit.id', $subquery)
+                ->whereNotIn('Subreddit.id', $ids)
                 ->execute();
         
         return $subreddits;

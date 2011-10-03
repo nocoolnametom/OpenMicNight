@@ -12,9 +12,10 @@
  */
 class EpisodeAssignment extends BaseEpisodeAssignment
 {
+
     public function save(Doctrine_Connection $conn = null)
     {
-        
+
         if ($this->isNew()) {
             /* Blocked users should not be able to sign up for an Episode.
              */
@@ -54,10 +55,16 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              * previous AuthorType (meaning the AuthorType with the next-longest
              * deadline).
              */
+            /*
             $user_id = $this->getSfGuardUser();
             $subreddit_id = $this->getEpisode()->getSubreddit();
             $authortype_id = $this->getAuthorType();
-            
+            $deadline_seconds = Doctrine::getTable('Deadline')
+                    ->getSecondsByAuthorAndSubreddit(
+                    $this->getAuthorTypeId(),
+                    $this->getEpisode()->getSubredditId()
+            );
+
             $previous_author_type_id = Doctrine_Query::create()
                     ->select('Deadline.author_type_id')
                     ->from('Deadline')
@@ -101,7 +108,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                         return;
                     }
                 }
-            }
+            }*/
         }
 
         parent::save($conn);
@@ -110,7 +117,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     public function hasBlockedUser()
     {
         $membership = Doctrine::getTable('sfGuardUserSubredditMembership')
-                ->getFirstByUserSubredditMembership(
+                ->getFirstByUserSubredditAndMemberships(
                 $this->getSfGuardUserId(),
                 $this->getEpisode()->getSubredditId(), array('blocked')
         );
@@ -133,8 +140,15 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 ->getSecondsByAuthorAndSubreddit(
                 $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId()
         );
-        return ($deadline_seconds >
-                $this->getEpisode()->getReleaseDate()->getTimestamp() - time());
+        $release_date = new DateTime($this->getEpisode()->getReleaseDate());
+        $now = new DateTime(date('Y-m-d H:i:s', time()));
+        $diff = $release_date->diff($now, true);
+        $seconds_between = ($diff->y * 365 * 24 * 60 * 60) +
+                ($diff->m * 30 * 24 * 60 * 60) +
+                ($diff->d * 24 * 60 * 60) +
+                ($diff->h * 60 * 60) +
+                $diff->s;
+        return ($deadline_seconds > $seconds_between );
     }
 
     public function deleteWithException($message = null, $code = null,

@@ -1,17 +1,16 @@
 <?php
-require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
+
+require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 
 class AuthorTypeTest extends sfPHPUnitBaseTestCase
 {
-  public function testDefault()
-  {
-    $t = $this->getTest();
 
-    // lime-like assertions
-    //$t->diag('hello world');
-    //$t->ok(true, 'test something');
-		
-    // native assertions
-    //$this->assertTrue(true, 'test something')
-  }
+    public function testCreate()
+    {
+        $test_description = 4321;
+        $t = new AuthorType();
+        $t->setDescription($test_description);
+        $this->assertTrue($t instanceof AuthorType);
+        $this->assertEquals($t->__toString(), $test_description);
+    }
 }

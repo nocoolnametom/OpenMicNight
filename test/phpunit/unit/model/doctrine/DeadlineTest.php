@@ -1,17 +1,17 @@
 <?php
-require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
+
+require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 
 class DeadlineTest extends sfPHPUnitBaseTestCase
 {
-  public function testDefault()
-  {
-    $t = $this->getTest();
 
-    // lime-like assertions
-    //$t->diag('hello world');
-    //$t->ok(true, 'test something');
-		
-    // native assertions
-    //$this->assertTrue(true, 'test something')
-  }
+    public function testCreate()
+    {
+        $test_seconds = 4321;
+        $t = new Deadline();
+        $t->setSeconds($test_seconds);
+        $this->assertTrue($t instanceof Deadline);
+        $this->assertEquals($t->__toString(), $test_seconds);
+    }
+
 }

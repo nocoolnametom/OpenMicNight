@@ -27,7 +27,7 @@ class sfGuardUserSubredditMembershipTable extends Doctrine_Table
                         $user_id)
                 ->andWhere('sfGuardUserSubredditMembership.subreddit_id = ?',
                            $subreddit_id)
-                ->andWhereIn('Membership.name', $memberships)
+                ->andWhereIn('Membership.type', $memberships)
                 ->execute()
                 ->getFirst();
         return $subreddit_membership;

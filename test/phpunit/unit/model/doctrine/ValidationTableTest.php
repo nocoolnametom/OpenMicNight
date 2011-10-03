@@ -1,11 +1,11 @@
 <?php
 require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
 
-class DeadlineTableTest extends sfPHPUnitBaseTestCase
+class ValidationTableTest extends sfPHPUnitBaseTestCase
 {
     public function testCreate()
     {
-        $t = DeadlineTable::getInstance();
+        $t = ValidationTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
 }

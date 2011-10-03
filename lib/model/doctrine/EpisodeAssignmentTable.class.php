@@ -18,18 +18,42 @@ class EpisodeAssignmentTable extends Doctrine_Table
         return Doctrine_Core::getTable('EpisodeAssignment');
     }
 
+    public function deleteBySubredditIdAndUserId($subreddit_id, $user_id)
+    {
+
+        $subreddit_id = (int) ($subreddit_id);
+        $subquery = Doctrine_Query::create()
+                ->select('EpisodeAssignment.id')
+                ->from('EpisodeAssignment')
+                ->leftJoin('Episode')
+                ->where('Episode.release_date > NOW()')
+                ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
+                ->fetchArray();
+        $ids = array();
+        foreach($subquery as $entry)
+        {
+            $id[] = $entry['id'];
+        }
+        /*$subquery = 'SELECT EpisodeAssignment.id FROM '
+                . 'EpisodeAssignment LEFT JOIN Episode WHERE '
+                . 'Episode.release_date > NOW() '
+                . 'AND Episode.subreddit_id = ' . $subreddit_id;*/
+        $query = $this->createQuery()
+                ->delete()
+                ->from('EpisodeAssignment')
+                ->where('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
+                ->andWhereIn('EpisodeAssignment.id',  $ids);
+        $query->execute();
+    }
+
     public function getFirstByUserAuthorTypeAndSubreddit($author_type_id,
-                                                          $user_id,
-                                                          $subreddit_id)
+                                                         $user_id, $subreddit_id)
     {
         $episode_assignments = $this->createQuery()
                 ->leftJoin('Episode')
-                ->where('EpisodeAssignment.author_type_id = ?',
-                        $author_type_id)
-                ->andWhere('EpisodeAssignment.sf_guard_user_id = ?',
-                           $user_id)
-                ->andWhere('Episode.subreddit_id = ?',
-                           $subreddit_id)
+                ->where('EpisodeAssignment.author_type_id = ?', $author_type_id)
+                ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
+                ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('Episode.release_date > NOW()')
                 ->execute()
                 ->getFirst();

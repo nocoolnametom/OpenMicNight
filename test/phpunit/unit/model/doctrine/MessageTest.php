@@ -3,15 +3,12 @@ require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
 
 class MessageTest extends sfPHPUnitBaseTestCase
 {
-  public function testDefault()
+  public function testCreate()
   {
-    $t = $this->getTest();
-
-    // lime-like assertions
-    //$t->diag('hello world');
-    //$t->ok(true, 'test something');
-		
-    // native assertions
-    //$this->assertTrue(true, 'test something')
+    $test_text = 'test text';
+    $t = new Message();
+    $t->setText($test_text);
+    $this->assertTrue($t instanceof Message);
+    $this->assertEquals($t->__toString(), $test_text);
   }
 }

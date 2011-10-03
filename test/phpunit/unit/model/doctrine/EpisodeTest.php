@@ -3,15 +3,12 @@ require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
 
 class EpisodeTest extends sfPHPUnitBaseTestCase
 {
-  public function testDefault()
+  public function testCreate()
   {
-    $t = $this->getTest();
-
-    // lime-like assertions
-    //$t->diag('hello world');
-    //$t->ok(true, 'test something');
-		
-    // native assertions
-    //$this->assertTrue(true, 'test something')
+    $test_title = 'test title';
+    $t = new Episode();
+    $t->setTitle($test_title);
+    $this->assertTrue($t instanceof Episode);
+    $this->assertEquals($t->__toString(), $test_title);
   }
 }
