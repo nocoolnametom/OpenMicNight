@@ -1,3 +1,4 @@
+build/
 cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
@@ -18,3 +19,4 @@ web/uploads/
 plugins/.filemap
 plugins/.registry/
 plugins/.channels/
+/.build/

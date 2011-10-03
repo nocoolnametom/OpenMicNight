@@ -7,6 +7,7 @@
  */
 class SubredditTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -17,7 +18,12 @@ class SubredditTable extends Doctrine_Table
         return Doctrine_Core::getTable('Subreddit');
     }
     
-    public function getSubredditsNeedingEpisodeGeneration($subreddit_name = '%')
+    public static function grabSubredditIdFromArray($value)
+    {
+        return (is_array($value) ? $value['subreddit_id'] : null);
+    }
+
+    public function getSubredditsNotNeedingEpisodeGeneration()
     {
         $subquery = $this->createQuery()
                 ->select('E.subreddit_id')
@@ -26,17 +32,19 @@ class SubredditTable extends Doctrine_Table
                 ->groupBy('E.subreddit_id')
                 ->where('E.release_date > TIMESTAMPADD(SECOND, S.creation_interval, NOW())')
                 ->fetchArray();
-        $ids = array();
-        foreach($subquery as $entry)
-        {
-            $id[] = $entry['subreddit_id'];
-        }
+        $ids = array_map(array('SubredditTable', 'grabSubredditIdFromArray'), $subquery);
+        return $ids;
+    }
+
+    public function getSubredditsNeedingEpisodeGeneration($subreddit_name = '%')
+    {
+        $ids = $this->getSubredditsNotNeedingEpisodeGeneration();
         $subreddits = @$this->createQuery()
-                ->where('Subreddit.name LIKE :name',
-                        array(':name' => $subreddit_name))
-                ->whereNotIn('Subreddit.id', $ids)
-                ->execute();
-        
+                        ->where('Subreddit.name LIKE :name', array(':name' => $subreddit_name))
+                        ->whereNotIn('Subreddit.id', $ids)
+                        ->execute();
+
         return $subreddits;
     }
+
 }

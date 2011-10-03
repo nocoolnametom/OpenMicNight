@@ -26,4 +26,10 @@
       <directory>lib/vendor/Cron/</directory>
     </blacklist>
   </filter>
+
+  <logging>
+    <log type="coverage-html" target="build/coverage" charset="UTF-8"
+        yui="true" highlight="true" lowUpperBound="90" highLowerBound="100"/>
+    <log type="coverage-clover" target=".build/test-coverage.xml"/>
+  </logging>
 </phpunit>
