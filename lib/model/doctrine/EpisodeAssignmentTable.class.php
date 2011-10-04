@@ -34,10 +34,6 @@ class EpisodeAssignmentTable extends Doctrine_Table
         {
             $id[] = $entry['id'];
         }
-        /*$subquery = 'SELECT EpisodeAssignment.id FROM '
-                . 'EpisodeAssignment LEFT JOIN Episode WHERE '
-                . 'Episode.release_date > NOW() '
-                . 'AND Episode.subreddit_id = ' . $subreddit_id;*/
         $query = $this->createQuery()
                 ->delete()
                 ->from('EpisodeAssignment')

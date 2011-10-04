@@ -53,62 +53,41 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             /* Even if the deadline has not yet passed, we may only sign up an 
              * AuthorType if the AuthorType is allowed to register before the 
              * previous AuthorType (meaning the AuthorType with the next-longest
-             * deadline).
+             * deadline).  The next few checks are for this purpose.
              */
-            /*
-            $user_id = $this->getSfGuardUser();
-            $subreddit_id = $this->getEpisode()->getSubreddit();
-            $authortype_id = $this->getAuthorType();
             $deadline_seconds = Doctrine::getTable('Deadline')
                     ->getSecondsByAuthorAndSubreddit(
                     $this->getAuthorTypeId(),
                     $this->getEpisode()->getSubredditId()
             );
 
-            $previous_author_type_id = Doctrine_Query::create()
-                    ->select('Deadline.author_type_id')
-                    ->from('Deadline')
-                    ->where('Deadline.subreddit_id = ?', $subreddit_id)
-                    ->andWhere('Deadline.seconds > ?', $deadline_seconds)
-                    ->orderBy('Deadline.seconds ASC')
-                    ->execute()
-                    ->getFirst();
-            if ($previous_author_type_id) {
-                $application_restricted = Doctrine_Query::create()
-                        ->select('Application.restricted_until_previous_misses_deadline')
-                        ->from('Application')
-                        ->where('Application.author_type_id = ?', $authortype_id)
-                        ->andWhere('Application.subreddit_id = ?', $subreddit_id)
-                        ->execute()
-                        ->getFirst();
-                if ($application_restricted) {
-                    $deadline_seconds = Doctrine_Query::create()
-                            ->select('Deadline.seconds')
-                            ->from('Deadline')
-                            ->where('Deadline.author_type_id = ?',
-                                    $previous_author_type_id)
-                            ->andWhere('Deadline.subreddit_id = ?',
-                                       $subreddit_id)
-                            ->execute()
-                            ->getFirst();
-                    $episode_valid = Doctrine_Query::create()
-                            ->select('Episode.id')
-                            ->from('Episode')
-                            ->where('Episode.id = ?', $this->getEpisodeId())
-                            ->andWhere('TO_SECONDS(Episode.release_date - NOW()) > ?',
-                                       $deadline_seconds)
-                            ->execute()
-                            ->getFirst();
-                    if ($episode_valid) {
-                        $this->delete();
-                        throw new sfException("Cannot create EpisodeAssignment because "
-                                . "the deadline has not yet passed for the "
-                                . "previous AuthorType $authortype_id within "
-                                . "Subreddit $subreddit_id.");
-                        return;
-                    }
+            /* Check to see if there *is* a previous AuthorType by Deadline
+             * length.
+             */
+            if ($previous_author_type_id = DeadlineTable::getInstance()
+                    ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
+                    $deadline_seconds, $this->getEpisode()->getSubreddit())) {
+                /* If a previous AuthorType exists, we need to see if the
+                 * current AuthorType is restricted until that previous 
+                 * uthorType is expired.  If it *is* restricted, then we need to
+                 * see if the previous AuthorType has yet expired.  If the
+                 * previous AuthorType is still beyond its Deadline for the
+                 * Episode (and has not expired) then we cannot allow the
+                 * current EpisodeAssignment to be saved.
+                 */
+                if (ApplicationTable::getInstance()
+                                ->getIfApplicationRestrictedByAuthorTypeAndSubreddit(
+                                        $this->getAuthorTypeId(),
+                                        $this->getEpisode()->getSubredditId())
+                        && $this->isWithinDeadlineForAuthorType($previous_author_type_id)) {
+                    $this->deleteWithException("Cannot create "
+                            . "EpisodeAssignment because the deadline has "
+                            . "not yet passed for the previous AuthorType "
+                            . $this->getAuthorTypeId() . " within Subreddit "
+                            . $this->getEpisode()->getSubredditId());
+                    return;
                 }
-            }*/
+            }
         }
 
         parent::save($conn);
@@ -134,11 +113,13 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         return ($assignment ? true : false);
     }
 
-    public function isWithinDeadlineForAuthorType()
+    public function isWithinDeadlineForAuthorType($author_type_id = null)
     {
+        if (is_null($author_type))
+            $author_type_id = $this->getAuthorTypeId();
         $deadline_seconds = Doctrine::getTable('Deadline')
                 ->getSecondsByAuthorAndSubreddit(
-                $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId()
+                $author_type_id, $this->getEpisode()->getSubredditId()
         );
         $release_date = new DateTime($this->getEpisode()->getReleaseDate());
         $now = new DateTime(date('Y-m-d H:i:s', time()));

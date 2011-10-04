@@ -7,6 +7,7 @@
  */
 class ApplicationTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,4 +17,17 @@ class ApplicationTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Application');
     }
+
+    public function getIfApplicationRestrictedByAuthorTypeAndSubreddit($authortype_id,
+                                                                       $subreddit_id)
+    {
+        $application_restricted = $this->createQuery()
+                ->select('Application.restricted_until_previous_misses_deadline')
+                ->where('Application.author_type_id = ?', $authortype_id)
+                ->andWhere('Application.subreddit_id = ?', $subreddit_id)
+                ->fetchOne();
+        
+        return $application_restricted;
+    }
+
 }
