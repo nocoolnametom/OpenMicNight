@@ -11,7 +11,7 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($t instanceof sfGuardUserSubredditMembership);
     }
 
-    public function testSavingWithBlockedUser()
+    public function testSavingBlockedUser()
     {
         // Establish fake Subreddit
         $subreddit = new Subreddit();
