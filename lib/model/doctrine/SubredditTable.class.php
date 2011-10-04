@@ -39,8 +39,8 @@ class SubredditTable extends Doctrine_Table
     public function getSubredditsNeedingEpisodeGeneration($subreddit_name = '%')
     {
         $ids = $this->getSubredditsNotNeedingEpisodeGeneration();
-        $subreddits = @$this->createQuery()
-                        ->where('Subreddit.name LIKE :name', array(':name' => $subreddit_name))
+        $subreddits = $this->createQuery()
+                        ->where('Subreddit.name LIKE ?', $subreddit_name)
                         ->whereNotIn('Subreddit.id', $ids)
                         ->execute();
 

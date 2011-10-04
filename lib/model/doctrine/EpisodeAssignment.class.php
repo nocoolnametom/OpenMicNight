@@ -115,7 +115,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
 
     public function isWithinDeadlineForAuthorType($author_type_id = null)
     {
-        if (is_null($author_type))
+        if (is_null($author_type_id))
             $author_type_id = $this->getAuthorTypeId();
         $deadline_seconds = Doctrine::getTable('Deadline')
                 ->getSecondsByAuthorAndSubreddit(

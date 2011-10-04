@@ -31,13 +31,13 @@ class SubredditTableTest extends sfPHPUnitBaseTestCase
         $subreddit->setCreationInterval('0');
         $subreddit->save();
         
-        // E know that a new subreddit with no episodes will NOT be in this list
+        // We know that a new subreddit with no episodes will NOT be in this list
         $subreddit_not_found = true;
         $subreddits = SubredditTable::getInstance()->getSubredditsNotNeedingEpisodeGeneration();
         $this->assertTrue(is_array($subreddits));
         foreach($subreddits as $found)
         {
-            if ($subreddit->getIncremented() == $found->getIncremented())
+            if ($subreddit->getIncremented() == $found)
                $subreddit_not_found = false; 
         }
         
