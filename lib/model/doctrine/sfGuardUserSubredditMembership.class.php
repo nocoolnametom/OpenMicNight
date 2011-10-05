@@ -23,9 +23,9 @@ class sfGuardUserSubredditMembership extends BasesfGuardUserSubredditMembership
                     ->deleteBySubredditIdAndUserId(
                             $this->getSubredditId(), $this->getSfGuardUserId()
             );
-
-            parent::save($conn);
         }
+
+        parent::save($conn);
     }
 
 }

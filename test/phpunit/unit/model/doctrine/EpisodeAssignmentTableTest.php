@@ -8,4 +8,16 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         $t = EpisodeAssignmentTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
+    
+    /* @todo: Finish test */
+    public function testDeleteBySubredditIdAndUserId()
+    {
+        ;
+    }
+    
+    /* @todo: Finish test */
+    public function testGetFirstByUserAuthorTypeAndSubreddit()
+    {
+        ;
+    }
 }

@@ -73,7 +73,7 @@ sfGuardUserSubredditMembership:
     sf_guard_user_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
     membership_id: { type: integer, notnull: true }
-    display_membersship: { type: boolean, default: 0 }
+    display_membership: { type: boolean, default: 0 }
   relations:
     sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: SubredditMemberships }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: sfGuardUserMemberships }
