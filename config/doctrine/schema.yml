@@ -1,5 +1,6 @@
 Subreddit:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     name: { type: string(255), notnull: true }
     domain: { type: string(127) }
@@ -9,7 +10,8 @@ Subreddit:
     creation_interval: { type: integer, notnull: true, default: 0 }
 
 AuthorType:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     type: { type: string(255), notnull: true }
     description: { type: string(127) }
@@ -19,13 +21,15 @@ Validation:
     type: { type: string(255), notnull: true }
 
 Membership:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     type: { type: string(255), notnull: true }
     description: { type: string(127) }
 
 Application:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     author_type_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -34,12 +38,11 @@ Application:
     AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Applications }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Applications }
   indexes:
-    oneOfEachAuthorTypePerSubreddit:
-      fields: { author_type_id, subreddit_id }
-      type: unique
+    oneOfEachAuthorTypePerSubreddit: { fields: [author_type_id, subreddit_id], type: unique}
 
 Deadline:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     author_type_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -48,12 +51,11 @@ Deadline:
     AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Deadlines }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Deadlines }
   indexes:
-    oneOfEachAuthorTypePerSubreddit:
-      fields: { author_type_id, subreddit_id }
-      type: unique
+    oneOfEachAuthorTypePerSubreddit: { fields: [author_type_id, subreddit_id], type: unique }
 
 Message:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     recipient_id: { type: integer, notnull: true }
     sender_id: { type: integer }
@@ -65,7 +67,8 @@ Message:
     Message: { onDelete: SET NULL, local: previous_message_id, foreign: id, foreignAlias: Replies }
 
 sfGuardUserSubredditMembership:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     sf_guard_user_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -73,15 +76,14 @@ sfGuardUserSubredditMembership:
     display_membersship: { type: boolean, default: 0 }
   relations:
     sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: SubredditMemberships }
-    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: ProfileMemberships }
-    Membership: { onDelete: CASCADE, local: membership_id, foreign: id, foreignAlias: SubredditProfiles }
+    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: sfGuardUserMemberships }
+    Membership: { onDelete: CASCADE, local: membership_id, foreign: id, foreignAlias: SubredditsfGuardUsers }
   indexes:
-    oneProfileMembershipPerSubreddit:
-      fields: { profile_id, subreddit_id }
-      type: unique
+    oneUserMembershipPerSubreddit: { fields: [sf_guard_user_id, subreddit_id], type: unique}
 
 Episode:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     sf_guard_user_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
@@ -104,7 +106,8 @@ Episode:
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Episodes }
 
 EpisodeAssignment:
-  actAs: { Timestampable: ~ }
+  actAs:
+    Timestampable: ~
   columns:
     author_type_id: { type: integer, notnull: true }
     sf_guard_user_id: { type: integer, notnull: true }
@@ -115,9 +118,5 @@ EpisodeAssignment:
     sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: EpisodeAssignments }
     Episode: { onDelete: CASCADE, local: episode_id, foreign: id, foreignAlias: EpisodeAssignments }
   indexes:
-    noMultipleProfileAssignmentsPerEpisode:
-      fields: { profile_id, episode_id }
-      type: unique
-    noMultipleAuthorTypeAssignmentsPerEpisode:
-      fields: { author_type_id, episode_id }
-      type: unique
+    noMultipleUserAssignmentsPerEpisode: { fields: [sf_guard_user_id, episode_id], type: unique }
+    noMultipleAuthorTypeAssignmentsPerEpisode: { fields: [author_type_id, episode_id], type: unique }

@@ -16,7 +16,8 @@
       <directory>apps</directory>
       <directory>cache/</directory>
       <directory>config/</directory>
-      <directory>plugins</directory>
+      <directory>plugins/</directory>
+      <directory>lib/</directory>
       <directory>lib/model/doctrine/base/</directory>
       <directory>lib/model/doctrine/sfDoctrineGuardPlugin/base/</directory>
       <exclude>
