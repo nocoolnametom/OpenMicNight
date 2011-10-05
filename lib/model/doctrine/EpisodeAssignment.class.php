@@ -66,7 +66,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              */
             if ($previous_author_type_id = DeadlineTable::getInstance()
                     ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
-                    $deadline_seconds, $this->getEpisode()->getSubreddit())) {
+                    $deadline_seconds, $this->getEpisode()->getSubredditId())) {
                 /* If a previous AuthorType exists, we need to see if the
                  * current AuthorType is restricted until that previous 
                  * uthorType is expired.  If it *is* restricted, then we need to

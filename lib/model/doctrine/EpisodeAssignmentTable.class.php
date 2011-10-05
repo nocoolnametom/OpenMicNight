@@ -22,23 +22,24 @@ class EpisodeAssignmentTable extends Doctrine_Table
     {
 
         $subreddit_id = (int) ($subreddit_id);
-        $subquery = Doctrine_Query::create()
+        $subquery = $this->createQuery()
                 ->select('EpisodeAssignment.id')
-                ->from('EpisodeAssignment')
-                ->leftJoin('Episode')
+                //->from('EpisodeAssignment')
+                ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('Episode.release_date > NOW()')
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
+                ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
+                ->groupBy('EpisodeAssignment.id')
                 ->fetchArray();
         $ids = array();
         foreach($subquery as $entry)
         {
-            $id[] = $entry['id'];
+            $ids[] = $entry['id'];
         }
         $query = $this->createQuery()
                 ->delete()
                 ->from('EpisodeAssignment')
-                ->where('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
-                ->andWhereIn('EpisodeAssignment.id',  $ids);
+                ->whereIn('EpisodeAssignment.id',  $ids);
         $query->execute();
     }
 
@@ -46,11 +47,12 @@ class EpisodeAssignmentTable extends Doctrine_Table
                                                          $user_id, $subreddit_id)
     {
         $episode_assignments = $this->createQuery()
-                ->leftJoin('Episode')
+                ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('EpisodeAssignment.author_type_id = ?', $author_type_id)
                 ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('Episode.release_date > NOW()')
+                ->orderBy('EpisodeAssignment.created_at ASC')
                 ->execute()
                 ->getFirst();
         return $episode_assignments;
