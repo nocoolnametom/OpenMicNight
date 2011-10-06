@@ -12,6 +12,11 @@
  */
 class Episode extends BaseEpisode
 {
+    /**
+     * Returns the Episode title
+     *
+     * @return string  The object formatted as a string
+     */
     public function __toString()
     {
         return $this->getTitle();

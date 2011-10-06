@@ -12,24 +12,48 @@
  */
 class Subreddit extends BaseSubreddit
 {
-
+    /**
+     * Returns the Subreddit name
+     *
+     * @return string  The object formatted as a string
+     */
     public function __toString()
     {
         return $this->getName();
     }
 
+    /**
+     * Returns the Episode schedule as a CronExpression.
+     * 
+     * @see Cron\CronExpression::factory
+     *
+     * @return Cron\CronExpression The Episode schedule
+     */
     public function getEpisodeScheduleAsCronExpression()
     {
         ProjectConfiguration::registerCron();
         return Cron\CronExpression::factory(parent::getEpisodeScheduleCronFormatted());
     }
 
+    /**
+     * Returns the creation schedule as a CronExpression.
+     * 
+     * @see Cron\CronExpression::factory
+     *
+     * @return Cron\CronExpression The creation schedule
+     */
     public function getCreationScheduleAsCronExpression()
     {
         ProjectConfiguration::registerCron();
         return Cron\CronExpression::factory(parent::getCreateNewEpisodesCronFormatted());
     }
 
+    /**
+     * Returns the interval between Episodes as defined by the Subreddit's 
+     * cron-formatted Episode schedule.
+     *
+     * @return DateInterval  The interval between Episodes
+     */
     public function getEpisodeItervalAsDateInterval()
     {
         $next_creation = $this->getEpisodeScheduleAsCronExpression()->getNextRunDate();
@@ -37,6 +61,12 @@ class Subreddit extends BaseSubreddit
         return $next_creation->diff($after_that);
     }
 
+    /**
+     * Returns the interval between Episode genration cycles as defined by the
+     * Subreddit's cron-formatted Episode generation schedule.
+     *
+     * @return DateInterval  The interval between Episode generation cycles.
+     */
     public function getCreationIntervalAsDateInterval()
     {
         $next_creation = $this->getCreationScheduleAsCronExpression()->getNextRunDate();
@@ -44,11 +74,22 @@ class Subreddit extends BaseSubreddit
         return $next_creation->diff($after_that);
     }
 
+    /**
+     * Retrieves the release date for the youngest Episode of the Subreddit.
+     *
+     * @return string  The release date of the youngest Episode. 
+     */
     public function getDateOfLastEpisode()
     {
         return SubredditTable::getInstance()->getLastEpisodeReleaseDate($this->getIncremented());
     }
 
+    /**
+     * Sets the Subreddit's creation interval to the number of seconds between
+     * intervals of the current cron-formatted creation schedule.
+     * 
+     * It does not save the Subreddit, however.
+     */
     public function calculateCreationInterval()
     {
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
@@ -65,6 +106,12 @@ class Subreddit extends BaseSubreddit
         $this->setCreationInterval($seconds_between);
     }
 
+    /**
+     * Creates a collection of Episodes with released dates assembled using the
+     * Subreddit's Episode schedule between the Subreddit's creation interval.
+     *
+     * @return array  An array of unsaved Episode objects
+     */
     public function collectGeneratedEpisodes()
     {
         ProjectConfiguration::registerCron();

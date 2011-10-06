@@ -12,6 +12,11 @@
  */
 class Deadline extends BaseDeadline
 {
+    /**
+     * Returns the Deadline seconds
+     *
+     * @return string  The object formatted as a string
+     */
     public function __toString()
     {
         return (string)$this->getSeconds();

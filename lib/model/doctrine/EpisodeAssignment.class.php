@@ -13,9 +13,46 @@
 class EpisodeAssignment extends BaseEpisodeAssignment
 {
 
+    /**
+     * applies the changes made to this object into database
+     * this method is smart enough to know if any changes are made
+     * and whether to use INSERT or UPDATE statement
+     *
+     * this method also saves the related components
+     * 
+     * Before creating a new EpisodeAssignment, this function verifies the
+     * following rules:
+     * 
+     * 101) Blocked users should not be able to sign up for an Episode. Throws
+     *      an sfException upon this failure.
+     * 
+     * 102) Only one sfGuardUser can sign up for one Episode with the same
+     *      AuthorType for each Application period. Throws an sfException upon
+     *      this failure.
+     * 
+     * 103) An sfGuardUser can only sign up for the same Episode with one
+     *      AuthorType. Throws an sfException upon this failure.
+     * 
+     * 104) The EpisodeAssignment must be within the deadline for the
+     *      AuthorType. Throws an sfException upon this failure.
+     * 
+     * 105) If the current AuthorType is flagged to be unavailable before the
+     *      previous AuthorType has passed its Deadline by its Application
+     *      record for the Subreddit and this previous Deadline has not passed,
+     *      then the object will not be saved.  Throws an sfException upon this
+     *      failure.
+     * 
+     * @see Doctrine_Record::save()
+     * @throws sfException
+     *
+     * @param Doctrine_Connection $conn     optional connection parameter
+     * @throws Exception                    if record is not valid and validation is active
+     * @return void
+     */
     public function save(Doctrine_Connection $conn = null)
     {
 
+        /* If an EpisodeAssignment already exists we don't care about it. */
         if ($this->isNew()) {
             /* Blocked users should not be able to sign up for an Episode.
              */
@@ -93,9 +130,20 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                             105);
         }
 
+        /* If the obejct is not new or has passed all rules for saving, we pass
+         * it on to the parent save function.
+         */
         parent::save($conn);
     }
 
+    /**
+     * Checks if the User of the EpisodeAssignment has a "blocked" Membership in
+     * the Subreddit.
+     * 
+     * @see sfGuardUserSubredditMembership::getFirstByUserSubredditAndMemberships()
+     *
+     * @return bool Whether the user has a "blocked" Membership
+     */
     public function hasBlockedUser()
     {
         $membership = Doctrine::getTable('sfGuardUserSubredditMembership')
@@ -106,6 +154,14 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         return ($membership ? true : false);
     }
 
+    /**
+     * Checks if the User of the EpisodeAssignment is already attached to a
+     * future EpisodeAssignment of the Subreddit with the same AuthorType.
+     * 
+     * @see EpisodeAssignmentTable::getFirstByUserAuthorTypeAndSubreddit()
+     *
+     * @return bool Whether an EpisodeAssignment already exists
+     */
     public function hasExistingUserAuthorTypeAssignment()
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
@@ -116,6 +172,12 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         return ($assignment ? true : false);
     }
     
+    /**
+     * Checks to see if the User of the EpsiodeAssignment is already attached to
+     * the curent Episode via another Authortype.
+     *
+     * @return bool Whether the User is already attached to the Episode 
+     */
     public function hasExistingAssignmentOnOtherEpisode()
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
@@ -126,7 +188,18 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         return ($assignment ? true : false);
     }
 
-    public function isPastDeadlineForAuthorType($author_type_id = null)
+    /**
+     * Verifies if the current time is still before the Subreddit Deadline for
+     * the AuthorType of the EpisodeAssignment.
+     * 
+     * If an AuthorType id is given, then the check is against the Subreddit
+     * Deadline for that AuthorTyope.
+     *
+     * @param int $author_type_id  The id for a given AuthorType (optional)
+     * @return bool                Whether the current time is within the 
+     *                              Subreddit Deadline.
+     */
+    public function isWithinDeadlineForAuthorType($author_type_id = null)
     {
         if (is_null($author_type_id))
             $author_type_id = $this->getAuthorTypeId();
@@ -145,6 +218,15 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         return ( $deadline_seconds > $seconds_between );
     }
 
+    /**
+     * Deletes the current object and also throws and exception.
+     * 
+     * @throws sfException
+     *
+     * @param struing $message      The message for the exception
+     * @param long $code            An error code for the exception
+     * @param sfException $previous A previously thrown exception.
+     */
     public function deleteWithException($message = null, $code = null,
                                         $previous = null)
     {

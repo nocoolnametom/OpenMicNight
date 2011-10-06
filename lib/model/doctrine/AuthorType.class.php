@@ -12,6 +12,11 @@
  */
 class AuthorType extends BaseAuthorType
 {
+    /**
+     * Returns the AuthorType description
+     *
+     * @return string  The object formatted as a string
+     */
     public function __toString()
     {
         return $this->getDescription();

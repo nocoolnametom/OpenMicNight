@@ -13,6 +13,23 @@
 class sfGuardUserSubredditMembership extends BasesfGuardUserSubredditMembership
 {
 
+    /**
+     * applies the changes made to this object into database
+     * this method is smart enough to know if any changes are made
+     * and whether to use INSERT or UPDATE statement
+     *
+     * this method also saves the related components
+     * 
+     * If the membrship that is made is a "blocked" membership, then the object
+     * also initiates the process of removing all future assignments the user
+     * has made in the membership's subreddit.
+     * 
+     * @see Doctrine_Record::save()
+     *
+     * @param Doctrine_Connection $conn     optional connection parameter
+     * @throws Exception                    if record is not valid and validation is active
+     * @return void
+     */
     public function save(Doctrine_Connection $conn = null)
     {
         /* If we're establishing a blocked membership, then we need to remove

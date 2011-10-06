@@ -12,6 +12,11 @@
  */
 class Message extends BaseMessage
 {
+    /**
+     * Returns the Message text
+     *
+     * @return string  The object formatted as a string
+     */
     public function __toString()
     {
         return $this->getText();
