@@ -85,7 +85,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             /* The EpisodeAssignment must be within the deadline for the
              * AuthorType.
              */
-            if ($this->isPastDeadlineForAuthorType())
+            if ($this->isWithinDeadlineForAuthorType())
                 $this->deleteWithException("Cannot create EpisodeAssignment "
                         . "because the deadline has already passed for "
                         . "AuthorType " . $this->getAuthorTypeId() . " within "
@@ -121,7 +121,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                                 ->getIfApplicationRestrictedByAuthorTypeAndSubreddit(
                                         $this->getAuthorTypeId(),
                                         $this->getEpisode()->getSubredditId())
-                        && $this->isPastDeadlineForAuthorType($previous_author_type_id))
+                        && $this->isWithinDeadlineForAuthorType($previous_author_type_id))
                     $this->deleteWithException("Cannot create "
                             . "EpisodeAssignment because the deadline has "
                             . "not yet passed for the previous AuthorType "
