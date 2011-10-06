@@ -10,6 +10,16 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         $t = EpisodeAssignmentTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
+    
+    public function testGrabIdFromArray()
+    {
+        $test_id = 2;
+        $an_array = array("id" => $test_id);
+        $not_an_array = $test_id;
+        
+        $this->assertEquals($test_id, EpisodeAssignmentTable::grabIdFromArray($an_array));
+        $this->assertTrue(is_null(EpisodeAssignmentTable::grabIdFromArray($not_an_array)));
+    }
 
     /* @todo: Finish test */
 
@@ -152,6 +162,7 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
             $assignment_three->save();
         } catch (Exception $exception) {
             $exception_thrown = true;
+            $this->assertEquals(102, $exception->getCode());
             unset($exception);
         }
         $this->assertTrue($exception_thrown);

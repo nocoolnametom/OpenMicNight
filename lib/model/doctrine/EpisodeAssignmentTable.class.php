@@ -17,6 +17,11 @@ class EpisodeAssignmentTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('EpisodeAssignment');
     }
+    
+    public static function grabIdFromArray($value)
+    {
+        return (is_array($value) ? $value['id'] : null);
+    }
 
     public function deleteBySubredditIdAndUserId($subreddit_id, $user_id)
     {
@@ -31,15 +36,11 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
                 ->groupBy('EpisodeAssignment.id')
                 ->fetchArray();
-        $ids = array();
-        foreach($subquery as $entry)
-        {
-            $ids[] = $entry['id'];
-        }
+        $ids = array_map(array('EpisodeAssignmentTable', 'grabIdFromArray'), $subquery);
         $query = $this->createQuery()
                 ->delete()
                 ->from('EpisodeAssignment')
-                ->whereIn('EpisodeAssignment.id',  $ids);
+                ->whereIn('EpisodeAssignment.id', $ids);
         $query->execute();
     }
 
@@ -50,6 +51,22 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('EpisodeAssignment.author_type_id = ?', $author_type_id)
                 ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
+                ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
+                ->andWhere('Episode.release_date > NOW()')
+                ->orderBy('EpisodeAssignment.created_at ASC')
+                ->execute()
+                ->getFirst();
+        return $episode_assignments;
+    }
+
+    public function getFirstByEpisodeAuthorTypeAndSubreddit($author_type_id,
+                                                            $episode_id,
+                                                            $subreddit_id)
+    {
+        $episode_assignments = $this->createQuery()
+                ->leftJoin('EpisodeAssignment.Episode Episode')
+                ->where('EpisodeAssignment.author_type_id = ?', $author_type_id)
+                ->andWhere('EpisodeAssignment.episode_id = ?', $episode_id)
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('Episode.release_date > NOW()')
                 ->orderBy('EpisodeAssignment.created_at ASC')

@@ -23,19 +23,18 @@ class DeadlineTable extends Doctrine_Table
                     ->select('Deadline.seconds')
                     ->where('Deadline.author_type_id = ?', $author_type_id)
                     ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
-                    ->execute()
-                    ->getFirst();
-        return $seconds;
+                    ->fetchArray();
+        return (count($seconds) ? $seconds[0]['seconds'] : 0);
     }
     
     public function getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan($seconds, $subreddit_id)
     {
-        $author_type_id = self::getInstance()->createQuery()
+        $deadlines = $this->createQuery()
                     ->select('Deadline.author_type_id')
                     ->where('Deadline.subreddit_id = ?', $subreddit_id)
                     ->andWhere('Deadline.seconds > ?', $seconds)
                     ->orderBy('Deadline.seconds ASC')
-                    ->fetchOne();
-        return $author_type_id;
+                    ->fetchArray();
+        return (count($deadlines) ? $deadlines[0]['author_type_id'] : null);
     }
 }
