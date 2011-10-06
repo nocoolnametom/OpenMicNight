@@ -1,11 +1,17 @@
 <?php
-require_once dirname(__FILE__).'/../../../../bootstrap/unit.php';
+
+require_once dirname(__FILE__) . '/../../../../bootstrap/unit.php';
 
 class sfGuardPermissionTest extends sfPHPUnitBaseTestCase
 {
-  public function testCreate()
-  {
-    $t = new sfGuardPermission();
-    $this->assertTrue($t instanceof sfGuardPermission);
-  }
+
+    /**
+     * Tests for success at creating the object.
+     */
+    public function testCreate()
+    {
+        $t = new sfGuardPermission();
+        $this->assertTrue($t instanceof sfGuardPermission);
+    }
+
 }

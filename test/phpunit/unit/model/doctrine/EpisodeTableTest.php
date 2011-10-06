@@ -5,12 +5,19 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class EpisodeTableTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $t = EpisodeTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
 
+    /**
+     * Tests whether we can grab an Episode that is due to be released within a
+     * specified length of time from now.
+     */
     public function testGetOneEpisodeReleasedWithinSeconds()
     {
         // Create Test Subreddit
@@ -19,10 +26,16 @@ class EpisodeTableTest extends sfPHPUnitBaseTestCase
 
         // Create Test Episode
         $episode = new Episode();
+        $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100));
         $episode->setSubreddit($subreddit);
         $episode->save();
+        
+        $another_episode = new Episode();
+        $another_episode->setReleaseDate(date('Y-m-d H:i:s', time() + 500));
+        $another_episode->setSubreddit($subreddit);
+        $another_episode->save();
 
-        $seconds_within = 15;
+        $seconds_within = 200;
 
         // Run table query to grab episode without ID
         $random_episode = EpisodeTable::getInstance()
@@ -31,11 +44,16 @@ class EpisodeTableTest extends sfPHPUnitBaseTestCase
 
         // Run table query to grab episode WITH ID
         $random_episode = EpisodeTable::getInstance()
-                ->getOneEpisodeReleasedWithinSeconds($seconds_within,
-                                                     $episode->getIncremented());
+                ->getOneEpisodeReleasedWithinSeconds($seconds_within, $episode->getIncremented());
         $this->assertTrue($random_episode instanceof Episode);
+        
+        // Run table query to grab anotherepisode WITH ID
+        $random_episode = EpisodeTable::getInstance()
+                ->getOneEpisodeReleasedWithinSeconds($seconds_within, $another_episode->getIncremented());
+        $this->assertFalse($random_episode instanceof Episode);
 
-        // Delete episode
+        // Delete episodes
+        $another_episode->delete();
         $episode->delete();
 
         // Delete subreddit.

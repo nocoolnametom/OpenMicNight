@@ -4,20 +4,21 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 
 class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
 {
-    /* Done! */
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $t = new EpisodeAssignment();
         $this->assertTrue($t instanceof EpisodeAssignment);
     }
 
-    /* Done! */
-
+    /**
+     * Blocked users should not be able to sign up for an Episode.
+     */
     public function testBlockSaveForBlockedUsers()
     {
-        /* Blocked users should not be able to sign up for an Episode.
-         */
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
         $subreddit->save();
@@ -66,13 +67,12 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($exception_thrown);
     }
 
-    /* Done! */
-
+    /**
+     * Only one sfGuardUser can sign up for one Episode with the same 
+     * AuthorType for each Application period.
+     */
     public function testBlockSaveWithExistingEpisodeAssignment()
     {
-        /* Only one sfGuardUser can sign up for one Episode with the same 
-         * AuthorType for each Application period.
-         */
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
         $subreddit->save();
@@ -127,13 +127,12 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($exception_thrown);
     }
 
-    /* Done! */
-
+    /**
+     * Only one sfGuardUser can sign up for one Episode with the same 
+     * AuthorType for each Application period.
+     */
     public function testBlockSaveForExistingAssignmentOnOtherUnreleasedEpisode()
     {
-        /* Only one sfGuardUser can sign up for one Episode with the same 
-         * AuthorType for each Application period.
-         */
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
         $subreddit->save();
@@ -188,12 +187,11 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($exception_thrown);
     }
 
-    /* Done! */
-
+    /**
+     *  The EpisodeAssignment must be within the deadline for the AuthorType.
+     */
     public function testBlockSaveForPastDeadlineForAuthorType()
     {
-        /* The EpisodeAssignment must be within the deadline for the AuthorType.
-         */
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
         $subreddit->save();
@@ -244,6 +242,11 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($exception_thrown);
     }
 
+    /**
+     * If the current AuthorTpe is flagged to not be available (see the
+     * Application tests for more info), then we test whether this prevents
+     * saving the EpisodeAssignment here.
+     */
     public function testBlockSaveForBlockedAuthorTypeBeforePreviousDeadline()
     {
         $subreddit = new Subreddit();
@@ -278,7 +281,7 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $understudy_deadline->setAuthorType($understudy);
         $understudy_deadline->setSeconds(10);
         $understudy_deadline->save();
-       
+
         $application_first = new Application();
         $application_first->setAuthorType($first);
         $application_first->setSubreddit($subreddit);
@@ -288,8 +291,8 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $application_next->setSubreddit($subreddit);
         $application_next->setRestrictedUntilPreviousMissesDeadline(true);
         $application_next->save();
-       
-       
+
+
         // Try to save episode assignment.
         $assignment = new EpisodeAssignment();
         $assignment->setEpisode($episode);
@@ -317,6 +320,11 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($exception_thrown);
     }
 
+    /**
+     * We've combined the process for preventing saving with a specific call for
+     * deletion to aid in handling errors and dealing with unsaved objects.
+     * This tests whether the exception is thrown
+     */
     public function testdeleteWithException()
     {
         $subreddit = new Subreddit();
@@ -335,29 +343,29 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
         $episode->setSubreddit($subreddit);
         $episode->save();
-        
+
         $assignment = new EpisodeAssignment();
         $assignment->setSfGuardUser($user);
         $assignment->setEpisode($episode);
         $assignment->setAuthorType($first);
         $assignment->save();
-        
+
         // Delete with exception
         $exception_thrown = false;
         $exception_code = 987654321;
-        try{
-        $assignment->deleteWithException("Test exception", $exception_code);
-        } catch (sfException $exception)
-        {
+        try {
+            $assignment->deleteWithException("Test exception", $exception_code);
+        } catch (sfException $exception) {
             $this->assertEquals($exception_code, $exception->getCode());
             unset($exception);
             $exception_thrown = true;
         }
         $this->assertTrue($exception_thrown);
-        
+
         // Delete the rest of the objects
         $episode->delete();
         $user->delete();
         $subreddit->delete();
     }
+
 }

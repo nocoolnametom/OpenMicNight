@@ -1,11 +1,17 @@
 <?php
-require_once dirname(__FILE__).'/../../../bootstrap/unit.php';
+
+require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 
 class ValidationTest extends sfPHPUnitBaseTestCase
 {
-  public function testCreate()
-  {
-    $t = new Validation();
-    $this->assertTrue($t instanceof Validation);
-  }
+
+    /**
+     * Tests for success at creating the object.
+     */
+    public function testCreate()
+    {
+        $t = new Validation();
+        $this->assertTrue($t instanceof Validation);
+    }
+
 }

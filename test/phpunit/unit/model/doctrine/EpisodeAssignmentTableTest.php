@@ -5,24 +5,37 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $t = EpisodeAssignmentTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
-    
+
+    /**
+     * This test is here merely to satisfy code coverage demands.  It takes a
+     * sub-array from a multi-dimensional array and returns just the value.
+     * This is to translate the multi-dimensional array to a one-dimensional
+     * array.  This tests whether the translation is occruing correctly.
+     */
     public function testGrabIdFromArray()
     {
         $test_id = 2;
         $an_array = array("id" => $test_id);
         $not_an_array = $test_id;
-        
+
         $this->assertEquals($test_id, EpisodeAssignmentTable::grabIdFromArray($an_array));
         $this->assertTrue(is_null(EpisodeAssignmentTable::grabIdFromArray($not_an_array)));
     }
 
-    /* @todo: Finish test */
-
+    /**
+     * This tests whether the
+     * EpisodeAssignmentTable::deleteBySubredditIdAndUserId() function deletes
+     * all future (and only future) EpisodeAssignments in a Subreddit attached
+     * to a particular User.
+     */
     public function testDeleteBySubredditIdAndUserId()
     {
         // Create two episode assignments: one for a past Episode, one for a future
@@ -103,8 +116,15 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         $subreddit->delete();
     }
 
-    /* @todo: Finish test */
-
+    /**
+     * This tests whether the
+     * EpisodeAssignmentTable::getFirstByUserAuthorTypeAndSubreddit() function
+     * retrieves the correct EpisodeAssignment for a particular User in a
+     * Subreddit based on the AuthorType used in the EpisodeAssignment.  Users
+     * can sign up for one Episode per AuthorType in each Subreddit, which means
+     * future Episodes (sicne we don't want the existence of past episode to
+     * disqualify Users from ever signing up again).
+     */
     public function testGetFirstByUserAuthorTypeAndSubreddit()
     {
         // Create two episode assignments: one for a past Episode, one for a future

@@ -5,12 +5,23 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class ApplicationTableTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $t = ApplicationTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
 
+    /**
+     * Applications store the AuthorTypes available for a particular Subreddit. 
+     * When these relatiosnhips are established, the Subreddit can choose
+     * whether or not to restrict an AuthorType from applying for an
+     * EpisodeAssignment if the previous AuthorType has not yet passed its
+     * Deadline.  This test determines whether such an Application flag, if set,
+     * will be returned accurately.
+     */
     public function testGetIfApplicationRestrictedByAuthorTypeAndSubreddit()
     {
         $first = AuthorTypeTable::getInstance()

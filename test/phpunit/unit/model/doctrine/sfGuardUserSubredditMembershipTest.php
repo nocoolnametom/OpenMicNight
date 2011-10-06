@@ -5,12 +5,21 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $t = new sfGuardUserSubredditMembership();
         $this->assertTrue($t instanceof sfGuardUserSubredditMembership);
     }
 
+    /**
+     * Tests saving a sfGuardUserSubredditMembership that identifies a User as
+     * "blocked" for a particular Subreddit.  When this occurs, all existing
+     * future EpisodeAssignments should be deleted because blocked users cannot
+     * participate with the Subreddit.
+     */
     public function testSavingBlockedUser()
     {
         // Establish fake Subreddit
@@ -71,8 +80,7 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
                 ->groupBy('EpisodeAssignment.id');
         $sql = $number_of_episodes->getSqlQuery();
         $number_of_episodes = $number_of_episodes->count();
-        $this->assertTrue(0 == $number_of_episodes,
-                          $sql . "\n"
+        $this->assertTrue(0 == $number_of_episodes, $sql . "\n"
                 . $subreddit->getIncremented() . "\n"
                 . $user_id);
 

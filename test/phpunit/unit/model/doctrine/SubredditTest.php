@@ -5,6 +5,9 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class SubredditTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $test_name = 'test';
@@ -15,6 +18,10 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $t->delete();
     }
 
+    /**
+     * Tests whether the Subreddit episode schedule is correctly transformed
+     * into a CronExpression object.
+     */
     public function testGetEpisodeScheduleAsCronExpression()
     {
         $subreddit = new Subreddit();
@@ -24,6 +31,10 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($episode_schedule instanceof Cron\CronExpression);
     }
 
+    /**
+     * Tests whether the Subreddit creation schedule is correctly transformed
+     * into a CronExpression object.
+     */
     public function testGetCreationScheduleAsCronExpression()
     {
         $subreddit = new Subreddit();
@@ -32,6 +43,10 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($creation_schedule instanceof Cron\CronExpression);
     }
 
+    /**
+     * Tests whether the Subreddit episode interval is correctly transformed
+     * into a DateInterval object.
+     */
     public function testGetEpisodeItervalAsDateInterval()
     {
         $subreddit = new Subreddit();
@@ -40,6 +55,10 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($episode_interval instanceof DateInterval);
     }
 
+    /**
+     * Tests whether the Subreddit creatiion schedule is correctly transformed
+     * into a DateInterval object.
+     */
     public function testGetCreationIntervalAsDateInterval()
     {
         $subreddit = new Subreddit();
@@ -48,21 +67,26 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($creation_internal instanceof DateInterval);
     }
 
+    /**
+     * Tests whether we can generate a collection of Episodes to be saved.
+     * These Episodes are produced using the creation and episode schedules of
+     * the Subreddit.
+     */
     public function testCollectGeneratedEpisodes()
     {
         /* @todo: Test iteration lengths, not just creation of episodes. */
-        
+
         $subreddit = new Subreddit;
         $subreddit->setEpisodeScheduleCronFormatted('0 0 * * *');
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->save();
-        
+
         $episodes = $subreddit->collectGeneratedEpisodes();
-        
+
         $this->assertTrue(!empty($episodes));
         $this->assertTrue($episodes[0] instanceof Episode);
-        
+
         $subreddit->delete();
-        
     }
+
 }

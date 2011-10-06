@@ -5,6 +5,9 @@ require_once dirname(__FILE__) . '/../../../bootstrap/unit.php';
 class DeadlineTest extends sfPHPUnitBaseTestCase
 {
 
+    /**
+     * Tests for success at creating the object.
+     */
     public function testCreate()
     {
         $test_seconds = 4321;
