@@ -17,22 +17,32 @@ class SubredditTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Subreddit');
     }
-    
+
     public static function grabSubredditIdFromArray($value)
     {
         return (is_array($value) ? $value['subreddit_id'] : null);
     }
 
+    /**
+     * Check for all Subreddits that have an Episode with a release_date
+     * beyond now plus the creation_interval.
+     * 
+     * This means that only when the release_dates all fall within the
+     * creation_interval will the Subreddit not be returned.  
+     *
+     * @return array   Array of Subreddits that don't need generation
+     */
     public function getSubredditsNotNeedingEpisodeGeneration()
     {
         $subquery = $this->createQuery()
-                ->select('E.subreddit_id')
-                ->from('Episode E')
-                ->leftJoin('Subreddit S')
-                ->groupBy('E.subreddit_id')
-                ->where('E.release_date > TIMESTAMPADD(SECOND, S.creation_interval, NOW())')
+                ->select('Episode.subreddit_id')
+                ->from('Episode')
+                ->leftJoin('Episode.Subreddit Subreddit')
+                ->groupBy('Episode.subreddit_id')
+                ->where('Episode.release_date > TIMESTAMPADD(SECOND, Subreddit.creation_interval, NOW())')
                 ->fetchArray();
-        $ids = array_map(array('SubredditTable', 'grabSubredditIdFromArray'), $subquery);
+        $ids = array_map(array('SubredditTable', 'grabSubredditIdFromArray'),
+                         $subquery);
         return $ids;
     }
 
@@ -40,11 +50,23 @@ class SubredditTable extends Doctrine_Table
     {
         $ids = $this->getSubredditsNotNeedingEpisodeGeneration();
         $subreddits = $this->createQuery()
-                        ->where('Subreddit.name LIKE ?', $subreddit_name)
-                        ->whereNotIn('Subreddit.id', $ids)
-                        ->execute();
+                ->where('Subreddit.name LIKE ?', $subreddit_name)
+                ->whereNotIn('Subreddit.id', $ids)
+                ->execute();
 
         return $subreddits;
+    }
+
+    public function getLastEpisodeReleaseDate($subreddit_id)
+    {
+        $results = $this->createQuery()
+                ->select('Episode.release_date')
+                ->from('Episode')
+                ->where('Episode.subreddit_id = ?', $subreddit_id)
+                ->orderBy('Episode.release_date DESC')
+                ->limit(1)
+                ->fetchArray();
+        return (count($results) ? $results[0]['release_date'] : date('Y-m-d H:i:s'));
     }
 
 }

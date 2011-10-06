@@ -42,8 +42,7 @@ EOF;
 
         foreach ($subreddits as $subreddit) {
             $episodes = $subreddit->collectGeneratedEpisodes();
-            foreach($episodes as $episode)
-            {
+            foreach ($episodes as $episode) {
                 $episode->save();
             }
         }

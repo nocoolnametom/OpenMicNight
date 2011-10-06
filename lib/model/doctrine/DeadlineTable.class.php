@@ -7,6 +7,7 @@
  */
 class DeadlineTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,25 +17,30 @@ class DeadlineTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Deadline');
     }
-    
-    public function getSecondsByAuthorAndSubreddit($author_type_id, $subreddit_id)
+
+    public function getSecondsByAuthorAndSubreddit($author_type_id,
+                                                   $subreddit_id)
     {
         $seconds = $this->createQuery()
-                    ->select('Deadline.seconds')
-                    ->where('Deadline.author_type_id = ?', $author_type_id)
-                    ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
-                    ->fetchArray();
+                ->select('Deadline.seconds')
+                ->where('Deadline.author_type_id = ?', $author_type_id)
+                ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
+                ->limit(1)
+                ->fetchArray();
         return (count($seconds) ? $seconds[0]['seconds'] : 0);
     }
-    
-    public function getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan($seconds, $subreddit_id)
+
+    public function getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan($seconds,
+                                                                              $subreddit_id)
     {
         $deadlines = $this->createQuery()
-                    ->select('Deadline.author_type_id')
-                    ->where('Deadline.subreddit_id = ?', $subreddit_id)
-                    ->andWhere('Deadline.seconds > ?', $seconds)
-                    ->orderBy('Deadline.seconds ASC')
-                    ->fetchArray();
+                ->select('Deadline.author_type_id')
+                ->where('Deadline.subreddit_id = ?', $subreddit_id)
+                ->andWhere('Deadline.seconds > ?', $seconds)
+                ->orderBy('Deadline.seconds ASC')
+                ->limit(1)
+                ->fetchArray();
         return (count($deadlines) ? $deadlines[0]['author_type_id'] : null);
     }
+
 }

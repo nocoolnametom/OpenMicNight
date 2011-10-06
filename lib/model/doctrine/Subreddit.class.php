@@ -18,7 +18,6 @@ class Subreddit extends BaseSubreddit
         return $this->getName();
     }
 
-    
     public function getEpisodeScheduleAsCronExpression()
     {
         ProjectConfiguration::registerCron();
@@ -45,17 +44,40 @@ class Subreddit extends BaseSubreddit
         return $next_creation->diff($after_that);
     }
 
+    public function getDateOfLastEpisode()
+    {
+        return SubredditTable::getInstance()->getLastEpisodeReleaseDate($this->getIncremented());
+    }
+
+    public function calculateCreationInterval()
+    {
+        $creation_schedule = $this->getCreationScheduleAsCronExpression();
+
+        $start = $creation_schedule->getNextRunDate();
+        $stop = $creation_schedule->getNextRunDate($start);
+
+        $diff = $start->diff($stop, true);
+        $seconds_between = ($diff->y * 365 * 24 * 60 * 60) +
+                ($diff->m * 30 * 24 * 60 * 60) +
+                ($diff->d * 24 * 60 * 60) +
+                ($diff->h * 60 * 60) +
+                $diff->s;
+        $this->setCreationInterval($seconds_between);
+    }
+
     public function collectGeneratedEpisodes()
     {
         ProjectConfiguration::registerCron();
-        
+
         $episode_schedule = $this->getEpisodeScheduleAsCronExpression();
 
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
 
-        $stop_creating = $creation_schedule->getNextRunDate();
+        $last_episode = new DateTime($this->getDateOfLastEpisode());
 
-        $episode_date = new DateTime(date('Y-m-d H:i:s', time()));
+        $stop_creating = $creation_schedule->getNextRunDate($last_episode);
+
+        $episode_date = $last_episode;
 
         $new_episodes = array();
         while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
@@ -68,6 +90,11 @@ class Subreddit extends BaseSubreddit
             $new_episodes[] = $episode;
         }
 
+
+        $this->calculateCreationInterval();
+        $this->save();
+
         return $new_episodes;
     }
+
 }
