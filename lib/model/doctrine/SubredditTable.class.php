@@ -18,6 +18,12 @@ class SubredditTable extends Doctrine_Table
         return Doctrine_Core::getTable('Subreddit');
     }
 
+    /**
+     * Pulls the 'subreddit_id' from a given sub-array.
+     *
+     * @param array $value  The sub-array from which to take the subreddit_id.
+     * @return int          The subreddit_id contained in the sub-array.
+     */
     public static function grabSubredditIdFromArray($value)
     {
         return (is_array($value) ? $value['subreddit_id'] : null);
@@ -46,6 +52,14 @@ class SubredditTable extends Doctrine_Table
         return $ids;
     }
 
+    /**
+     * Retrieves all Subreddits that are in need of generating new Episodes.
+     * Checking against particular Subreddits can be done by giving the
+     * Subreddit name as an argument (accepts SQL LIKE format).
+     *
+     * @param string $subreddit_name A given Subreddit name to check against.
+     * @return array                 An array of Subreddits
+     */
     public function getSubredditsNeedingEpisodeGeneration($subreddit_name = '%')
     {
         $ids = $this->getSubredditsNotNeedingEpisodeGeneration();
@@ -57,6 +71,13 @@ class SubredditTable extends Doctrine_Table
         return $subreddits;
     }
 
+    /**
+     * Retrieves the release date for the youngest Episode of the given 
+     * Subreddit.
+     *
+     * @param int $subreddit_id  The incremented ID of a Subreddit object
+     * @return string            The release date of the youngest Episode.
+     */
     public function getLastEpisodeReleaseDate($subreddit_id)
     {
         $results = $this->createQuery()

@@ -18,6 +18,14 @@ class DeadlineTable extends Doctrine_Table
         return Doctrine_Core::getTable('Deadline');
     }
 
+    /**
+     * Return the seconds of the Deadline identified by the given AuthorType and
+     * Subreddit.
+     *
+     * @param int $author_type_id  The incremented ID of an AuthorType object
+     * @param int $subreddit_id    The incremented ID of a Subreddit object
+     * @return int                 The seconds for the returned Deadline
+     */
     public function getSecondsByAuthorAndSubreddit($author_type_id,
                                                    $subreddit_id)
     {
@@ -30,6 +38,14 @@ class DeadlineTable extends Doctrine_Table
         return (count($seconds) ? $seconds[0]['seconds'] : 0);
     }
 
+    /**
+     * Returns the AuthorTypeId of the first AuthorType that has a Deadline
+     * shorter than the given seconds.
+     *
+     * @param int $seconds      
+     * @param int $subreddit_id The incremented ID of a Subreddit object
+     * @return int  
+     */
     public function getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan($seconds,
                                                                               $subreddit_id)
     {

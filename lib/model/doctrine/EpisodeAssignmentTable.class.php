@@ -18,11 +18,24 @@ class EpisodeAssignmentTable extends Doctrine_Table
         return Doctrine_Core::getTable('EpisodeAssignment');
     }
     
+    /**
+     * Pulls the 'id' from a given sub-array.
+     *
+     * @param array $value  The sub-array from which to take the id.
+     * @return int          The id contained in the sub-array.
+     */
     public static function grabIdFromArray($value)
     {
         return (is_array($value) ? $value['id'] : null);
     }
 
+    /**
+     * Deletes all future EpisodeAssignments in a given Subreddit for a
+     * particular User.
+     *
+     * @param int $subreddit_id The incremented ID of a Subreddit object
+     * @param int $user_id      The incremented ID of an sfGuardUser object
+     */
     public function deleteBySubredditIdAndUserId($subreddit_id, $user_id)
     {
 
@@ -44,6 +57,23 @@ class EpisodeAssignmentTable extends Doctrine_Table
         $query->execute();
     }
 
+    /**
+     * Returns the first future EpisodeAssignment identified by a given User,
+     * AuthorType, and Subreddit.  Since there should only be one entry in all
+     * future EpisodeAssignments for these threee identifiying factors, this
+     * function should return the only EpisodeAssignment possible.
+     * 
+     * Returns null on not finding an Episode Assignment.
+     * 
+     * Similar to getFirstByEpisodeAuthorTypeAndSubreddit(), but is concerned
+     * about finding the EpisodeAssignment for a particular User.
+     *
+     * @param int $author_type_id The incremented ID of an AuthorType object
+     * @param int $user_id        The incremented ID of an sfGuardUser object
+     * @param int $subreddit_id   The incremented ID of a Subreddit object
+     * @return EpisodeAssignment  The EpisodeAssignment identified by the given
+     *                            parameters.
+     */
     public function getFirstByUserAuthorTypeAndSubreddit($author_type_id,
                                                          $user_id, $subreddit_id)
     {
@@ -59,6 +89,23 @@ class EpisodeAssignmentTable extends Doctrine_Table
         return $episode_assignments;
     }
 
+    /**
+     * Returns the first future EpisodeAssignment identified by a given Episode,
+     * AuthorType, and Subreddit.  Since there should only be one entry in all
+     * future EpisodeAssignments for these threee identifiying factors, this
+     * function should return the only EpisodeAssignment possible.
+     * 
+     * Returns null on not finding an Episode Assignment.
+     * 
+     * Similar to getFirstByUserAuthorTypeAndSubreddit(), but is concerned
+     * about finding the EpisodeAssignment for a particular Episode.
+     *
+     * @param int $author_type_id The incremented ID of an AuthorType object
+     * @param int $episode_id     The incremented ID of an sfGuardUser object
+     * @param int $subreddit_id   The incremented ID of a Subreddit object
+     * @return EpisodeAssignment  The EpisodeAssignment identified by the given
+     *                            parameters.
+     */
     public function getFirstByEpisodeAuthorTypeAndSubreddit($author_type_id,
                                                             $episode_id,
                                                             $subreddit_id)

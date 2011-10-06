@@ -18,6 +18,14 @@ class ApplicationTable extends Doctrine_Table
         return Doctrine_Core::getTable('Application');
     }
 
+    /**
+     * Returns whether an Application for a given Subreddit and AuthorType is
+     * restricted until the previous AuthorType passes its Deadline.
+     *
+     * @param int $authortype_id The incremented ID of an AuthorType object
+     * @param int $subreddit_id  The incremented ID of a Subreddit object
+     * @return bool              Whether the Application record is restricted
+     */
     public function getIfApplicationRestrictedByAuthorTypeAndSubreddit($authortype_id,
                                                                        $subreddit_id)
     {

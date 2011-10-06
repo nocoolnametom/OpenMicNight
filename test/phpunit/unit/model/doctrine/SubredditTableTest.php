@@ -67,7 +67,7 @@ class SubredditTableTest extends sfPHPUnitBaseTestCase
                 ->getSubredditsNeedingEpisodeGeneration($subreddit->getName());
         $this->assertTrue(!empty($subreddits));
         $this->assertTrue($subreddits[0] instanceof Subreddit);
-        $this->assertTrue($subreddits[0] == $subreddit, $subreddits[0]->getIncremented() . ' ' . $subreddit->getIncremented());
+        $this->assertTrue($subreddits[0] == $subreddit);
 
         $subreddit->delete();
     }
