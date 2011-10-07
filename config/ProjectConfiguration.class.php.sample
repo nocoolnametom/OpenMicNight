@@ -14,16 +14,16 @@ class ProjectConfiguration extends sfProjectConfiguration
             return;
         }
 
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/FieldInterface.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/AbstractField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/CronExpression.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/DayOfMonthField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/DayOfWeekField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/FieldFactory.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/HoursField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/MinutesField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/MonthField.php';
-        require_once sfConfig::get('sf_lib_dir') . '/vendor/' . 'Cron/YearField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronFieldInterface.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronAbstractField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronCronExpression.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronDayOfMonthField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronDayOfWeekField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronFieldFactory.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronHoursField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronMinutesField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronMonthField.php';
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/CronExpression/src/CronYearField.php';
 
         self::$cronLoaded = true;
     }
