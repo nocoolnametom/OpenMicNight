@@ -1,0 +1,6 @@
+[submodule "lib/vendor/AWS-SDK"]
+	path = lib/vendor/AWS-SDK
+	url = git://github.com/amazonwebservices/aws-sdk-for-php.git
+[submodule "lib/vendor/CronExpression"]
+	path = lib/vendor/CronExpression
+	url = git://github.com/mtdowling/cron-expression.git
