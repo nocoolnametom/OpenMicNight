@@ -5,8 +5,20 @@ sfCoreAutoload::register();
 
 class ProjectConfiguration extends sfProjectConfiguration
 {
-
     static protected $cronLoaded = false;
+    static protected $awsLoaded = false;
+
+    public function setup()
+    {
+        $this->enablePlugins(array(
+            'sfDoctrinePlugin',
+            'sfDoctrineGuardPlugin',
+            'sfAdminThemejRollerPlugin',
+            'sfWidgetFormInputSWFUploadPlugin',
+            'sfJqueryFormValidationPlugin',
+            'sfPHPUnit2Plugin',
+        ));
+    }
 
     static public function registerCron()
     {
@@ -28,17 +40,15 @@ class ProjectConfiguration extends sfProjectConfiguration
         self::$cronLoaded = true;
     }
 
-    public function setup()
+    static public function registerAws()
     {
-        $this->enablePlugins(array(
-            'sfDoctrinePlugin',
-            'sfDoctrineGuardPlugin',
-            'sfAdminThemejRollerPlugin',
-            'sfWidgetFormInputSWFUploadPlugin',
-            'sfJqueryFormValidationPlugin',
-            'sfPHPUnit2Plugin',
-        ));
-        //self::registerCron();
+        if (self::$awsLoaded) {
+            return;
+        }
+
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/AWS-SDK/sdk.class.php';
+
+        self::$awsLoaded = true;
     }
 
 }
