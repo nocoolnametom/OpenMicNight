@@ -20,6 +20,13 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
     private $first_deadline;
     private $second_deadline;
     private $third_deadline;
+    private $first_membership;
+    private $second_membership;
+    private $third_membership;
+    private $fourth_membership;
+    private $first_ep_assignment;
+    private $second_ep_assignment;
+    private $third_ep_assignment;
 
     /**
      * We set up the following situation:
@@ -27,7 +34,11 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
      * EpisodeAssignments with the Episode in question.  The deadline for the 
      * first user has passed, but the deadline for the second has not.  The 
      * third user is in an AuthorType that should prevent creating an 
-     * AuthorType for the Episode before the second user's deadline passes.
+     * AuthorType for the Episode before the second user's deadline passes, even
+     * though that User is an admin.
+     * 
+     * The second user (the one who is able to submit their episode) is a
+     * moderator, but she should not be able to approve her own episode.
      */
     public function setUp()
     {
@@ -42,13 +53,13 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->aws = new AmazonS3();
 
         $this->subreddit = new Subreddit();
-        $this->subreddit->setName(rand(0,1000));
+        $this->subreddit->setName(rand(0, 1000));
         $this->subreddit->save();
-        
+
         $first = AuthorTypeTable::getInstance()->findOneByType('first');
         $understudy = AuthorTypeTable::getInstance()->findOneByType('understudy');
         $dark_horse = AuthorTypeTable::getInstance()->findOneByType('dark_horse');
-        
+
         $this->first_application = new Application();
         $this->first_application->setAuthorType($first);
         $this->first_application->setSubreddit($this->subreddit);
@@ -62,7 +73,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->third_application->setSubreddit($this->subreddit);
         $this->third_application->setRestrictedUntilPreviousMissesDeadline(true);
         $this->third_application->save();
-        
+
         $this->first_deadline = new Deadline();
         $this->first_deadline->setAuthorType($first);
         $this->first_deadline->setSeconds(1000);
@@ -88,7 +99,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->after_deadline_user->setEmailAddress(rand(0, 1000));
         $this->after_deadline_user->setUsername(rand(0, 1000));
         $this->after_deadline_user->save();
-        
+
         $this->dark_horse_user = new sfGuardUser();
         $this->dark_horse_user->setEmailAddress(rand(0, 1000));
         $this->dark_horse_user->setUsername(rand(0, 1000));
@@ -99,15 +110,65 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->approver->setUsername(rand(0, 1000));
         $this->approver->save();
 
+        $moderator = MembershipTable::getInstance()->findOnebyType('moderator');
+        $admin = MembershipTable::getInstance()->findOnebyType('admin');
+        $member = MembershipTable::getInstance()->findOnebyType('user');
+        
+        $this->first_membership = new sfGuardUserSubredditMembership();
+        $this->first_membership->setMembership($member);
+        $this->first_membership->setSubreddit($this->subreddit);
+        $this->first_membership->setSfGuardUser($this->after_deadline_user);
+        $this->first_membership->save();
+        $this->second_membership = new sfGuardUserSubredditMembership();
+        $this->second_membership->setMembership($member);
+        $this->second_membership->setSubreddit($this->subreddit);
+        $this->second_membership->setSfGuardUser($this->user);
+        $this->second_membership->save();
+        $this->third_membership = new sfGuardUserSubredditMembership();
+        $this->third_membership->setMembership($admin);
+        $this->third_membership->setSubreddit($this->subreddit);
+        $this->third_membership->setSfGuardUser($this->dark_horse_user );
+        $this->third_membership->save();
+        $this->fourth_membership = new sfGuardUserSubredditMembership();
+        $this->fourth_membership->setMembership($moderator);
+        $this->fourth_membership->setSubreddit($this->subreddit);
+        $this->fourth_membership->setSfGuardUser($this->approver);
+        $this->fourth_membership->save();
+
         $this->episode = new Episode();
+        $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 10000));
         $this->episode->setAudioFile($this->episode_filename);
         $this->episode->setNiceFilename('14 . W Will Rock You');
         $this->episode->setSfGuardUser($this->user);
-        $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 750));
         $this->episode->setDescription('This is a test.');
         $this->episode->setTitle('Test Episode');
         $this->episode->setIsNsfw(false);
         $this->episode->setSubreddit($this->subreddit);
+        $this->episode->save();
+
+        $this->first_ep_assignment = new EpisodeAssignment();
+        $this->first_ep_assignment->setEpisode($this->episode);
+        $this->first_ep_assignment->setAuthorType($first);
+        $this->first_ep_assignment->setSfGuardUser($this->after_deadline_user);
+        $this->first_ep_assignment->setMissedDeadline(true);
+        print_r($this->first_ep_assignment->hasBlockedUser());
+        $this->first_ep_assignment->save();
+        
+        $this->second_ep_assignment = new EpisodeAssignment();
+        $this->second_ep_assignment->setEpisode($this->episode);
+        $this->second_ep_assignment->setAuthorType($understudy);
+        $this->second_ep_assignment->setSfGuardUser($this->user);
+        $this->second_ep_assignment->setMissedDeadline(false);
+        $this->second_ep_assignment->save();
+        
+        $this->third_ep_assignment = new EpisodeAssignment();
+        $this->third_ep_assignment->setEpisode($this->episode);
+        $this->third_ep_assignment->setAuthorType($dark_horse);
+        $this->third_ep_assignment->setSfGuardUser($this->dark_horse_user);
+        $this->third_ep_assignment->setMissedDeadline(false);
+        $this->third_ep_assignment->save();
+
+        $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 750));
         $this->episode->save();
     }
 
@@ -121,6 +182,23 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $t->setTitle($test_title);
         $this->assertTrue($t instanceof Episode);
         $this->assertEquals($t->__toString(), $test_title);
+    }
+
+    /**
+     * Tests setting the Episode as submitted.  Since it's currently saved by a user beyond deadline, this submission should error out..
+     */
+    public function testSubmissionOfEpsiode()
+    {
+
+
+        /* Now that the Episode is set up, let's ensure that some of the process
+         * of submitting and approving (and unapproving and unsubmitting [you
+         * can't unsubmit]) work.
+         */
+
+
+
+        $this->episode->setApprovedBy($this->approver);
     }
 
     /**
@@ -144,6 +222,21 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
 
     public function tearDown()
     {
+
+        if ($this->first_membership)
+            $this->first_membership->delete();
+        if ($this->second_membership)
+            $this->second_membership->delete();
+        if ($this->third_membership)
+            $this->third_membership->delete();
+        if ($this->fourth_membership)
+            $this->fourth_membership->delete();
+        if ($this->first_ep_assignment)
+            $this->first_ep_assignment->delete();
+        if ($this->second_ep_assignment)
+            $this->second_ep_assignment->delete();
+        if ($this->third_ep_assignment)
+            $this->third_ep_assignment->delete();
         if ($this->episode)
             $this->episode->delete();
         if ($this->approver)

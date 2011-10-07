@@ -36,7 +36,7 @@ class sfGuardUserSubredditMembershipTable extends Doctrine_Table
                                                     $memberships = array())
     {
         $subreddit_membership = $this->createQuery()
-                ->leftJoin('sfGuardUserSubredditMembership.Membership')
+                ->leftJoin('sfGuardUserSubredditMembership.Membership Membership')
                 ->where('sfGuardUserSubredditMembership.sf_guard_user_id = ?',
                         $user_id)
                 ->andWhere('sfGuardUserSubredditMembership.subreddit_id = ?',
