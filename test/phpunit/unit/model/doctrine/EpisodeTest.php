@@ -120,7 +120,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->first_membership->setSfGuardUser($this->after_deadline_user);
         $this->first_membership->save();
         $this->second_membership = new sfGuardUserSubredditMembership();
-        $this->second_membership->setMembership($member);
+        $this->second_membership->setMembership($moderator);
         $this->second_membership->setSubreddit($this->subreddit);
         $this->second_membership->setSfGuardUser($this->user);
         $this->second_membership->save();
@@ -239,6 +239,35 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->setApprovedBy($this->approver->getIncremented());
         $this->episode->save();
         $this->assertEquals(null, $this->episode->getApprovedBy());
+        
+        // Cannot save an Approver who is the same as the Submitter.
+        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->save();
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertTrue($this->episode->getIsSubmitted());
+        $this->assertTrue(strlen($this->episode->getSubmittedAt()) > 0);
+        
+        $this->episode->setApprovedBy($this->user->getIncremented());
+        $this->episode->save();
+        $this->assertEquals(null, $this->episode->getApprovedBy());
+        
+        // Cannot save an Approver who is not an admin or moderator.
+        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->save();
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertTrue($this->episode->getIsSubmitted());
+        $this->assertTrue(strlen($this->episode->getSubmittedAt()) > 0);
+        
+        $this->episode->setApprovedBy($this->after_deadline_user->getIncremented());
+        $this->episode->save();
+        $this->assertEquals(null, $this->episode->getApprovedBy());
+        
+        // Can save an Approver who is an admin or moderator.
+        $this->episode->setApprovedBy($this->approver->getIncremented());
+        $this->episode->save();
+        $this->assertEquals($this->approver->getIncremented(), $this->episode->getApprovedBy());
     }
 
     public function tearDown()

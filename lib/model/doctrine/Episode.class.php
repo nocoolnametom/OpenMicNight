@@ -76,13 +76,25 @@ class Episode extends BaseEpisode
         $this->_set('is_submitted', $is_submitted);
     }
 
-    public function setApprovedBy($approver)
+    public function setApprovedBy($approver_id)
     {
         // Episode must already have a User
         if (!$this->getSfGuardUserId() || !$this->getIsSubmitted())
             return;
+        
+        if ($this->getSfGuardUserId() == $approver_id)
+            return;
+        
+        // The Approver must actually *be* an approver in the Episode Subreddit.
+        $membership = sfGuardUserSubredditMembershipTable::getInstance()
+                ->getFirstByUserSubredditAndMemberships(
+                $approver_id,
+                $this->getSubredditId(), array('moderator', 'admin')
+        );
+        if (!$membership)
+            return;
 
-        $this->_set('approved_by', $approver);
+        $this->_set('approved_by', $approver_id);
     }
 
     public function setIsApproved($is_approved)
@@ -102,7 +114,7 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getApprovedBy()->getIncremented(),
+                $this->getApprovedBy(),
                 $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
