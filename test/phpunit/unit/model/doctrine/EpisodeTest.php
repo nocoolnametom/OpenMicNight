@@ -136,10 +136,10 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->fourth_membership->save();
 
         $this->episode = new Episode();
-        $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 10000));
+        $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 20000));
         $this->episode->setAudioFile($this->episode_filename);
         $this->episode->setNiceFilename('14 . W Will Rock You');
-        $this->episode->setSfGuardUser($this->user);
+        //$this->episode->setSfGuardUserId($this->user);
         $this->episode->setDescription('This is a test.');
         $this->episode->setTitle('Test Episode');
         $this->episode->setIsNsfw(false);
@@ -147,26 +147,26 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->save();
 
         $this->first_ep_assignment = new EpisodeAssignment();
-        $this->first_ep_assignment->setEpisode($this->episode);
+        $this->first_ep_assignment->setEpisodeId($this->episode->getIncremented());
         $this->first_ep_assignment->setAuthorType($first);
         $this->first_ep_assignment->setSfGuardUser($this->after_deadline_user);
-        $this->first_ep_assignment->setMissedDeadline(true);
-        print_r($this->first_ep_assignment->hasBlockedUser());
         $this->first_ep_assignment->save();
         
         $this->second_ep_assignment = new EpisodeAssignment();
-        $this->second_ep_assignment->setEpisode($this->episode);
+        $this->second_ep_assignment->setEpisodeId($this->episode->getIncremented());
         $this->second_ep_assignment->setAuthorType($understudy);
         $this->second_ep_assignment->setSfGuardUser($this->user);
-        $this->second_ep_assignment->setMissedDeadline(false);
         $this->second_ep_assignment->save();
         
         $this->third_ep_assignment = new EpisodeAssignment();
-        $this->third_ep_assignment->setEpisode($this->episode);
+        $this->third_ep_assignment->setEpisodeId($this->episode->getIncremented());
         $this->third_ep_assignment->setAuthorType($dark_horse);
         $this->third_ep_assignment->setSfGuardUser($this->dark_horse_user);
-        $this->third_ep_assignment->setMissedDeadline(false);
-        $this->third_ep_assignment->save();
+        try {
+            $this->third_ep_assignment->save();
+        } catch (sfException $exception) {
+            unset($exception);
+        }
 
         $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 750));
         $this->episode->save();
@@ -185,20 +185,41 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
     }
 
     /**
-     * Tests setting the Episode as submitted.  Since it's currently saved by a user beyond deadline, this submission should error out..
+     * Tests setting the Episode as submitted.  Since it's currently saved by a
+     * user beyond deadline, this submission should error out..
      */
     public function testSubmissionOfEpsiode()
     {
-
-
         /* Now that the Episode is set up, let's ensure that some of the process
          * of submitting and approving (and unapproving and unsubmitting [you
          * can't unsubmit]) work.
          */
-
-
-
-        $this->episode->setApprovedBy($this->approver);
+        
+        // Try to submit without a user (and fail).
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertFalse($this->episode->getIsSubmitted());
+        
+        // Set up a user beyond Deadline and try to submit (and fail).
+        $this->episode->setSfGuardUserId($this->after_deadline_user->getIncremented());
+        $this->episode->save();
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertFalse($this->episode->getIsSubmitted());
+        
+        // Set up a user within Deadline and try to submit (and succeed).
+        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->save();
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertTrue($this->episode->getIsSubmitted());
+        $this->assertTrue(strlen($this->episode->getSubmittedAt()) > 0);
+        
+        // Try to unsubmit the episode (and fail).
+        $this->episode->setIsSubmitted(false);
+        $this->episode->save();
+        $this->assertTrue($this->episode->getIsSubmitted());
+        $this->assertTrue(strlen($this->episode->getSubmittedAt()) > 0);
     }
 
     /**
@@ -208,16 +229,16 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
      */
     public function testApprovalOfEpsiode()
     {
-
-
         /* Now that the Episode is set up, let's ensure that some of the process
          * of submitting and approving (and unapproving and unsubmitting [you
          * can't unsubmit]) work.
          */
 
 
-
-        $this->episode->setApprovedBy($this->approver);
+        // Cannot save an Approver without having a User and a Submission Date.
+        $this->episode->setApprovedBy($this->approver->getIncremented());
+        $this->episode->save();
+        $this->assertEquals(null, $this->episode->getApprovedBy());
     }
 
     public function tearDown()

@@ -24,21 +24,25 @@ class sfGuardUserSubredditMembershipTableTest extends sfPHPUnitBaseTestCase
     public function testGetFirstByUserSubredditAndMemberships()
     {
         $user = new sfGuardUser();
+        $user->setEmailAddress(rand(0, 1000));
+        $user->setUsername(rand(0, 1000));
+        $user->save();
         $subreddit = new Subreddit();
+        $subreddit->save();
         $membership = MembershipTable::getInstance()
-                ->findOneBy('type', 'user');
+                ->findOneByType('user');
         $second_membership = MembershipTable::getInstance()
-                ->findOneBy('type', 'admin');
+                ->findOneByType('admin');
 
         $user_subreddit_membership = new sfGuardUserSubredditMembership();
-        $user_subreddit_membership->setSfGuardUser($user);
-        $user_subreddit_membership->setSubreddit($subreddit);
+        $user_subreddit_membership->setSfGuardUserId($user->getIncremented());
+        $user_subreddit_membership->setSubredditId($subreddit->getIncremented());
         $user_subreddit_membership->setMembership($membership);
         $user_subreddit_membership->save();
         
         $second_user_subreddit_membership = new sfGuardUserSubredditMembership();
-        $second_user_subreddit_membership->setSfGuardUser($user);
-        $second_user_subreddit_membership->setSubreddit($subreddit);
+        $second_user_subreddit_membership->setSfGuardUserId($user->getIncremented());
+        $second_user_subreddit_membership->setSubredditId($subreddit->getIncremented());
         $second_user_subreddit_membership->setMembership($second_membership);
         $exception_thrown = false;
         try {

@@ -46,5 +46,15 @@ class EpisodeTable extends Doctrine_Table
                 ->getFirst();
         return $episode_assignments;
     }
+    
+    public function getCurrentReleaseDate($episode_id)
+    {
+        $release_date = $this->createQuery()
+                ->select('Episode.release_date')
+                ->where('Episode.id = ?', $episode_id)
+                ->limit(1)
+                ->fetchArray();
+        return (count($release_date) ? $release_date[0]['release_date'] : date());
+    }
 
 }

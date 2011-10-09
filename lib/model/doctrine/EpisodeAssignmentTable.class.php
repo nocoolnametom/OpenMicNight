@@ -101,7 +101,7 @@ class EpisodeAssignmentTable extends Doctrine_Table
      * about finding the EpisodeAssignment for a particular Episode.
      *
      * @param int $author_type_id The incremented ID of an AuthorType object
-     * @param int $episode_id     The incremented ID of an sfGuardUser object
+     * @param int $episode_id     The incremented ID of an Episode object
      * @param int $subreddit_id   The incremented ID of a Subreddit object
      * @return EpisodeAssignment  The EpisodeAssignment identified by the given
      *                            parameters.
@@ -121,5 +121,45 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->getFirst();
         return $episode_assignments;
     }
+    
+    /**
+     * Returns the first future EpisodeAssignment identified by a given Episode,
+     * User, and Subreddit.  Since there should only be one entry in all
+     * future EpisodeAssignments for these threee identifiying factors, this
+     * function should return the only EpisodeAssignment possible.
+     * 
+     * Returns null on not finding an Episode Assignment.
+     * 
+     * Similar to getFirstByUserAuthorTypeAndSubreddit(), but is concerned
+     * about finding the EpisodeAssignment for a particular User.
+     *
+     * @param int $aut$user_id    The incremented ID of an sfGuardUser object
+     * @param int $episode_id     The incremented ID of an Episode object
+     * @param int $subreddit_id   The incremented ID of a Subreddit object
+     * @return EpisodeAssignment  The EpisodeAssignment identified by the given
+     *                            parameters.
+     */
+    public function getFirstByUserEpisodeAndSubreddit($user_id,
+                                                            $episode_id,
+                                                            $subreddit_id)
+    {
+        $episode_assignments = $this->createQuery()
+                ->leftJoin('EpisodeAssignment.Episode Episode')
+                ->where('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
+                ->andWhere('EpisodeAssignment.episode_id = ?', $episode_id)
+                ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
+                ->andWhere('Episode.release_date > NOW()')
+                ->orderBy('EpisodeAssignment.created_at ASC')
+                ->execute()
+                ->getFirst();
+        return $episode_assignments;
+    }
 
+    public function getAllByEpisodeId($episode_id)
+    {
+        $episode_assignments = $this->createQuery()
+                ->where('EpisodeAssignment.episode_id = ?', $episode_id)
+                ->execute();
+        return $episode_assignments;
+    }
 }

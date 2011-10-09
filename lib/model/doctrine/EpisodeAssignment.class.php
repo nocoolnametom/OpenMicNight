@@ -71,7 +71,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                         . " has already registered with AuthorType "
                         . $this->getAuthorTypeId() . " within Subreddit "
                         . $this->getEpisode()->getSubredditId(), 102);
-            
+
             /* Only one sfGuardUser can sign up for one Episode with the same
              * AuthorType for each Application period.
              */
@@ -85,12 +85,12 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             /* The EpisodeAssignment must be within the deadline for the
              * AuthorType.
              */
-            if ($this->isWithinDeadlineForAuthorType())
+            if (!$this->isBeforeDeadlineForAuthorType())
                 $this->deleteWithException("Cannot create EpisodeAssignment "
                         . "because the deadline has already passed for "
                         . "AuthorType " . $this->getAuthorTypeId() . " within "
                         . "Subreddit " . $this->getEpisode()->getSubredditId(),
-                        104);
+                                           104);
 
             /* Even if the deadline has not yet passed, we may only sign up an 
              * AuthorType if the AuthorType is allowed to register before the 
@@ -109,25 +109,24 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             if ($previous_author_type_id = DeadlineTable::getInstance()
                     ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
                     $deadline_seconds, $this->getEpisode()->getSubredditId()))
-                /* If a previous AuthorType exists, we need to see if the
-                 * current AuthorType is restricted until that previous 
-                 * uthorType is expired.  If it *is* restricted, then we need to
-                 * see if the previous AuthorType has yet expired.  If the
-                 * previous AuthorType is still beyond its Deadline for the
-                 * Episode (and has not expired) then we cannot allow the
-                 * current EpisodeAssignment to be saved.
-                 */
+            /* If a previous AuthorType exists, we need to see if the
+             * current AuthorType is restricted until that previous 
+             * uthorType is expired.  If it *is* restricted, then we need to
+             * see if the previous AuthorType has yet expired.  If the
+             * previous AuthorType is still beyond its Deadline for the
+             * Episode (and has not expired) then we cannot allow the
+             * current EpisodeAssignment to be saved.
+             */
                 if (ApplicationTable::getInstance()
                                 ->getIfApplicationRestrictedByAuthorTypeAndSubreddit(
                                         $this->getAuthorTypeId(),
                                         $this->getEpisode()->getSubredditId())
-                        && $this->isWithinDeadlineForAuthorType($previous_author_type_id))
+                        && !$this->isBeforeDeadlineForAuthorType($previous_author_type_id))
                     $this->deleteWithException("Cannot create "
                             . "EpisodeAssignment because the deadline has "
                             . "not yet passed for the previous AuthorType "
                             . $this->getAuthorTypeId() . " within Subreddit "
-                            . $this->getEpisode()->getSubredditId(),
-                            105);
+                            . $this->getEpisode()->getSubredditId(), 105);
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
@@ -171,7 +170,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         );
         return ($assignment ? true : false);
     }
-    
+
     /**
      * Checks to see if the User of the EpsiodeAssignment is already attached to
      * the curent Episode via another Authortype.
@@ -199,23 +198,24 @@ class EpisodeAssignment extends BaseEpisodeAssignment
      * @return bool                Whether the current time is within the 
      *                              Subreddit Deadline.
      */
-    public function isWithinDeadlineForAuthorType($author_type_id = null)
+    public function isBeforeDeadlineForAuthorType($author_type_id = null)
     {
         if (is_null($author_type_id))
             $author_type_id = $this->getAuthorTypeId();
+        if ($this->getMissedDeadline())
+            return false;
         $deadline_seconds = Doctrine::getTable('Deadline')
                 ->getSecondsByAuthorAndSubreddit(
                 $author_type_id, $this->getEpisode()->getSubredditId()
         );
-        $release_date = new DateTime($this->getEpisode()->getReleaseDate());
-        $now = new DateTime(date('Y-m-d H:i:s', time()));
-        $diff = $release_date->diff($now, true);
-        $seconds_between = ($diff->y * 365 * 24 * 60 * 60) +
-                ($diff->m * 30 * 24 * 60 * 60) +
-                ($diff->d * 24 * 60 * 60) +
-                ($diff->h * 60 * 60) +
-                $diff->s;
-        return ( $deadline_seconds > $seconds_between );
+        $release_date = new DateTime(EpisodeTable::getInstance()
+                                ->getCurrentReleaseDate($this->getEpisodeId()));
+        $now_and_deadline = new DateTime(date('Y-m-d H:i:s',
+                                              time() + $deadline_seconds));
+        if (($now_and_deadline > $release_date ) && !$this->getMissedDeadline()) {
+            $this->setMissedDeadline(true);
+        }
+        return ( $now_and_deadline < $release_date );
     }
 
     /**

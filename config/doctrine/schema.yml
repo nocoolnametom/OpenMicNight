@@ -85,9 +85,9 @@ Episode:
   actAs:
     Timestampable: ~
   columns:
-    sf_guard_user_id: { type: integer, notnull: true }
+    sf_guard_user_id: { type: integer, default: null }
     subreddit_id: { type: integer, notnull: true }
-    approved_by: { type: integer }
+    approved_by: { type: integer, default: null }
     release_date: { type: timestamp, notnull: true }
     audio_file: { type: string(255) }
     nice_filename: { type: string(255) }
@@ -101,7 +101,7 @@ Episode:
     approved_at: { type: timestamp }
     reddit_post_url: { type: string(255) }
   relations:
-    sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: SubmittedEpisodes }
+    sfGuardUser: { onDelete: SET NULL, local: sf_guard_user_id, foreign: id, foreignAlias: SubmittedEpisodes }
     sfGuardUser: { onDelete: SET NULL, local: approved_by, foreign: id, foreignAlias: ApprovedEpisodes }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Episodes }
 

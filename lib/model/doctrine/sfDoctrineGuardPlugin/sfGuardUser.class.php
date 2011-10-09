@@ -12,4 +12,13 @@
  */
 class sfGuardUser extends PluginsfGuardUser
 {
+	public function save(Doctrine_Connection $conn = null)
+    {
+        if (is_null($this->_get('username')) && is_null($this->_get('email_address')))
+        {
+            //throw new Exception('Cannot save User with null username and email!');
+            return;
+        }
+        parent::save($conn);
+    }
 }

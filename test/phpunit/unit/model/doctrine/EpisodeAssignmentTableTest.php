@@ -53,32 +53,11 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         $this->assertTrue($first instanceof AuthorType);
         $this->assertNotEquals(null, $first->getIncremented());
 
-        $past_episode_one = new Episode();
-        $past_episode_one->setReleaseDate(date('Y-m-d H:i:s', time() - 200000));
-        $past_episode_one->setSubreddit($subreddit);
-        $past_episode_one->save();
-        $past_episode_two = new Episode();
-        $past_episode_two->setReleaseDate(date('Y-m-d H:i:s', time() - 100000));
-        $past_episode_two->setSubreddit($subreddit);
-        $past_episode_two->setSfGuardUser($user);
-        $past_episode_two->save();
         $future_episode = new Episode();
         $future_episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
         $future_episode->setSubreddit($subreddit);
         $future_episode->save();
 
-        $past_assignment_one = new EpisodeAssignment();
-        $past_assignment_one->setEpisode($past_episode_one);
-        $past_assignment_one->setMissedDeadline(true);
-        $past_assignment_one->setSfGuardUser($user);
-        $past_assignment_one->setAuthorType($first);
-        $past_assignment_one->save();
-        $past_assignment_two = new EpisodeAssignment();
-        $past_assignment_two->setEpisode($past_episode_two);
-        $past_assignment_two->setMissedDeadline(false);
-        $past_assignment_two->setSfGuardUser($user);
-        $past_assignment_two->setAuthorType($first);
-        $past_assignment_two->save();
         $future_assignment = new EpisodeAssignment();
         $future_assignment->setEpisode($future_episode);
         $future_assignment->setSfGuardUser($user);
@@ -93,24 +72,14 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
                 ->deleteBySubredditIdAndUserId(
                         $subreddit->getIncremented(), $user->getIncremented());
 
-        $test_past_one = EpisodeAssignmentTable::getInstance()
-                ->find($past_assignment_one->getIncremented());
-        $test_past_two = EpisodeAssignmentTable::getInstance()
-                ->find($past_assignment_two->getIncremented());
         $test_future = EpisodeAssignmentTable::getInstance()
                 ->find($future_assignment->getIncremented());
 
-        $this->assertTrue($test_past_one instanceof EpisodeAssignment, 'past_one ' . $past_assignment_one->getIncremented());
-        $this->assertTrue($test_past_two instanceof EpisodeAssignment, 'past_two ' . $past_assignment_two->getIncremented());
         $this->assertFalse($test_future instanceof EpisodeAssignment, 'future ' . $future_assignment->getIncremented());
 
         // Cleanup
         if ($future_assignment)
             $future_assignment->delete();
-        $past_assignment_one->delete();
-        $past_assignment_two->delete();
-        $past_episode_one->delete();
-        $past_episode_two->delete();
         $future_episode->delete();
         $user->delete();
         $subreddit->delete();
