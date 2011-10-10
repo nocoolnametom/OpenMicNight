@@ -12,7 +12,7 @@
  */
 class Subreddit extends BaseSubreddit
 {
-    
+
     /**
      * Returns the Subreddit name
      *
@@ -27,7 +27,8 @@ class Subreddit extends BaseSubreddit
     {
         $this->_set('name', $name);
         if ($this->getName() && (!$this->getBucketName() || strlen($this->getBucketName()) == 0)) {
-            $bucket_name = $this->createAmazonBucketName('herddit-' . $name);
+            $bucket_name = $this->createAmazonBucketName(
+                    ProjectConfiguration::getAmazonBucketPrefix() . $name);
             $this->setBucketName($bucket_name);
         }
     }

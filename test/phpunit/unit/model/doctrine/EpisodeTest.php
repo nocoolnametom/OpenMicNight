@@ -285,7 +285,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         
         // Once an Approver is set, we can flip the Episode to Approved
         $this->assertFalse($this->episode->getFileIsRemote());
-        $this->episode->setIsApproved(true, $this->unapproved_file_location);
+        $this->episode->setIsApproved(true);
         $this->episode->save();
         $this->assertTrue($this->episode->getFileIsRemote());
         $guessed_remote = 'http://' . $this->subreddit->getBucketName()
@@ -293,7 +293,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->assertEquals($guessed_remote, $this->episode->getRemoteUrl());
         
         // Unapprove Episode (in preparation of deleting an approved Episode)
-        $this->episode->setisApproved(false, $this->unapproved_file_location);
+        $this->episode->setisApproved(false);
         $this->assertFalse($this->episode->getFileIsRemote());
     }
 

@@ -56,7 +56,7 @@ class Episode extends BaseEpisode
         // Episode Must already have a User
         if (!$this->getSfGuardUser())
             return;
-        
+
         // Episode must also have a file attached
         if (!$this->getAudioFile())
             return;
@@ -100,16 +100,17 @@ class Episode extends BaseEpisode
 
         $this->_set('approved_by', $approver_id);
     }
-    
+
     public function getNiceFilename()
     {
         $nice_filename = $this->_get('nice_filename');
         $nice_filename = ($nice_filename ? $nice_filename : $this->getAudioFile());
-        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_", $nice_filename);
+        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_",
+                                      $nice_filename);
         return $nice_filename;
     }
 
-    public function setIsApproved($is_approved, $file_location = '')
+    public function setIsApproved($is_approved)
     {
         // Episode must already have a User
         if (!$this->getSfGuardUser())
@@ -135,27 +136,28 @@ class Episode extends BaseEpisode
         // We set the timestamp for this action.
         if ($is_approved)
             $this->setApprovedAt(date('Y-m-d H:i:s'));
-        
+
         $now = new DateTime();
         $release_date = new DateTime($this->getReleaseDate());
 
         if ($is_approved && !$this->_get('is_approved')) {
             // We move the physical file of the Episode to Amazon.
             if ($file_location)
-                $this->moveEpisodeFileToAmazon($file_location);
+                $this->moveEpisodeFileToAmazon();
         } elseif (!$is_approved && $this->_get('is_approved') && ($now < $release_date)) {
             // We move the physical file of the Episode from Amazon.
             if ($file_location)
-                $this->moveEpisodeFileFromAmazon($file_location);
+                $this->moveEpisodeFileFromAmazon();
         }
 
         $this->_set('is_approved', $is_approved);
     }
 
-    public function moveEpisodeFileToAmazon($file_location)
+    public function moveEpisodeFileToAmazon()
     {
         if (!$this->getAudioFile())
             throw new Exception("No local file to upload!");
+        $file_location = ProjectConfiguration::getEpisodeAudioFileLocalDirectory();
         $filename = $file_location . $this->getAudioFile();
         if (!file_exists($filename))
             throw new Exception("No local file to upload!");
@@ -164,7 +166,7 @@ class Episode extends BaseEpisode
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
             $response = $s3->create_object($bucket, $this->getNiceFilename(),
-                                          array(
+                                           array(
                 'fileUpload' => $file_location . $this->getAudioFile()
                     ));
             if ($response->isOK())
@@ -176,9 +178,10 @@ class Episode extends BaseEpisode
         $this->setFileIsRemote(true);
     }
 
-    public function moveEpisodeFileFromAmazon($file_location)
+    public function moveEpisodeFileFromAmazon()
     {
         ProjectConfiguration::registerAws();
+        $file_location = ProjectConfiguration::getEpisodeAudioFileLocalDirectory();
         $s3 = new AmazonS3;
         $bucket = $this->getSubreddit()->getBucketName();
         if (!$s3->if_bucket_exists($bucket)) {
@@ -194,8 +197,9 @@ class Episode extends BaseEpisode
         $this->setFileIsRemote(false);
     }
 
-    public function deleteLocalFile($filename, $file_location = '')
+    public function deleteLocalFile($filename, $file_location = null)
     {
+        $file_location = ($file_location ? $file_location : ProjectConfiguration::getEpisodeAudioFileLocalDirectory());
         if (!file_exists($filename)) {
             throw new Exception("$filename does not exist in $file_location");
         }
@@ -216,6 +220,23 @@ class Episode extends BaseEpisode
         $response = $s3->delete_object($bucket, $filename);
         if (!$response->isOK())
             throw new Exception('Failed to remove file from Amazon!');
+    }
+
+    public function delete(Doctrine_Connection $conn = null)
+    {
+        $is_remote = $this->getFileIsRemote();
+        $audio_filename = $this->getAudioFile();
+        $graphic_filename = $this->getGraphicFile();
+        $nice_filename = $this->getNiceFilename();
+        $bucket = $this->getSubreddit()->getBucketName();
+        parent::delete($conn);
+        if ($is_remote)
+            $this->deleteEpisodeFileFromAmazon($audio_filename);
+        if (!$is_remote && $audio_filename)
+            $this->deleteLocalFile($audio_filename);
+        if ($graphic_filename)
+            $this->deleteLocalFile($graphic_filename,
+                                   ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
     }
 
     public function getEpisodeAssignments()

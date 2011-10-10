@@ -5,6 +5,7 @@ sfCoreAutoload::register();
 
 class ProjectConfiguration extends sfProjectConfiguration
 {
+
     static protected $cronLoaded = false;
     static protected $awsLoaded = false;
 
@@ -49,6 +50,21 @@ class ProjectConfiguration extends sfProjectConfiguration
         require_once sfConfig::get('sf_lib_dir') . '/vendor/AWS-SDK/sdk.class.php';
 
         self::$awsLoaded = true;
+    }
+
+    static public function getAmazonBucketPrefix()
+    {
+        return 'hreddit-';
+    }
+
+    static public function getEpisodeAudioFileLocalDirectory()
+    {
+        return sfConfig::get('sf_data_dir') . '/temp/';
+    }
+
+    static public function getEpisodeGraphicFileLocalDirectory()
+    {
+        return sfConfig::get('sf_web_dir') . '/uploads/';
     }
 
 }
