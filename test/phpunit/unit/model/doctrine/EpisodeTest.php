@@ -12,7 +12,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
     private $approver;
     private $episode;
     private $episode_filename;
-    private $unapproved_file_lcoation;
+    private $unapproved_file_location;
     private $aws;
     private $first_application;
     private $second_application;
@@ -138,7 +138,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode = new Episode();
         $this->episode->setReleaseDate(date('Y-m-d H:i:s', time() + 20000));
         $this->episode->setAudioFile($this->episode_filename);
-        $this->episode->setNiceFilename('14 . W Will Rock You');
+        $this->episode->setNiceFilename('14. We Will Rock You.mp3');
         //$this->episode->setSfGuardUserId($this->user);
         $this->episode->setDescription('This is a test.');
         $this->episode->setTitle('Test Episode');
@@ -207,8 +207,17 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->save();
         $this->assertFalse($this->episode->getIsSubmitted());
         
-        // Set up a user within Deadline and try to submit (and succeed).
+        // Set up a user within Deadline without a filename and try to submit (and fail).
         $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setAudioFile('');
+        $this->episode->save();
+        $this->episode->setIsSubmitted(true);
+        $this->episode->save();
+        $this->assertFalse($this->episode->getIsSubmitted());
+        
+        // Set up a user within Deadline with a filename and try to submit (and succeed).
+        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setAudioFile($this->episode_filename);
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
         $this->episode->save();
@@ -233,7 +242,11 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
          * of submitting and approving (and unapproving and unsubmitting [you
          * can't unsubmit]) work.
          */
-
+        
+        // Cannot set an Episode to Approved without an Approver
+        $this->episode->setIsApproved(true);
+        $this->episode->save();
+        $this->assertFalse($this->episode->getIsApproved());
 
         // Cannot save an Approver without having a User and a Submission Date.
         $this->episode->setApprovedBy($this->approver->getIncremented());
@@ -242,6 +255,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         
         // Cannot save an Approver who is the same as the Submitter.
         $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setAudioFile($this->episode_filename);
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
         $this->episode->save();
@@ -269,7 +283,18 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->save();
         $this->assertEquals($this->approver->getIncremented(), $this->episode->getApprovedBy());
         
-        //
+        // Once an Approver is set, we can flip the Episode to Approved
+        $this->assertFalse($this->episode->getFileIsRemote());
+        $this->episode->setIsApproved(true, $this->unapproved_file_location);
+        $this->episode->save();
+        $this->assertTrue($this->episode->getFileIsRemote());
+        $guessed_remote = 'http://' . $this->subreddit->getBucketName()
+                . '.s3.amazonaws.com/' . $this->episode->getNiceFilename();
+        $this->assertEquals($guessed_remote, $this->episode->getRemoteUrl());
+        
+        // Unapprove Episode (in preparation of deleting an approved Episode)
+        $this->episode->setisApproved(false, $this->unapproved_file_location);
+        $this->assertFalse($this->episode->getFileIsRemote());
     }
 
     public function tearDown()

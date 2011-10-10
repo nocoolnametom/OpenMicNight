@@ -56,6 +56,10 @@ class Episode extends BaseEpisode
         // Episode Must already have a User
         if (!$this->getSfGuardUser())
             return;
+        
+        // Episode must also have a file attached
+        if (!$this->getAudioFile())
+            return;
 
         // The User who is submitting must be within their Deadline.
         $assignment = EpisodeAssignmentTable::getInstance()
@@ -96,6 +100,14 @@ class Episode extends BaseEpisode
 
         $this->_set('approved_by', $approver_id);
     }
+    
+    public function getNiceFilename()
+    {
+        $nice_filename = $this->_get('nice_filename');
+        $nice_filename = ($nice_filename ? $nice_filename : $this->getAudioFile());
+        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_", $nice_filename);
+        return $nice_filename;
+    }
 
     public function setIsApproved($is_approved, $file_location = '')
     {
@@ -108,7 +120,7 @@ class Episode extends BaseEpisode
             return;
 
         // The Episode cannot be approved by its User
-        if ($this->getSfGuardUser() == $this->getApprovedBy())
+        if ($this->getSfGuardUserId() == $this->getApprovedBy())
             return;
 
         // The Approver must actually *be* an approver in the Episode Subreddit.
@@ -123,12 +135,15 @@ class Episode extends BaseEpisode
         // We set the timestamp for this action.
         if ($is_approved)
             $this->setApprovedAt(date('Y-m-d H:i:s'));
+        
+        $now = new DateTime();
+        $release_date = new DateTime($this->getReleaseDate());
 
         if ($is_approved && !$this->_get('is_approved')) {
             // We move the physical file of the Episode to Amazon.
             if ($file_location)
                 $this->moveEpisodeFileToAmazon($file_location);
-        } elseif (!$is_approved && $this->_get('is_approved')) {
+        } elseif (!$is_approved && $this->_get('is_approved') && ($now < $release_date)) {
             // We move the physical file of the Episode from Amazon.
             if ($file_location)
                 $this->moveEpisodeFileFromAmazon($file_location);
@@ -146,11 +161,11 @@ class Episode extends BaseEpisode
             throw new Exception("No local file to upload!");
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3;
-        $bucket = $episode->getSubreddit()->getBucketName();
+        $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
-            $respose = $s3->create_object($bucket, $this->getNiceFilename(),
+            $response = $s3->create_object($bucket, $this->getNiceFilename(),
                                           array(
-                'fileUpload' => $file
+                'fileUpload' => $file_location . $this->getAudioFile()
                     ));
             if ($response->isOK())
                 $this->setRemoteUrl($s3->get_object_url($bucket,
@@ -165,7 +180,7 @@ class Episode extends BaseEpisode
     {
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3;
-        $bucket = $episode->getSubreddit()->getBucketName();
+        $bucket = $this->getSubreddit()->getBucketName();
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
@@ -193,11 +208,11 @@ class Episode extends BaseEpisode
     {
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3;
-        $bucket = (is_null($bucket) ? $episode->getSubreddit()->getBucketName() : $bucket);
+        $bucket = (is_null($bucket) ? $this->getSubreddit()->getBucketName() : $bucket);
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
-        $filename = (is_null($file_name) ? $this->getNiceFilename() : $filename);
+        $filename = (is_null($filename) ? $this->getNiceFilename() : $filename);
         $response = $s3->delete_object($bucket, $filename);
         if (!$response->isOK())
             throw new Exception('Failed to remove file from Amazon!');
