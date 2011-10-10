@@ -58,7 +58,7 @@ class Subreddit extends BaseSubreddit
         ProjectConfiguration::registerAws();
         $aws = new AmazonS3();
         if ($aws->if_bucket_exists($name)) {
-            return $aws->delete_bucket($name);
+            return $aws->delete_bucket($name, true);
         }
     }
 

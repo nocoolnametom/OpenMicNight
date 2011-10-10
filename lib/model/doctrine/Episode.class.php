@@ -64,8 +64,7 @@ class Episode extends BaseEpisode
         // The User who is submitting must be within their Deadline.
         $assignment = EpisodeAssignmentTable::getInstance()
                 ->getFirstByUserEpisodeAndSubreddit(
-                $this->getSfGuardUserId(), $this->getIncremented(),
-                $this->getSubredditId());
+                $this->getSfGuardUserId(), $this->getIncremented(), $this->getSubredditId());
         if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
             return;
         }
@@ -92,8 +91,7 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $approver_id, $this->getSubredditId(),
-                array('moderator', 'admin')
+                $approver_id, $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -105,8 +103,7 @@ class Episode extends BaseEpisode
     {
         $nice_filename = $this->_get('nice_filename');
         $nice_filename = ($nice_filename ? $nice_filename : $this->getAudioFile());
-        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_",
-                                      $nice_filename);
+        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_", $nice_filename);
         return $nice_filename;
     }
 
@@ -127,8 +124,7 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getApprovedBy(), $this->getSubredditId(),
-                array('moderator', 'admin')
+                $this->getApprovedBy(), $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -142,12 +138,10 @@ class Episode extends BaseEpisode
 
         if ($is_approved && !$this->_get('is_approved')) {
             // We move the physical file of the Episode to Amazon.
-            if ($file_location)
-                $this->moveEpisodeFileToAmazon();
+            $this->moveEpisodeFileToAmazon();
         } elseif (!$is_approved && $this->_get('is_approved') && ($now < $release_date)) {
             // We move the physical file of the Episode from Amazon.
-            if ($file_location)
-                $this->moveEpisodeFileFromAmazon();
+            $this->moveEpisodeFileFromAmazon();
         }
 
         $this->_set('is_approved', $is_approved);
@@ -165,13 +159,11 @@ class Episode extends BaseEpisode
         $s3 = new AmazonS3;
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
-            $response = $s3->create_object($bucket, $this->getNiceFilename(),
-                                           array(
+            $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
                 'fileUpload' => $file_location . $this->getAudioFile()
                     ));
             if ($response->isOK())
-                $this->setRemoteUrl($s3->get_object_url($bucket,
-                                                        $this->getNiceFilename()));
+                $this->setRemoteUrl($s3->get_object_url($bucket, $this->getNiceFilename()));
         } else {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
@@ -187,8 +179,7 @@ class Episode extends BaseEpisode
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
-        $response = $s3->get_object($bucket, $this->getNiceFilename(),
-                                    array(
+        $response = $s3->get_object($bucket, $this->getNiceFilename(), array(
             'fileDownload' => $file_location . $this->getAudioFile()
                 ));
         if (!$response->isOK())
@@ -201,7 +192,7 @@ class Episode extends BaseEpisode
     {
         $file_location = ($file_location ? $file_location : ProjectConfiguration::getEpisodeAudioFileLocalDirectory());
         if (!file_exists($filename)) {
-            throw new Exception("$filename does not exist in $file_location");
+            return;
         }
         if (!unlink($file_location . $filename)) {
             throw new Exception("Failed to remove $file_location$filename...\n");
@@ -235,8 +226,7 @@ class Episode extends BaseEpisode
         if (!$is_remote && $audio_filename)
             $this->deleteLocalFile($audio_filename);
         if ($graphic_filename)
-            $this->deleteLocalFile($graphic_filename,
-                                   ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
+            $this->deleteLocalFile($graphic_filename, ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
     }
 
     public function getEpisodeAssignments()
