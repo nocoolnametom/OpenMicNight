@@ -10,7 +10,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
      */
     public function testCreate()
     {
-        $test_name = 'test';
+        $test_name = 'test3';
         $t = new Subreddit();
         $t->setName($test_name);
         $this->assertTrue($t instanceof Subreddit);

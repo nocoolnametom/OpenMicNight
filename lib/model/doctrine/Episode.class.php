@@ -162,8 +162,10 @@ class Episode extends BaseEpisode
             $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
                 'fileUpload' => $file_location . $this->getAudioFile()
                     ));
-            if ($response->isOK())
+            if ($response->isOK()) {
                 $this->setRemoteUrl($s3->get_object_url($bucket, $this->getNiceFilename()));
+                $this->deleteLocalFile($this->getAudioFile());
+            }
         } else {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }

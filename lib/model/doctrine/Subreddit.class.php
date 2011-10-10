@@ -26,7 +26,7 @@ class Subreddit extends BaseSubreddit
     public function setName($name)
     {
         $this->_set('name', $name);
-        if ($this->getName() && (!$this->getBucketName() || strlen($this->getBucketName()) == 0)) {
+        if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
             $bucket_name = $this->createAmazonBucketName(
                     ProjectConfiguration::getAmazonBucketPrefix() . $name);
             $this->setBucketName($bucket_name);
@@ -36,19 +36,19 @@ class Subreddit extends BaseSubreddit
     public function createAmazonBucketName($name)
     {
         ProjectConfiguration::registerAws();
-        $aws = new AmazonS3();
-        if (!$aws->if_bucket_exists($name)) {
-            $aws->create_bucket($name, AmazonS3::REGION_US_E1,
+        $s3 = new AmazonS3();
+        if (!$s3->if_bucket_exists($name)) {
+            $s3->create_bucket($name, AmazonS3::REGION_US_E1,
                                 AmazonS3::ACL_PUBLIC);
-            $exists = $aws->if_bucket_exists($name);
+            $exists = $s3->if_bucket_exists($name);
             while (!$exists) {
                 // Not yet? Sleep for 1 second, then check again
                 sleep(1);
-                $exists = $aws->if_bucket_exists($name);
+                $exists = $s3->if_bucket_exists($name);
             }
             return $name;
         }
-        $response = $aws->get_bucket_policy($name);
+        $response = $s3->get_bucket_policy($name);
         if (in_array($response->status, array(403, 405)))
             return $this->createAmazonBucketName($name . rand(0, 1000));
     }
@@ -56,9 +56,9 @@ class Subreddit extends BaseSubreddit
     public function deleteAmazonBucket($name)
     {
         ProjectConfiguration::registerAws();
-        $aws = new AmazonS3();
-        if ($aws->if_bucket_exists($name)) {
-            return $aws->delete_bucket($name, true);
+        $s3 = new AmazonS3();
+        if ($s3->if_bucket_exists($name)) {
+            return $s3->delete_bucket($name, true);
         }
     }
 
