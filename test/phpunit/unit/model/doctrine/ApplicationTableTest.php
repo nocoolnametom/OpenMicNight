@@ -30,6 +30,7 @@ class ApplicationTableTest extends sfPHPUnitBaseTestCase
                 ->findOneBy('type', 'understudy');
 
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->save();
 
         $first_application = new Application();

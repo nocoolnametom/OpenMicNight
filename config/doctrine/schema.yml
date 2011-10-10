@@ -8,6 +8,7 @@ Subreddit:
     create_new_episodes_cron_formatted: { type: string(32), notnull: true }
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
     creation_interval: { type: integer, notnull: true, default: 0 }
+    bucket_name: { type: string(64) }
 
 AuthorType:
   actAs:
@@ -99,6 +100,8 @@ Episode:
     submitted_at: { type: timestamp }
     is_approved: { type: boolean, default: 0 }
     approved_at: { type: timestamp }
+    file_is_remote: { type: boolean, default: 0 }
+    remote_url: { type: string(255) }
     reddit_post_url: { type: string(255) }
   relations:
     sfGuardUser: { onDelete: SET NULL, local: sf_guard_user_id, foreign: id, foreignAlias: SubmittedEpisodes }

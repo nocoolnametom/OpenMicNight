@@ -24,6 +24,7 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
     {
         // Establish fake Subreddit
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->save();
 
         // Establish User

@@ -81,15 +81,15 @@ class Episode extends BaseEpisode
         // Episode must already have a User
         if (!$this->getSfGuardUserId() || !$this->getIsSubmitted())
             return;
-        
+
         if ($this->getSfGuardUserId() == $approver_id)
             return;
-        
+
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $approver_id,
-                $this->getSubredditId(), array('moderator', 'admin')
+                $approver_id, $this->getSubredditId(),
+                array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -97,7 +97,7 @@ class Episode extends BaseEpisode
         $this->_set('approved_by', $approver_id);
     }
 
-    public function setIsApproved($is_approved)
+    public function setIsApproved($is_approved, $file_location = '')
     {
         // Episode must already have a User
         if (!$this->getSfGuardUser())
@@ -114,8 +114,8 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getApprovedBy(),
-                $this->getSubredditId(), array('moderator', 'admin')
+                $this->getApprovedBy(), $this->getSubredditId(),
+                array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -124,15 +124,83 @@ class Episode extends BaseEpisode
         if ($is_approved)
             $this->setApprovedAt(date('Y-m-d H:i:s'));
 
-        // We move the physical file of the Episode to Amazon.
-        $this->moveEpisodeFileToAmazon();
+        if ($is_approved && !$this->_get('is_approved')) {
+            // We move the physical file of the Episode to Amazon.
+            if ($file_location)
+                $this->moveEpisodeFileToAmazon($file_location);
+        } elseif (!$is_approved && $this->_get('is_approved')) {
+            // We move the physical file of the Episode from Amazon.
+            if ($file_location)
+                $this->moveEpisodeFileFromAmazon($file_location);
+        }
 
         $this->_set('is_approved', $is_approved);
     }
 
-    public function moveEpisodeFileToAmazon()
+    public function moveEpisodeFileToAmazon($file_location)
     {
-        ;
+        if (!$this->getAudioFile())
+            throw new Exception("No local file to upload!");
+        $filename = $file_location . $this->getAudioFile();
+        if (!file_exists($filename))
+            throw new Exception("No local file to upload!");
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = $episode->getSubreddit()->getBucketName();
+        if ($s3->if_bucket_exists($bucket)) {
+            $respose = $s3->create_object($bucket, $this->getNiceFilename(),
+                                          array(
+                'fileUpload' => $file
+                    ));
+            if ($response->isOK())
+                $this->setRemoteUrl($s3->get_object_url($bucket,
+                                                        $this->getNiceFilename()));
+        } else {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        $this->setFileIsRemote(true);
+    }
+
+    public function moveEpisodeFileFromAmazon($file_location)
+    {
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = $episode->getSubreddit()->getBucketName();
+        if (!$s3->if_bucket_exists($bucket)) {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        $response = $s3->get_object($bucket, $this->getNiceFilename(),
+                                    array(
+            'fileDownload' => $file_location . $this->getAudioFile()
+                ));
+        if (!$response->isOK())
+            throw new Exception('There was an error retrieving from Amazon.');
+        $this->deleteEpisodeFileFromAmazon();
+        $this->setFileIsRemote(false);
+    }
+
+    public function deleteLocalFile($filename, $file_location = '')
+    {
+        if (!file_exists($filename)) {
+            throw new Exception("$filename does not exist in $file_location");
+        }
+        if (!unlink($file_location . $filename)) {
+            throw new Exception("Failed to remove $file_location$filename...\n");
+        }
+    }
+
+    public function deleteEpisodeFileFromAmazon($filename = null, $bucket = null)
+    {
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = (is_null($bucket) ? $episode->getSubreddit()->getBucketName() : $bucket);
+        if (!$s3->if_bucket_exists($bucket)) {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        $filename = (is_null($file_name) ? $this->getNiceFilename() : $filename);
+        $response = $s3->delete_object($bucket, $filename);
+        if (!$response->isOK())
+            throw new Exception('Failed to remove file from Amazon!');
     }
 
     public function getEpisodeAssignments()

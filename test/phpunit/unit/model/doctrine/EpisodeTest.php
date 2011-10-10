@@ -46,9 +46,9 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $original_filename = '1234567890abcde.mp3';
 
         $this->episode_filename = 'abcde0123456789.mp3';
-        $this->unapproved_file_lcoation = sfConfig::get('sf_data_dir') . '/temp/';
-        if (!copy($this->unapproved_file_lcoation . $original_filename, $this->unapproved_file_lcoation . $this->episode_filename)) {
-            echo "failed to copy $this->unapproved_file_lcoation$original_filename...\n";
+        $this->unapproved_file_location = sfConfig::get('sf_data_dir') . '/temp/';
+        if (!copy($this->unapproved_file_location . $original_filename, $this->unapproved_file_location . $this->episode_filename)) {
+            echo "failed to copy $this->unapproved_file_location$original_filename...\n";
         }
         $this->aws = new AmazonS3();
 
@@ -268,6 +268,8 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->setApprovedBy($this->approver->getIncremented());
         $this->episode->save();
         $this->assertEquals($this->approver->getIncremented(), $this->episode->getApprovedBy());
+        
+        //
     }
 
     public function tearDown()

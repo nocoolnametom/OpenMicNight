@@ -28,6 +28,7 @@ class sfGuardUserSubredditMembershipTableTest extends sfPHPUnitBaseTestCase
         $user->setUsername(rand(0, 1000));
         $user->save();
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->save();
         $membership = MembershipTable::getInstance()
                 ->findOneByType('user');

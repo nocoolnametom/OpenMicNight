@@ -25,10 +25,13 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     public function testGetEpisodeScheduleAsCronExpression()
     {
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
+        $subreddit->save();
         $episode_schedule = $subreddit->getEpisodeScheduleAsCronExpression();
 
         $this->assertTrue($episode_schedule instanceof Cron\CronExpression);
+        $subreddit->delete();
     }
 
     /**
@@ -38,9 +41,12 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     public function testGetCreationScheduleAsCronExpression()
     {
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
+        $subreddit->save();
         $creation_schedule = $subreddit->getCreationScheduleAsCronExpression();
         $this->assertTrue($creation_schedule instanceof Cron\CronExpression);
+        $subreddit->delete();
     }
 
     /**
@@ -50,9 +56,12 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     public function testGetEpisodeItervalAsDateInterval()
     {
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
+        $subreddit->save();
         $episode_interval = $subreddit->getEpisodeItervalAsDateInterval();
         $this->assertTrue($episode_interval instanceof DateInterval);
+        $subreddit->delete();
     }
 
     /**
@@ -62,9 +71,12 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     public function testGetCreationIntervalAsDateInterval()
     {
         $subreddit = new Subreddit();
+        $subreddit->setName(rand(0, 1000));
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
+        $subreddit->save();
         $creation_internal = $subreddit->getCreationIntervalAsDateInterval();
         $this->assertTrue($creation_internal instanceof DateInterval);
+        $subreddit->delete();
     }
 
     /**
@@ -77,6 +89,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         /* @todo: Test iteration lengths, not just creation of episodes. */
 
         $subreddit = new Subreddit;
+        $subreddit->setName(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 * * *');
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->save();

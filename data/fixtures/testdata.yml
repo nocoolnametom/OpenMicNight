@@ -1,9 +1,10 @@
 Subreddit:
   rexmo:
-    name:              exmormon
+    name:           exmormon
     create_new_episodes_cron_formatted: "0 0 1 * *"
     episode_schedule_cron_formatted:    "0 22 * * 1,3,5"
     creation_interval: 0
+    bucket_name:    herddit-exmormon
 
 sfGuardUser:
   nocoolnametom:
