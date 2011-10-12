@@ -129,6 +129,10 @@ EpisodeAssignment:
     noMultipleAuthorTypeAssignmentsPerEpisode: { fields: [author_type_id, episode_id], type: unique }
 
 Session:
+  options:
+    symfony:
+      form: false
+      filter: false
   columns:
     sess_id: { type: string(32), primary: true, notnull: true }
     sess_data: { type: string(4000), notnull: true }
