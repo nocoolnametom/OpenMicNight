@@ -1,15 +1,15 @@
 <?php
 
 /**
- * subreddit actions.
+ * message actions.
  *
  * @package    OpenMicNight
- * @subpackage subreddit
+ * @subpackage message
  * @author     Tom Doggett
  * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z xavier $
- * @see        class::autosubredditActions
+ * @see        class::automessageActions
  */
-class subredditActions extends autosubredditActions
+class messageActions extends automessageActions
 {
 
     public function getCreateValidators()
@@ -22,6 +22,11 @@ class subredditActions extends autosubredditActions
         $validators['updated_at'] = new sfValidatorDateTime(array(
                     'required' => false,
                 ));
+        $validators['recipient_id'] = new sfValidatorDoctrineChoice(array(
+                    'model' => Doctrine_Core::getTable('Message')
+                            ->getRelation('sfGuardUser')
+                            ->getAlias(),
+                ));
         return $validators;
     }
 
@@ -29,13 +34,10 @@ class subredditActions extends autosubredditActions
     {
         // make created_at and updated_at fields non-required
         $validators = parent::getUpdateValidators();
-        $validators['name'] = new sfValidatorString(array('required' => false));
-        $validators['create_new_episodes_cron_formatted'] = new sfValidatorString(array(
-                    'max_length' => 32,
-                    'required' => false,
-                ));
-        $validators['episode_schedule_cron_formatted'] = new sfValidatorString(array(
-                    'max_length' => 32,
+        $validators['recipient_id'] = new sfValidatorDoctrineChoice(array(
+                    'model' => Doctrine_Core::getTable('Message')
+                            ->getRelation('sfGuardUser')
+                            ->getAlias(),
                     'required' => false,
                 ));
         return $validators;

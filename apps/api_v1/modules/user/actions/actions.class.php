@@ -1,15 +1,15 @@
 <?php
 
 /**
- * subreddit actions.
+ * user actions.
  *
  * @package    OpenMicNight
- * @subpackage subreddit
+ * @subpackage user
  * @author     Tom Doggett
  * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z xavier $
- * @see        class::autosubredditActions
+ * @see        class::autouserActions
  */
-class subredditActions extends autosubredditActions
+class userActions extends autouserActions
 {
 
     public function getCreateValidators()
@@ -29,13 +29,12 @@ class subredditActions extends autosubredditActions
     {
         // make created_at and updated_at fields non-required
         $validators = parent::getUpdateValidators();
-        $validators['name'] = new sfValidatorString(array('required' => false));
-        $validators['create_new_episodes_cron_formatted'] = new sfValidatorString(array(
-                    'max_length' => 32,
+        $validators['email_address'] = new sfValidatorEmail(array(
+                    'max_length' => 255,
                     'required' => false,
                 ));
-        $validators['episode_schedule_cron_formatted'] = new sfValidatorString(array(
-                    'max_length' => 32,
+        $validators['username'] = new sfValidatorString(array(
+                    'max_length' => 255,
                     'required' => false,
                 ));
         return $validators;

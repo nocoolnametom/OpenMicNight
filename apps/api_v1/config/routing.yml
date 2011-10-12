@@ -1,3 +1,48 @@
+user:
+  class:   sfObjectRouteCollection
+  options:
+    model:   sfGuardUser
+    actions: [ create, delete, list, show, update ]
+    module:  user
+    column:  id
+    default_params:
+      sf_format:  json
+message:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Message
+    actions: [ create, delete, list, show, update ]
+    module:  message
+    column:  id
+    default_params:
+      sf_format:  json
+membershiptype:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Membership
+    actions: [ create, delete, list, show, update ]
+    module:  membershiptype
+    column:  id
+    default_params:
+      sf_format:  json
+authortype:
+  class:   sfObjectRouteCollection
+  options:
+    model:   AuthorType
+    actions: [ create, delete, list, show, update ]
+    module:  authortype
+    column:  id
+    default_params:
+      sf_format:  json
+episode:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Episode
+    actions: [ create, delete, list, show, update ]
+    module:  episode
+    column:  id
+    default_params:
+      sf_format:  json
 subreddit:
   class:   sfObjectRouteCollection
   options:

@@ -9,6 +9,10 @@ Subreddit:
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
     creation_interval: { type: integer, notnull: true, default: 0 }
     bucket_name: { type: string(64) }
+  indexes:
+    name: { fields: [name], type: unique}
+    domain: { fields: [domain], type: unique}
+    bucketName: { fields: [bucket_name], type: unique}
 
 AuthorType:
   actAs:
@@ -126,6 +130,6 @@ EpisodeAssignment:
 
 Session:
   columns:
-    id: { type: string(32), primary: true, notnull: true }
-    data: { type: string(4000), notnull: true }
-    time: { type: integer(4), notnull: true }
+    sess_id: { type: string(32), primary: true, notnull: true }
+    sess_data: { type: string(4000), notnull: true }
+    sess_time: { type: integer(4), notnull: true }
