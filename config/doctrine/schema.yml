@@ -137,3 +137,34 @@ Session:
     sess_id: { type: string(32), primary: true, notnull: true }
     sess_data: { type: string(4000), notnull: true }
     sess_time: { type: integer(4), notnull: true }
+
+ApiKey:
+  actAs:
+    Timestampable: ~
+  options:
+    symfony:
+      form: false
+      filter: false
+  columns:
+    api_key: { type: string(255), notnull: true }
+    shared_secret: { type: string(255), notnull: true }
+    api_app_name: { type: string(255), notnull: true }
+    developer_name: { type: string(255), notnull: true }
+    developer_email: { type: string(255), notnull: true }
+    is_active: { type: boolean, default: 1 }
+  indexes:
+    uniqueKeys: { fields: [api_key, developer_email], type: unique }
+
+sfGuardUserAuthKey:
+  actAs:
+    Timestampable: ~
+  options:
+    symfony:
+      form: false
+      filter: false
+  columns:
+    api_key_id: { type: integer, notnull: true }
+    sf_guard_user_id: { type: integer, notnull: true }
+    auth_key: { type: string(255), notnull: true }
+    expires_at: { type: timestamp, notnull: true}
+    is_revoked: { type: boolean, default: 0 }
