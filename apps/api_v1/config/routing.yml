@@ -1,3 +1,57 @@
+message:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Message
+    actions: [ create, delete, list, show, update ]
+    module:  message
+    column:  id
+    default_params:
+      sf_format:  json
+subredditmembership:
+  class:   sfObjectRouteCollection
+  options:
+    model:   sfGuardUserSubredditMembership
+    actions: [ create, delete, list, show, update ]
+    module:  subredditmembership
+    column:  id
+    default_params:
+      sf_format:  json
+episodeassignment:
+  class:   sfObjectRouteCollection
+  options:
+    model:   EpisodeAssignment
+    actions: [ create, delete, list, show, update ]
+    module:  episodeassignment
+    column:  id
+    default_params:
+      sf_format:  json
+subredditauthortype:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Application
+    actions: [ create, delete, list, show, update ]
+    module:  subredditauthortype
+    column:  id
+    default_params:
+      sf_format:  json
+subredditdeadline:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Deadline
+    actions: [ create, delete, list, show, update ]
+    module:  subredditdeadline
+    column:  id
+    default_params:
+      sf_format:  json
+subredditauthortypes:
+  class:   sfObjectRouteCollection
+  options:
+    model:   Application
+    actions: [ create, delete, list, show, update ]
+    module:  subredditauthortypes
+    column:  id
+    default_params:
+      sf_format:  json
 user:
   class:   sfObjectRouteCollection
   options:
