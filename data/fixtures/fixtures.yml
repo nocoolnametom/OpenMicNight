@@ -25,3 +25,18 @@ Membership:
   admin:
     type:        admin
     description: Administrator
+
+# The following is the web app API key and shared secret - alter them for
+# production.  Keep it secret, keep it safe.  Ensure that the api key is present
+# in the API's config/app.yml file.  This will prevent users from revoking their
+# own access to the web app or getting a login notification from the web app
+# upon every login (which couldget annoying).  The config/app.yml also controls
+# the length of time that thelogin authkey is valid for each user, depending on
+# whether they select"Remember Me" or not.
+ApiKey:
+  web_app:
+    api_key: 75d32b53a0ccf8b92d7513c548351261d8d5cafe
+    shared_secret: dbc39c8cecb3dda2146ae9ba0f0bdb0879755180
+    api_app_name: The Web App
+    developer_name: Tom Doggett
+    developer_email: nocoolnametom@gmail.com

@@ -153,7 +153,7 @@ ApiKey:
     developer_email: { type: string(255), notnull: true }
     is_active: { type: boolean, default: 1 }
   indexes:
-    uniqueKeys: { fields: [api_key, developer_email], type: unique }
+    uniqueKeys: { fields: [api_key], type: unique }
 
 sfGuardUserAuthKey:
   actAs:
@@ -168,3 +168,20 @@ sfGuardUserAuthKey:
     auth_key: { type: string(255), notnull: true }
     expires_at: { type: timestamp, notnull: true}
     is_revoked: { type: boolean, default: 0 }
+  relations:
+    sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: AuthKeys }
+    ApiKey: { onDelete: CASCADE, local: api_key_id, foreign: id, foreignAlias: AuthKeys }
+
+AuthFailure:
+  actAs:
+    Timestampable: ~
+  options:
+    symfony:
+      form: false
+      filter: false
+  columns:
+    api_key_id: { type: integer, notnull: true }
+    sf_guard_user_id: { type: integer }
+  relations:
+    sfGuardUser: { onDelete: CASCADE, local: sf_guard_user_id, foreign: id, foreignAlias: AuthFailures }
+    ApiKey: { onDelete: CASCADE, local: api_key_id, foreign: id, foreignAlias: AuthFailures }

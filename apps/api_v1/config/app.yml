@@ -1,5 +1,12 @@
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/11-App
 
-# default values
-#all:
+# Remember to change the api key before using the app in production! Keep it
+# secret, keep it safe!
+all:
+  web_app_api:
+    key: 75d32b53a0ccf8b92d7513c548351261d8d5cafe
+    # 2 hours before regular login is revoked
+    auth_key_login_expiration: 7200 
+    # 2 weeks before a "Remember Me" login is revoked
+    auth_key_remember_me_expiration: 1209600

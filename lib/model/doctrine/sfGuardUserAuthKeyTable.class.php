@@ -7,6 +7,7 @@
  */
 class sfGuardUserAuthKeyTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,4 +17,19 @@ class sfGuardUserAuthKeyTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('sfGuardUserAuthKey');
     }
+
+    public function getMostRecentValidByApiKeyIdAndAuthKey($api_key_id,
+                                                           $auth_key)
+    {
+        $auth = $this->createQuery()
+                ->where('sfGuardUserAuthKey.api_key_id = ?', $api_key_id)
+                ->andWhere('sfGuardUserAuthKey.auth_key = ?', $auth_key)
+                ->andWhere('sfGuardUserAuthKey.is_revoked = 0')
+                ->andWhere('sfGuardUserAuthKey.expires_at >= NOW()')
+                ->orderBy('sfGuardUserAuthKey.created_at DESC')
+                ->execute()
+                ->getFirst();
+        return $auth;
+    }
+
 }
