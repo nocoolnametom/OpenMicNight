@@ -12,6 +12,15 @@
 class messageActions extends automessageActions
 {
 
+    public function checkApiAuth($parameters, $content = null)
+    {
+        parent::checkApiAuth($parameters, $content);
+        $this->getUser()->setParams($parameters);
+        if (!$this->getUser()->apiIsAuthorized())
+            throw new sfException('API authorization failed.');
+        return true;
+    } 
+
     public function getUpdateValidators()
     {
         $validators = parent::getUpdateValidators();

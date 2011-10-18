@@ -19,21 +19,7 @@ class userActions extends autouserActions
         if (!$this->getUser()->apiIsAuthorized())
             throw new sfException('API authorization failed.');
         return true;
-    }
-
-    public function parsePayload($payload, $force = false, $remove_api = true)
-    {
-        //return parent::parsePayload($payload, $force, $remove_api);
-        if ($remove_api) {
-            $api_auth_params = $this->getApiAuthFields();
-            $this->_payload_array = parent::parsePayload($payload, $force,
-                                                         $remove_api);
-            $this->_payload_array = array_diff_key($this->_payload_array,
-                                                   $api_auth_params);
-        }
-
-        return $this->_payload_array;
-    }
+    } 
 
     public function getUpdateValidators()
     {

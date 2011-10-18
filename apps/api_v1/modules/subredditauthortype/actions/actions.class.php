@@ -11,4 +11,14 @@
  */
 class subredditauthortypeActions extends autosubredditauthortypeActions
 {
+
+    public function checkApiAuth($parameters, $content = null)
+    {
+        parent::checkApiAuth($parameters, $content);
+        $this->getUser()->setParams($parameters);
+        if (!$this->getUser()->apiIsAuthorized())
+            throw new sfException('API authorization failed.');
+        return true;
+    }
+
 }

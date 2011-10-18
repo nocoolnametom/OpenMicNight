@@ -39,7 +39,7 @@ class Subreddit extends BaseSubreddit
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
             $s3->create_bucket($name, AmazonS3::REGION_US_E1,
-                                AmazonS3::ACL_PUBLIC);
+                               AmazonS3::ACL_PUBLIC);
             $exists = $s3->if_bucket_exists($name);
             while (!$exists) {
                 // Not yet? Sleep for 1 second, then check again
@@ -66,7 +66,9 @@ class Subreddit extends BaseSubreddit
     {
         $bucket_name = $this->getBucketName();
         parent::delete($conn);
-        $this->deleteAmazonBucket($bucket_name);
+        if ($bucket_name) {
+            $this->deleteAmazonBucket($bucket_name);
+        }
     }
 
     /**
