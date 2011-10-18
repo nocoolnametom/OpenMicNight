@@ -12,22 +12,31 @@
 class userActions extends autouserActions
 {
 
-    public function getCreateValidators()
+    public function checkApiAuth($parameters, $content = null)
     {
-        // make created_at and updated_at fields non-required
-        $validators = parent::getCreateValidators();
-        $validators['created_at'] = new sfValidatorDateTime(array(
-                    'required' => false,
-                ));
-        $validators['updated_at'] = new sfValidatorDateTime(array(
-                    'required' => false,
-                ));
-        return $validators;
+        parent::checkApiAuth($parameters, $content);
+        $this->getUser()->setParams($parameters);
+        if (!$this->getUser()->apiIsAuthorized())
+            throw new sfException('API authorization failed.');
+        return true;
+    }
+
+    public function parsePayload($payload, $force = false, $remove_api = true)
+    {
+        //return parent::parsePayload($payload, $force, $remove_api);
+        if ($remove_api) {
+            $api_auth_params = $this->getApiAuthFields();
+            $this->_payload_array = parent::parsePayload($payload, $force,
+                                                         $remove_api);
+            $this->_payload_array = array_diff_key($this->_payload_array,
+                                                   $api_auth_params);
+        }
+
+        return $this->_payload_array;
     }
 
     public function getUpdateValidators()
     {
-        // make created_at and updated_at fields non-required
         $validators = parent::getUpdateValidators();
         $validators['email_address'] = new sfValidatorEmail(array(
                     'max_length' => 255,

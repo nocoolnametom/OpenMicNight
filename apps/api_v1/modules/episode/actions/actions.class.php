@@ -12,22 +12,8 @@
 class episodeActions extends autoepisodeActions
 {
 
-    public function getCreateValidators()
-    {
-        // make created_at and updated_at fields non-required
-        $validators = parent::getCreateValidators();
-        $validators['created_at'] = new sfValidatorDateTime(array(
-                    'required' => false,
-                ));
-        $validators['updated_at'] = new sfValidatorDateTime(array(
-                    'required' => false,
-                ));
-        return $validators;
-    }
-
     public function getUpdateValidators()
     {
-        // make created_at and updated_at fields non-required
         $validators = parent::getUpdateValidators();
         $validators['subreddit_id'] = new sfValidatorDoctrineChoice(array(
                     'model' => Doctrine_Core::getTable('Episode')
@@ -38,13 +24,6 @@ class episodeActions extends autoepisodeActions
         $validators['release_date'] = new sfValidatorDateTime(array(
                     'required' => false,
                 ));
-        return $validators;
-    }
-    
-    public function getIndexValidators()
-    {
-        $validators = parent::getIndexValidators();
-        
         return $validators;
     }
 

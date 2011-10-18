@@ -5,26 +5,41 @@ generator:
 
     config:
       default:
-#        fields:                                # list here the fields.
-#          created_at:                  { date_format: 'Y-m-d\TH:i:s', tag_name: 'created' }      # for instance
+        fields:
+          created_at:                  { date_format: 'Y-m-d\TH:i:s', tag_name: 'created' }
 #        formats_enabled:               [ json, xml, yaml ]    # enabled formats
 #        formats_strict:                true
 #        separator:                     ','     # separator used for multiple filters
+#        api_auth_fields:
+#          api_key:                     { pattern: '~^[0-9a-zA-Z]{40}$~', must-match: true }
+#          time:                        { pattern: '~^[0-9]{10,}$~', must-match: true }
+#          signature:                   { pattern: '~^[0-9a-zA-Z]{40}$~', must-match: true }
+#        user_auth_fields:
+#          auth_key:                    { pattern: '~^[0-9a-zA-Z]{40}$~', must-match: true, required: false }
       get:
-#        additional_params:             []      # list here additionnal params names, which are not object properties
+        # list here additionnal params names, which are not object properties
+        additional_params:             [ api_key, time, signature, auth_key ]
 #        default_format:                json    # the default format of the response. If not set, will default to json. accepted values are "json", "xml" or "yaml"
 #        display:                       []      # list here the fields to render in the response
 #        embed_relations:               []      # list here relations to embed in the response
 #        embedded_relations_hide:
 #          Category:                    [id]    # you can hide fields inside a certain embedded relation
-#        global_additional_fields:      []      # list here additionnal calculated global fields
-#        hide:                          [id]    # list here the fields you don't want to expose
+        # list here additionnal calculated global fields
+#        global_additional_fields:      [ api_key, time, signature, auth_key ]
+        # list here the fields you don't want to expose
+        hide:                          [ password, salt, algorithm, reddit_validation_key, is_super_admin, is_active, is_validated, last_logged_in, updated_at ]
 #        max_items:                     0       # uncomment to fix an absolute limit to the number of items in the response
 #        object_additional_fields:      []      # list here additionnal calculated fields
-#        pagination_enabled:            false   # set to true to activate the pagination
-#        pagination_custom_page_size:   false   # set to true to allow the client to pass a page_size parameter
-#        pagination_page_size:          100     # the default number of items in a page
-#        sort_custom:                   false   # set to true to allow the client to pass a sort_by and a sort_order parameter
-#        sort_default:                  []      # set to [column, asc|desc] in order to sort on a column
-#        filters:                               # list here the filters
-#          created_at:                  { date_format: 'd-m-Y', multiple: true }  # for instance
+        # set to true to activate the pagination
+        pagination_enabled:            false
+        # set to true to allow the client to pass a page_size parameter
+        pagination_custom_page_size:   false
+        # the default number of items in a page
+        pagination_page_size:          100
+        # set to true to allow the client to pass a sort_by and a sort_order parameter
+        sort_custom:                   false
+        # set to [column, asc|desc] in order to sort on a column
+        sort_default:                  [ created_at ]
+        # list here the filters
+        filters:
+          created_at:                  { date_format: 'Y-m-d', multiple: true }
