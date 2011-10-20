@@ -21,25 +21,25 @@ class myUser extends sfGuardSecurityUser
         //if ($this->getAttribute('api_authorized', false))
         //    return $this->getAttribute('api_authorized');
 
-        /*if ($request->getParameter('api_key', $this->getAttribute('api_key'))
-                && $request->getParameter('time', $this->getAttribute('time'))
-                && $request->getParameter('signature',
-                                          $this->getAttribute('signature'))) {
-            $this->setAttribute('api_key',
-                                $request->getParameter('api_key',
-                                                       $this->getAttribute('api_key')));
-            $time = $request->getParameter('time', $this->getAttribute('time'));
-            $signature = $request->getParameter('signature',
-                                                $this->getAttribute('signature'));*/
-            $api = ApiKeyTable::getInstance()->findOneByApiKey($this->getAttribute('api_key'));
-            if ($api instanceof ApiKey && $api->getIsActive()) {
-                $shared_secret = $api->getSharedSecret();
-                $constructed_signature = sha1($shared_secret . $this->getAttribute('time'));
-                if ($constructed_signature == $this->getAttribute('signature')) {
-                    $this->setAttribute('api_authorized', true);
-                    return $this->getAttribute('api_authorized');
-                }
+        /* if ($request->getParameter('api_key', $this->getAttribute('api_key'))
+          && $request->getParameter('time', $this->getAttribute('time'))
+          && $request->getParameter('signature',
+          $this->getAttribute('signature'))) {
+          $this->setAttribute('api_key',
+          $request->getParameter('api_key',
+          $this->getAttribute('api_key')));
+          $time = $request->getParameter('time', $this->getAttribute('time'));
+          $signature = $request->getParameter('signature',
+          $this->getAttribute('signature')); */
+        $api = ApiKeyTable::getInstance()->findOneByApiKey($this->getAttribute('api_key'));
+        if ($api instanceof ApiKey && $api->getIsActive()) {
+            $shared_secret = $api->getSharedSecret();
+            $constructed_signature = sha1($shared_secret . $this->getAttribute('time'));
+            if ($constructed_signature == $this->getAttribute('signature')) {
+                $this->setAttribute('api_authorized', true);
+                return $this->getAttribute('api_authorized');
             }
+        }
         //}
         return false;
     }
@@ -68,23 +68,27 @@ class myUser extends sfGuardSecurityUser
         }
         return null;
     }
-
-    public function requestAuthKey($email_address, $password, $expires_in = 7200)
+    
+    public function sendAuthRequestEmail(ApiKey $api)
     {
-        if ($this->getAttribute('auth_key')) {
-            return $this->getAttribute('auth_key');
-        }
+        /* @todo  WE need this to send out an email notifying the user that they've logged in through an API. */
+        return;
+    }
 
+    public function requestAuthKey($email_address, $password, $expires_in = null)
+    {
+        if (is_null($expires_in))
+            $expires_in = sfConfig::get('app_web_app_api_auth_key_login_expiration');
+        
         if (!self::apiIsAuthorized()) {
             return $this->getAttribute('auth_key');
         }
 
         $api = ApiKeyTable::getInstance()
                 ->findOneByApiKey($this->getAttribute('api_key'));
-
-        $this->setAttribute('auth_key', $api->requestAuthKey($email_address, $password,
-                                               $expires_in));
-        return $this->getAttribute('auth_key');
+        if (!$api->getApiKey() == sfConfig::get('app_web_app_api_key'))
+            $this->sendAuthRequestEmail ($api);
+        return $api->requestAuthKey($email_address, $password, $expires_in);
     }
 
 }

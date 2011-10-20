@@ -32,7 +32,7 @@ class ApiKey extends BaseApiKey
             throw new sfException('The user does not exist in the database.');
         // Find out how many failures in the past two minutes - max of five
         $failures = AuthFailureTable::getInstance()
-                ->countFailuresMadeInRecentSeconds($api_key_id,
+                ->countFailuresMadeInRecentSeconds($this->getIncremented(),
                                                    $user->getIncremented(), 120);
         if ($failures >= 6)
             throw new sfException('Too many failures. Please wait a few minutes and try again.');

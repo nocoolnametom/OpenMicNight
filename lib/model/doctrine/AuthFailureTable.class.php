@@ -22,7 +22,7 @@ class AuthFailureTable extends Doctrine_Table
                                                      $sf_guard_user_id,
                                                      $seconds = 120)
     {
-        $failurs = $this->createQuery()
+        $failures = $this->createQuery()
                 ->select('COUNT(AuthFailure.id) AS count')
                 ->where('AuthFailure.created_at >= ?',
                         date('Y-m-d H:i:s', time() - $seconds))
