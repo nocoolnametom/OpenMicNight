@@ -16,6 +16,9 @@
     $validators['signature'] = new sfValidatorString(array(
       'required' => true,
     ));
+    $validators['auth_key'] = new sfValidatorString(array(
+      'required' => false,
+    ));
     return $validators;
   }
   
@@ -41,6 +44,7 @@
       'api_key'   => 'api_key',
       'time'      => 'time',
       'signature' => 'signature',
+      'auth_key'  => 'auth_key',
     );
     return $fields;
   }

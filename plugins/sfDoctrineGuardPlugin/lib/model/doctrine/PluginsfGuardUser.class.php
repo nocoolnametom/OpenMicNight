@@ -33,7 +33,7 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
      */
     public function getName()
     {
-        return trim($this->getProfile()->getFullName());
+        return trim($this->getFullName());
     }
 
     /**
