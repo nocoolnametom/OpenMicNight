@@ -47,6 +47,11 @@ class Episode extends BaseEpisode
                 return;
             }
         }
+        
+        // Make sure that the user has been validated as a emmber of Reddit!
+        $user = sfGuardUserTable::getInstance()->find($user_id);
+        if ($user && !$user->getIsValidated())
+            return;
 
         $this->_set('sf_guard_user_id', $episode_user_id);
     }
@@ -94,6 +99,11 @@ class Episode extends BaseEpisode
                 $approver_id, $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
+            return;
+        
+        // Make sure that the user has been validated as a emmber of Reddit!
+        $user = sfGuardUserTable::getInstance()->find($approver_id);
+        if ($user && !$user->getIsValidated())
             return;
 
         $this->_set('approved_by', $approver_id);

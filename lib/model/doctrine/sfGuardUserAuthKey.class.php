@@ -12,4 +12,46 @@
  */
 class sfGuardUserAuthKey extends BasesfGuardUserAuthKey
 {
+
+    public function save(Doctrine_Connection $conn = null)
+    {
+        if ($this->isNew()) {
+            if (!$this->hasVerifiedUser())
+                $this->deleteWithException("Cannot create UserToken "
+                        . "because sfGuardUser " . $this->getSfGuardUserId()
+                        . " has not been validated yet.", 106);
+        }
+
+        /* If the obejct is not new or has passed all rules for saving, we pass
+         * it on to the parent save function.
+         */
+        parent::save($conn);
+    }
+
+    /**
+     * Checks if the User of the EpisodeAssignment has been validated as a
+     * member of Reddit yet.
+     *
+     * @return bool  Whether the user is marked as "validated". 
+     */
+    public function hasVerifiedUser()
+    {
+        return (bool) $this->getSfGuardUser()->getIsValidated();
+    }
+
+    /**
+     * Deletes the current object and also throws and exception.
+     * 
+     * @throws sfException
+     *
+     * @param struing $message      The message for the exception
+     * @param long $code            An error code for the exception
+     * @param sfException $previous A previously thrown exception.
+     */
+    public function deleteWithException($message = null, $code = null, $previous = null)
+    {
+        $this->delete();
+        throw new sfException($message, $code, $previous);
+    }
+
 }

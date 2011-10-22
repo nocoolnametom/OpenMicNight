@@ -42,6 +42,8 @@ class EpisodeAssignment extends BaseEpisodeAssignment
      *      then the object will not be saved.  Throws an sfException upon this
      *      failure.
      * 
+     * 106) The user attached to the EpisodeAssignment must be validated.
+     * 
      * @see Doctrine_Record::save()
      * @throws sfException
      *
@@ -89,8 +91,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 $this->deleteWithException("Cannot create EpisodeAssignment "
                         . "because the deadline has already passed for "
                         . "AuthorType " . $this->getAuthorTypeId() . " within "
-                        . "Subreddit " . $this->getEpisode()->getSubredditId(),
-                                           104);
+                        . "Subreddit " . $this->getEpisode()->getSubredditId(), 104);
 
             /* Even if the deadline has not yet passed, we may only sign up an 
              * AuthorType if the AuthorType is allowed to register before the 
@@ -99,8 +100,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              */
             $deadline_seconds = Doctrine::getTable('Deadline')
                     ->getSecondsByAuthorAndSubreddit(
-                    $this->getAuthorTypeId(),
-                    $this->getEpisode()->getSubredditId()
+                    $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId()
             );
 
             /* Check to see if there *is* a previous AuthorType by Deadline
@@ -119,14 +119,18 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              */
                 if (ApplicationTable::getInstance()
                                 ->getIfApplicationRestrictedByAuthorTypeAndSubreddit(
-                                        $this->getAuthorTypeId(),
-                                        $this->getEpisode()->getSubredditId())
+                                        $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId())
                         && !$this->isBeforeDeadlineForAuthorType($previous_author_type_id))
                     $this->deleteWithException("Cannot create "
                             . "EpisodeAssignment because the deadline has "
                             . "not yet passed for the previous AuthorType "
                             . $this->getAuthorTypeId() . " within Subreddit "
                             . $this->getEpisode()->getSubredditId(), 105);
+
+            if (!$this->hasVerifiedUser())
+                $this->deleteWithException("Cannot create EpisodeAssignment "
+                        . "because sfGuardUser " . $this->getSfGuardUserId()
+                        . " has not been validated yet.", 106);
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
@@ -147,10 +151,20 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $membership = Doctrine::getTable('sfGuardUserSubredditMembership')
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId(), array('blocked')
+                $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array('blocked')
         );
         return ($membership ? true : false);
+    }
+
+    /**
+     * Checks if the User of the EpisodeAssignment has been validated as a
+     * member of Reddit yet.
+     *
+     * @return bool  Whether the user is marked as "validated". 
+     */
+    public function hasVerifiedUser()
+    {
+        return (bool) $this->getSfGuardUser()->getIsValidated();
     }
 
     /**
@@ -165,8 +179,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
                 ->getFirstByUserAuthorTypeAndSubreddit(
-                $this->getAuthorTypeId(), $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId()
+                $this->getAuthorTypeId(), $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId()
         );
         return ($assignment ? true : false);
     }
@@ -181,8 +194,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
                 ->getFirstByEpisodeAuthorTypeAndSubreddit(
-                $this->getAuthorTypeId(), $this->getEpisodeId(),
-                $this->getEpisode()->getSubredditId()
+                $this->getAuthorTypeId(), $this->getEpisodeId(), $this->getEpisode()->getSubredditId()
         );
         return ($assignment ? true : false);
     }
@@ -210,8 +222,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         );
         $release_date = new DateTime(EpisodeTable::getInstance()
                                 ->getCurrentReleaseDate($this->getEpisodeId()));
-        $now_and_deadline = new DateTime(date('Y-m-d H:i:s',
-                                              time() + $deadline_seconds));
+        $now_and_deadline = new DateTime(date('Y-m-d H:i:s', time() + $deadline_seconds));
         if (($now_and_deadline > $release_date ) && !$this->getMissedDeadline()) {
             $this->setMissedDeadline(true);
         }
@@ -227,8 +238,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
      * @param long $code            An error code for the exception
      * @param sfException $previous A previously thrown exception.
      */
-    public function deleteWithException($message = null, $code = null,
-                                        $previous = null)
+    public function deleteWithException($message = null, $code = null, $previous = null)
     {
         $this->delete();
         throw new sfException($message, $code, $previous);
