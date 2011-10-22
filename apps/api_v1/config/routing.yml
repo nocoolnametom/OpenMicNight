@@ -62,8 +62,8 @@ user:
     default_params:
       sf_format:  json
 request_user_key:
-  url:   /user/request_key
-  param: { module: user, action: request_key }
+  url:   /user/token
+  param: { module: user, action: token }
 
 message:
   class:   sfObjectRouteCollection

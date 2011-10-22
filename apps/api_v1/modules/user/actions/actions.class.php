@@ -35,7 +35,7 @@ class userActions extends autouserActions
         return $validators;
     }
 
-    public function getRequestValidators()
+    public function getTokenValidators()
     {
         $validators = array();
         $validators['email_address'] = new sfValidatorEmail(array(
@@ -53,24 +53,24 @@ class userActions extends autouserActions
         return $validators;
     }
 
-    public function getRequestPostValidators()
+    public function getTokenPostValidators()
     {
         $validators = array();
         return $validators;
     }
 
-    public function validateRequest($payload)
+    public function validateToken($payload)
     {
         $params = $this->parsePayload($payload);
 
-        $validators = $this->getRequestValidators();
+        $validators = $this->getTokenValidators();
         $this->validate($params, $validators);
 
-        $postvalidators = $this->getRequestPostValidators();
+        $postvalidators = $this->getTokenPostValidators();
         $this->postValidate($params, $postvalidators);
     }
 
-    public function requestAuthKey($content)
+    public function requestToken($content)
     {
         $data = $this->parsePayload($content);
         $email_address = $data['email_address'];
@@ -81,11 +81,11 @@ class userActions extends autouserActions
     }
 
     /**
-     * Creates a sfGuardUser object
+     * Creates a token referring to an sfGuardUser object
      * @param   sfWebRequest   $request a request object
      * @return  string
      */
-    public function executeRequest_key(sfWebRequest $request)
+    public function executeToken(sfWebRequest $request)
     {
         //$this->forward404Unless($request->isMethod(sfRequest::POST));
         $content = $request->getContent();
@@ -105,11 +105,8 @@ class userActions extends autouserActions
             $parameters = $request->getParameterHolder()->getAll();
             $params = $this->getApiAuthFieldValues($parameters, $content);
             $this->validateApiAuth($parameters, $content);
-            $this->validateRequest($content);
-            $auth_key = $this->requestAuthKey($content);
-            if (!$auth_key) {
-                throw new Exception("Invalid credentials given.");
-            }
+            $this->validateToken($content);
+            $auth_key = $this->requestToken($content);
         } catch (Exception $e) {
             $this->getResponse()->setStatusCode(406);
             $serializer = $this->getSerializer();
