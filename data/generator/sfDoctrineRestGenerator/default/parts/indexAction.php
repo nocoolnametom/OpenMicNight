@@ -78,11 +78,22 @@
 <?php endforeach; ?>
 
     // configure the fields of the returned objects and eventually hide some
-    $this->setFieldVisibility();
+    $this->setFieldVisibilityIndex();
     $this->configureFields();
 
     $serializer = $this->getSerializer();
     $this->getResponse()->setContentType($serializer->getContentType());
     $this->output = $serializer->serialize($this->objects, $this->model);
     unset($this->objects);
+  }
+
+  /**
+   * Manages the visibility of fields in record collections and in relations.
+   * This method will hide some fields, based on the configuration file
+   *
+   * @return  void
+   */
+  protected function setFieldVisibilityIndex()
+  {
+    $this->setFieldVisibility();
   }

@@ -26,10 +26,14 @@ class Message extends BaseMessage
     public function save(Doctrine_Connection $conn = null)
     {
         if ($this->isNew()) {
-            if (!$this->hasVerifiedUser())
+            if (!$this->hasVerifiedSender())
                 $this->deleteWithException("Cannot create Message "
-                        . "because sfGuardUser " . $this->getSfGuardUserId()
-                        . " has not been validated yet.", 106);
+                        . "because sfGuardUser " . $this->getSenderId ()
+                        . " has not been validated yet.", 406);
+            if (!$this->hasVerifiedRecipient())
+                $this->deleteWithException("Cannot create Message "
+                        . "because sfGuardUser " . $this->getSenderId ()
+                        . " has not been validated yet.", 406);
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
@@ -44,9 +48,22 @@ class Message extends BaseMessage
      *
      * @return bool  Whether the user is marked as "validated". 
      */
-    public function hasVerifiedUser()
+    public function hasVerifiedSender()
     {
         return (bool) $this->getSfGuardUser()->getIsValidated();
+    }
+    
+    /**
+     * Checks if the User of the EpisodeAssignment has been validated as a
+     * member of Reddit yet.
+     *
+     * @return bool  Whether the user is marked as "validated". 
+     */
+    public function hasVerifiedRecipient()
+    {
+        $recipient_id = $this->getRecipientId();
+        $user = sfGuardUserTable::getInstance()->find($recipient_id);
+        return (bool) ($user && $user->getIsValidated());
     }
 
     /**

@@ -25,7 +25,7 @@
       $parameters = $request->getParameterHolder()->getAll();
       $params = $this->getApiAuthFieldValues($parameters, $content);
       $this->validateApiAuth($parameters, $content);
-      $this->validateUpdate($content, $request);
+      $this->validateCreate($content, $request);
     }
     catch (Exception $e)
     {
