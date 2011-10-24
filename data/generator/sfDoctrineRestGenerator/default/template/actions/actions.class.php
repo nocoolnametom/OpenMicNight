@@ -67,11 +67,13 @@ class <?php echo $this->getGeneratedModuleName() ?>Actions extends <?php echo $t
 
 <?php include sfConfig::get('sf_plugins_dir').'/sfDoctrineRestGeneratorPlugin/data/generator/sfDoctrineRestGenerator/default/parts/validate.php' ?>
 
-<?php include sfConfig::get('sf_plugins_dir').'/sfDoctrineRestGeneratorPlugin/data/generator/sfDoctrineRestGenerator/default/parts/validateCreate.php' ?>
+<?php include dirname(__FILE__).'/../../parts/validateCreate.php' ?>
+  
+<?php include dirname(__FILE__).'/../../parts/validateDelete.php' ?>
 
-<?php include sfConfig::get('sf_plugins_dir').'/sfDoctrineRestGeneratorPlugin/data/generator/sfDoctrineRestGenerator/default/parts/validateIndex.php' ?>
+<?php include dirname(__FILE__).'/../../parts/validateIndex.php' ?>
 
-<?php include sfConfig::get('sf_plugins_dir').'/sfDoctrineRestGeneratorPlugin/data/generator/sfDoctrineRestGenerator/default/parts/validateShow.php' ?>
+<?php include dirname(__FILE__).'/../../parts/validateShow.php' ?>
 
-<?php include sfConfig::get('sf_plugins_dir').'/sfDoctrineRestGeneratorPlugin/data/generator/sfDoctrineRestGenerator/default/parts/validateUpdate.php' ?>
+<?php include dirname(__FILE__).'/../../parts/validateUpdate.php' ?>
 }

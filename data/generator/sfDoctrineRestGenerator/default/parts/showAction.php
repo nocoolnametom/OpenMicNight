@@ -19,11 +19,11 @@
     {
       $format = $this->getFormat();
       $this->validateApiAuth($request->getParameterHolder()->getAll());
-      $this->validateShow($params);
+      $this->validateShow($params, $request);
     }
     catch (Exception $e)
     {
-    	$this->getResponse()->setStatusCode(406);
+    	$this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
       $serializer = $this->getSerializer();
       $this->getResponse()->setContentType($serializer->getContentType());
       $error = $e->getMessage();

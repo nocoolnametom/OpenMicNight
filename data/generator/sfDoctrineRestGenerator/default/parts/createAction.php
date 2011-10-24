@@ -25,11 +25,11 @@
       $parameters = $request->getParameterHolder()->getAll();
       $params = $this->getApiAuthFieldValues($parameters, $content);
       $this->validateApiAuth($parameters, $content);
-      $this->validateUpdate($content);
+      $this->validateUpdate($content, $request);
     }
     catch (Exception $e)
     {
-    	$this->getResponse()->setStatusCode(406);
+    	$this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
       $serializer = $this->getSerializer();
       $this->getResponse()->setContentType($serializer->getContentType());
       $error = $e->getMessage();
