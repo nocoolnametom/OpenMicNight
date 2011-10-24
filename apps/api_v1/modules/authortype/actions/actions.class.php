@@ -31,4 +31,30 @@ class authortypeActions extends autoauthortypeActions
         return $validators;
     }
     
+    public function validateCreate($payload, sfWebRequest $request = null)
+    {
+        parent::validateCreate($payload, $request);
+        if (!$this->getUser()->isSuperAdmin())
+            throw new sfException("Your user does not have permissions to "
+                    . "create new AuthorTypes.", 403);
+    }
+
+    public function validateDelete($payload, sfWebRequest $request = null)
+    {
+        parent::validateDelete($payload, $request);
+        if (!$this->getUser()->isSuperAdmin())
+            throw new sfException("Your user does not have permissions to "
+                    . "delete AuthorTypes.", 403);
+    }
+
+    public function validateUpdate($payload, sfWebRequest $request = null)
+    {
+        parent::validateUpdate($payload, $request);
+        $params = $this->parsePayload($payload);
+        $primaryKey = $request->getParameter('id');
+        if (!$this->getUser()->isSuperAdmin())
+            throw new sfException("Your user does not have permissions to "
+                    . "alter AuthorTypes.", 403);
+    }
+    
 }

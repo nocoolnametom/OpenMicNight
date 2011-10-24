@@ -17,7 +17,7 @@ class userActions extends autouserActions
         parent::checkApiAuth($parameters, $content);
         $this->getUser()->setParams($parameters);
         if (!$this->getUser()->apiIsAuthorized())
-            throw new sfException('API authorization failed.');
+            throw new sfException('API authorization failed.', 401);
         return true;
     }
 
@@ -32,7 +32,45 @@ class userActions extends autouserActions
                     'max_length' => 255,
                     'required' => false,
                 ));
+        unset($validators["is_validated"],
+                $validators["salt"],
+                $validators["is_active"],
+                $validators["reddit_validation_key"],
+                $validators["algorithm"],
+                $validators["is_super_admin"],
+                $validators["last_login"],
+                $validators["created_at"],
+                $validators["updated_at"]);
         return $validators;
+    }
+
+    public function validateCreate($payload, sfWebRequest $request = null)
+    {
+        parent::validateCreate($payload, $request);
+        if ($this->getUser()->getAttribute("api_key") != sfConfig::get("app_web_app_api_key"))
+            throw new sfException("Only the web application is allowed to "
+                    . "create new users.", 403);
+    }
+
+    public function validateDelete($payload, sfWebRequest $request = null)
+    {
+        parent::validateDelete($payload, $request);
+        if ($this->getUser()->getAttribute("api_key") != sfConfig::get("app_web_app_api_key")
+                || (!$this->getUser()->isSuperAdmin()))
+            throw new sfException("Only the web application is allowed to "
+                    . "delete users.", 403);
+    }
+
+    public function validateUpdate($payload, sfWebRequest $request = null)
+    {
+        parent::validateUpdate($payload, $request);
+        $params = $this->parsePayload($payload);
+        $primaryKey = $request->getParameter('id');
+        if (!$this->getUser()->getGuardUser() ||
+                (($this->getUser()->getGuardUser()->getIncremented() != $primaryKey)
+                && (!$this->getUser()->isSuperAdmin())))
+            throw new sfException("You can only alter information for your own "
+                    . "user record.", 403);
     }
 
     public function getTokenValidators()
@@ -108,7 +146,7 @@ class userActions extends autouserActions
             $this->validateToken($content);
             $auth_key = $this->requestToken($content);
         } catch (Exception $e) {
-            $this->getResponse()->setStatusCode(406);
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
             $serializer = $this->getSerializer();
             $this->getResponse()->setContentType($serializer->getContentType());
             $error = $e->getMessage();
