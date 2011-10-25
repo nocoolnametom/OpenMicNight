@@ -189,7 +189,11 @@ class messageActions extends automessageActions
     {
         $user_id = ($this->getUser()->getGuardUser() ? $this->getUser()
                                 ->getGuardUser()->getIncremented() : 0);
-        $query = $this->query($params)
+        
+        $query = $this->query($params);
+        
+        if ($this->getUser()->getGuardUser() && !$this->getUser()->isSuperAdmin())
+        $query = $query
                 ->andWhere($this->model . '.sender_id = ?', $user_id)
                 ->orWhere($this->model . '.recipient_id = ?', $user_id);
 
