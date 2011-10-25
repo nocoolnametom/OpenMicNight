@@ -31,3 +31,21 @@
 
     return $this->_payload_array;
   }
+
+  public function packagePayload($payload_array)
+  {
+    $format = $this->getFormat();
+    $serializer = $this->getSerializer();
+
+    if ($serializer)
+    {
+      $payload = $serializer->serialize($payload_array);
+    }
+
+    if (!isset($payload) || !$payload)
+    {
+      throw new sfException(sprintf('Could not package payload as %s data!', $format));
+    }
+
+    return $payload;
+  }

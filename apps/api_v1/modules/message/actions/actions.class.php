@@ -50,7 +50,7 @@ class messageActions extends automessageActions
         return $validators;
     }
 
-    public function validateShow($params, sfWebRequest $request = null)
+    public function validateShow($payload, sfWebRequest $request = null)
     {
 
         $primaryKey = $request->getParameter('id');
@@ -64,20 +64,23 @@ class messageActions extends automessageActions
         )
             throw new sfException("Your user does not have permissions to "
                     . "view this Message.", 403);
+
+        parent::validateShow($payload, $request);
     }
 
     public function validateCreate($payload, sfWebRequest $request = null)
     {
         $params = $this->parsePayload($payload);
 
-        if (!$this->getUser()->isSuperAdmin() || !array_key_exists('sender_id', $params))
+        if (!array_key_exists('sender_id', $params)
+                || (!$this->getUser()->isSuperAdmin()
+                && $params['sender_id'] != $this->getUser()->getGuardUser()->getIncremented()))
             $params['sender_id'] = $this->getUser()->getGuardUser()->getIncremented();
 
-        $validators = $this->getUpdateValidators();
-        $this->validate($params, $validators);
+        $payload = $this->packagePayload($params);
+        unset($this->_payload_array);
 
-        $postvalidators = $this->getUpdatePostValidators();
-        $this->postValidate($params, $postvalidators);
+        parent::validateCreate($payload, $request);
     }
 
     public function validateDelete($payload, sfWebRequest $request = null)
@@ -101,7 +104,9 @@ class messageActions extends automessageActions
         $primaryKey = $request->getParameter('id');
         $message = MessageTable::getInstance()->find($primaryKey);
 
-        if (!$this->getUser()->isSuperAdmin() && array_key_exists('sender_id', $params))
+        if (!array_key_exists('sender_id', $params)
+                || (!$this->getUser()->isSuperAdmin()
+                && $params['sender_id'] != $this->getUser()->getGuardUser()->getIncremented()))
             $params['sender_id'] = $this->getUser()->getGuardUser()->getIncremented();
 
         if ($message
@@ -110,11 +115,10 @@ class messageActions extends automessageActions
             throw new sfException("Your user does not have permissions to "
                     . "alter this Message.", 403);
 
-        $validators = $this->getUpdateValidators();
-        $this->validate($params, $validators);
+        $payload = $this->packagePayload($params);
+        unset($this->_payload_array);
 
-        $postvalidators = $this->getUpdatePostValidators();
-        $this->postValidate($params, $postvalidators);
+        parent::validateUpdate($payload, $request);
     }
 
     /**
@@ -150,7 +154,8 @@ class messageActions extends automessageActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -165,11 +170,36 @@ class messageActions extends automessageActions
         }
 
         $object_params = $this->parsePayload($content);
-        if (!$this->getUser()->isSuperAdmin() || !array_key_exists('sender_id', $object_params))
+        if (!$this->getUser()->isSuperAdmin() || !array_key_exists('sender_id',
+                                                                   $object_params))
             $object_params['sender_id'] = $this->getUser()->getGuardUser()->getIncremented();
 
         $this->object = $this->createObject();
         $this->object->importFrom('array', $object_params);
         return $this->doSave($params);
     }
+
+    /**
+     * Execute the query for selecting a collection of objects, eventually
+     * along with related objects
+     *
+     * @param   array   $params  an array of criterions for the selection
+     */
+    public function queryExecute($params)
+    {
+        $user_id = ($this->getUser()->getGuardUser() ? $this->getUser()
+                                ->getGuardUser()->getIncremented() : 0);
+        $query = $this->query($params)
+                ->andWhere($this->model . '.sender_id = ?', $user_id)
+                ->orWhere($this->model . '.recipient_id = ?', $user_id);
+
+        $this->objects = $this->dispatcher->filter(
+                        new sfEvent(
+                                $this,
+                                'sfDoctrineRestGenerator.filter_results',
+                                array()
+                        ), $query->execute(array(), Doctrine::HYDRATE_ARRAY)
+                )->getReturnValue();
+    }
+
 }
