@@ -17,7 +17,7 @@ class subredditActions extends autosubredditActions
         parent::checkApiAuth($parameters, $content);
         $this->getUser()->setParams($parameters);
         if (!$this->getUser()->apiIsAuthorized())
-            throw new sfException('API authorization failed.');
+            throw new sfException('API authorization failed.', 401);
         return true;
     } 
 

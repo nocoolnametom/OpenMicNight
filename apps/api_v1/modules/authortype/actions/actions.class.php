@@ -17,7 +17,7 @@ class authortypeActions extends autoauthortypeActions
         parent::checkApiAuth($parameters, $content);
         $this->getUser()->setParams($parameters);
         if (!$this->getUser()->apiIsAuthorized())
-            throw new sfException('API authorization failed.');
+            throw new sfException('API authorization failed.', 401);
         return true;
     } 
 
@@ -30,7 +30,7 @@ class authortypeActions extends autoauthortypeActions
             ));
         return $validators;
     }
-    
+
     public function validateCreate($payload, sfWebRequest $request = null)
     {
         parent::validateCreate($payload, $request);
