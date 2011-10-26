@@ -32,15 +32,11 @@ class userActions extends autouserActions
                     'max_length' => 255,
                     'required' => false,
                 ));
-        unset($validators["is_validated"],
-                $validators["salt"],
-                $validators["is_active"],
-                $validators["reddit_validation_key"],
-                $validators["algorithm"],
-                $validators["is_super_admin"],
-                $validators["last_login"],
-                $validators["created_at"],
-                $validators["updated_at"]);
+        unset($validators["is_validated"], $validators["salt"],
+              $validators["is_active"], $validators["reddit_validation_key"],
+              $validators["algorithm"], $validators["is_super_admin"],
+              $validators["last_login"], $validators["created_at"],
+              $validators["updated_at"]);
         return $validators;
     }
 
@@ -113,7 +109,8 @@ class userActions extends autouserActions
         $data = $this->parsePayload($content);
         $email_address = $data['email_address'];
         $password = $data['password'];
-        $expires_in = (array_key_exists('expires_in', $data) ? $data['expires_in'] : null);
+        $expires_in = (array_key_exists('expires_in', $data) ? $data['expires_in']
+                            : null);
         return $this->getUser()
                         ->requestAuthKey($email_address, $password, $expires_in);
     }
@@ -153,7 +150,8 @@ class userActions extends autouserActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -169,7 +167,10 @@ class userActions extends autouserActions
 
         $serializer = $this->getSerializer();
         $this->getResponse()->setContentType($serializer->getContentType());
-        $this->output = $serializer->serialize(array('auth_key' => $auth_key), $this->model, false);
+        $this->output = $serializer->serialize(array(
+            'auth_key' => $auth_key,
+            'sf_guard_user_id' => $this->getUser()->getGuardUser()->getIncremented(),
+                ), $this->model, false);
     }
 
 }
