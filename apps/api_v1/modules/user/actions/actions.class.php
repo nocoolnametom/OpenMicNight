@@ -142,6 +142,8 @@ class userActions extends autouserActions
             $this->validateApiAuth($parameters, $content);
             $this->validateToken($content);
             $auth_key = $this->requestToken($content);
+            $data = $this->parsePayload($content);
+            $email_address = $data['email_address'];
         } catch (Exception $e) {
             $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
             $serializer = $this->getSerializer();
@@ -167,9 +169,11 @@ class userActions extends autouserActions
 
         $serializer = $this->getSerializer();
         $this->getResponse()->setContentType($serializer->getContentType());
+        $user = sfGuardUserTable::getInstance()->findOneBy('email_address', $email_address);
+        $user_id = ($user && $auth_key ? $user->getIncremented() : null);
         $this->output = $serializer->serialize(array(
             'auth_key' => $auth_key,
-            'sf_guard_user_id' => $this->getUser()->getGuardUser()->getIncremented(),
+            'user_id' => $user_id,
                 ), $this->model, false);
     }
 

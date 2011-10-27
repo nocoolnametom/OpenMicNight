@@ -43,7 +43,7 @@ sf_guard_password:
 # default rules
 homepage:
   url:   /
-  param: { module: default, action: index }
+  param: { module: home, action: index }
 
 subreddit_index:
   url:   /r/:subreddit_name/:module
