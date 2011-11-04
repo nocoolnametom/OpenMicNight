@@ -15,8 +15,6 @@ sfGuardUser:
     full_name:      Tom Doggett
     preferred_name: Tom
     is_super_admin: true
-      
-      
 
 Episode:
   episode_one:

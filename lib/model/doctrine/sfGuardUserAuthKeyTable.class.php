@@ -31,5 +31,4 @@ class sfGuardUserAuthKeyTable extends Doctrine_Table
                 ->getFirst();
         return $auth;
     }
-
 }

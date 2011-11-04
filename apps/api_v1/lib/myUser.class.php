@@ -31,6 +31,10 @@ class myUser extends sfGuardSecurityUser
           $time = $request->getParameter('time', $this->getAttribute('time'));
           $signature = $request->getParameter('signature',
           $this->getAttribute('signature')); */
+        $time = $this->getAttribute('time', 0);
+        // API authentication is only valid if the timestamp given is current within a half-hour window - The current time of the API server can be found by running a GET request against "usr/time" or "/time"
+        if (!($time > time() - 900 && $time < time() + 900))
+            return false;
         $api = ApiKeyTable::getInstance()->findOneByApiKey($this->getAttribute('api_key'));
         if ($api instanceof ApiKey && $api->getIsActive()) {
             $shared_secret = $api->getSharedSecret();
@@ -68,7 +72,7 @@ class myUser extends sfGuardSecurityUser
         }
         return null;
     }
-    
+
     public function sendAuthRequestEmail(ApiKey $api)
     {
         /* @todo  WE need this to send out an email notifying the user that they've logged in through an API. */
@@ -79,7 +83,7 @@ class myUser extends sfGuardSecurityUser
     {
         if (is_null($expires_in))
             $expires_in = sfConfig::get('app_web_app_api_auth_key_login_expiration');
-        
+
         if (!self::apiIsAuthorized()) {
             return $this->getAttribute('auth_key');
         }
@@ -87,7 +91,7 @@ class myUser extends sfGuardSecurityUser
         $api = ApiKeyTable::getInstance()
                 ->findOneByApiKey($this->getAttribute('api_key'));
         if (!$api->getApiKey() == sfConfig::get('app_web_app_api_key'))
-            $this->sendAuthRequestEmail ($api);
+            $this->sendAuthRequestEmail($api);
         return $api->requestAuthKey($email_address, $password, $expires_in);
     }
 

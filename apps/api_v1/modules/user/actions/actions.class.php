@@ -32,11 +32,7 @@ class userActions extends autouserActions
                     'max_length' => 255,
                     'required' => false,
                 ));
-        unset($validators["is_validated"], $validators["salt"],
-              $validators["is_active"], $validators["reddit_validation_key"],
-              $validators["algorithm"], $validators["is_super_admin"],
-              $validators["last_login"], $validators["created_at"],
-              $validators["updated_at"]);
+        unset($validators["is_validated"], $validators["salt"], $validators["is_active"], $validators["reddit_validation_key"], $validators["algorithm"], $validators["is_super_admin"], $validators["last_login"], $validators["created_at"], $validators["updated_at"]);
         return $validators;
     }
 
@@ -93,6 +89,18 @@ class userActions extends autouserActions
         return $validators;
     }
 
+    public function getTokenUserIdValidators()
+    {
+        $validators = array();
+        return $validators;
+    }
+
+    public function getTokenUserIdPostValidators()
+    {
+        $validators = array();
+        return $validators;
+    }
+
     public function validateToken($payload)
     {
         $params = $this->parsePayload($payload);
@@ -104,15 +112,29 @@ class userActions extends autouserActions
         $this->postValidate($params, $postvalidators);
     }
 
+    public function validateTokenUserId($params, sfWebRequest $request = null)
+    {
+        $validators = $this->getTokenUserIdValidators();
+        $this->validate($params, $validators);
+
+        $postvalidators = $this->getTokenUserIdPostValidators();
+        $this->postValidate($params, $postvalidators);
+    }
+
     public function requestToken($content)
     {
         $data = $this->parsePayload($content);
         $email_address = $data['email_address'];
         $password = $data['password'];
-        $expires_in = (array_key_exists('expires_in', $data) ? $data['expires_in']
-                            : null);
+        $expires_in = (array_key_exists('expires_in', $data) ? $data['expires_in'] : null);
         return $this->getUser()
                         ->requestAuthKey($email_address, $password, $expires_in);
+    }
+
+    public function requestTokenUserId()
+    {
+        return ($this->getUser()->getGuardUser() ? 
+                $this->getUser()->getGuardUser()->getIncremented() : null);
     }
 
     /**
@@ -152,8 +174,7 @@ class userActions extends autouserActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
-                            $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -174,6 +195,104 @@ class userActions extends autouserActions
         $this->output = $serializer->serialize(array(
             'auth_key' => $auth_key,
             'user_id' => $user_id,
+                ), $this->model, false);
+    }
+
+    /**
+     * Creates a token referring to an sfGuardUser object
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeToken_user_id(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+
+        try {
+            $format = $this->getFormat();
+            $this->validateApiAuth($request->getParameterHolder()->getAll());
+            $this->validateShow($params, $request);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $user_id = $this->requestTokenUserId();
+        $this->output = $serializer->serialize(array(
+            'user_id' => $user_id,
+                ), $this->model, false);
+    }
+    
+    /**
+     * Creates a token referring to an sfGuardUser object
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeTime(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+
+        try {
+            $format = $this->getFormat();
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $user_id = $this->requestTokenUserId();
+        $this->output = $serializer->serialize(array(
+            'time' => time(),
                 ), $this->model, false);
     }
 

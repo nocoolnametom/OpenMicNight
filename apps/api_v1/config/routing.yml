@@ -64,6 +64,12 @@ user:
 request_user_key:
   url:   /user/token
   param: { module: user, action: token }
+request_user_id:
+  url:   /user_id
+  param: { module: user, action: token_user_id }
+request_current_time:
+  url:   /time
+  param: { module: user, action: time }
 
 message:
   class:   sfObjectRouteCollection

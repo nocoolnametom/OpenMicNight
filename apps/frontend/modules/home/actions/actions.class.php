@@ -18,11 +18,7 @@ class homeActions extends sfActions
      */
     public function executeIndex(sfWebRequest $request)
     {
-        $this->getUser()->requestToken('nocoolnametom@gmail.com', 'admin');
-        $response = Api::getInstance()
-                ->setUser($this->getUser()->getApiAuthKey())
-                ->delete('authortype/1');
-        die(var_dump($response) . 'Done!');
+        $this->user = $this->getUser()->getGuardUser();
     }
 
 }
