@@ -77,6 +77,14 @@ sfGuardUser:
       type: string(127)
       notnull: true
       default: ""
+    is_authorized:
+      type: boolean
+      default: 0
+    email_authorization_key:
+      type: string(127)
+      notnull: true
+      default: ""
+      unique: true
     full_name: { type: string(127) }
     preferred_name: { type: string(127) }
     website: { type: string(255) }
