@@ -66,6 +66,9 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
 
         $this->_set('password',
                     call_user_func_array($algorithm, array($salt . $password)));
+        
+        $auth_hash = $this->buildEmailAuthorizationKeyHash();
+        $this->setEmailAuthorizationKey($auth_hash);
     }
 
     public function setEmailAddress($emailAddress)
@@ -74,6 +77,8 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
         $reddit_hash = $this->buildRedditValidationKeyHash();
         $this->setRedditValidationKey($reddit_hash);
         $this->setIsValidated(false);
+        $auth_hash = $this->buildEmailAuthorizationKeyHash();
+        $this->setEmailAuthorizationKey($auth_hash);
     }
 
     public function setUsername($username)
@@ -91,6 +96,15 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
             $this->setSalt($salt);
         }
         return md5($this->getSalt() . $this->getUsername() . $this->getEmailAddress());
+    }
+    
+    public function buildEmailAuthorizationKeyHash()
+    {
+        if (!$salt = $this->getSalt()) {
+            $salt = md5(rand(100000, 999999) . $this->getEmailAddress());
+            $this->setSalt($salt);
+        }
+        return md5($this->getSalt() . $this->getPassword() . $this->getEmailAddress()) . md5($this->getSalt() . $this->getEmailAddress() . $this->getPassword());
     }
 
     /**

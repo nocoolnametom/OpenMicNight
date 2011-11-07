@@ -27,7 +27,7 @@ generator:
         # list here additionnal calculated global fields
 #        global_additional_fields:      [ api_key, time, signature, auth_key ]
         # list here the fields you don't want to expose
-        hide:                          [ password, salt, algorithm, reddit_validation_key, is_super_admin, is_active, is_validated, last_logged_in, updated_at ]
+        hide:                          [ password, salt, algorithm, reddit_validation_key, is_super_admin, is_active, is_validated, last_logged_in, updated_at, email_authorization_key, authorized_at, is_authorized ]
 #        max_items:                     0       # uncomment to fix an absolute limit to the number of items in the response
 #        object_additional_fields:      []      # list here additionnal calculated fields
         # set to true to activate the pagination
