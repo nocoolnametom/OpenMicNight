@@ -32,6 +32,8 @@ class emailActions extends sfActions
         $user_id = $request->getParameter('user_id');
         $this->user = sfGuardUserTable::getInstance()->find($user_id);
         $this->forward404Unless($this->user);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
     /**
@@ -45,6 +47,8 @@ class emailActions extends sfActions
         $user_id = $request->getParameter('user_id');
         $this->user = sfGuardUserTable::getInstance()->find($user_id);
         $this->forward404Unless($this->user);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
 
         $this->reddit_post = sfConfig::get('app_email_reddit_validation_post_location');
         if (sfConfig::get('app_email_reddit_validation_local_file', false)) {
@@ -66,6 +70,8 @@ class emailActions extends sfActions
         $user_id = $request->getParameter('user_id');
         $this->user = sfGuardUserTable::getInstance()->find($user_id);
         $this->forward404Unless($this->user);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
     /**
@@ -79,6 +85,8 @@ class emailActions extends sfActions
         $user_id = $request->getParameter('user_id');
         $this->user = sfGuardUserTable::getInstance()->find($user_id);
         $this->forward404Unless($$this->user);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
     /**
@@ -92,6 +100,8 @@ class emailActions extends sfActions
         $user_id = $request->getParameter('user_id');
         $this->user = sfGuardUserTable::getInstance()->find($user_id);
         $this->forward404Unless($this->user);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
     /**
@@ -108,6 +118,8 @@ class emailActions extends sfActions
         $this->episode = EpisodeTable::getInstance()->find($episode_id);
         $this->deadline_date = $request->getParameter('deadline');
         $this->forward404Unless($this->user && $this->episode && $this->deadline_date);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
         $this->deadline_date = strtotime($this->deadline_date);
     }
 
@@ -124,6 +136,8 @@ class emailActions extends sfActions
         $message_id = $request->getParameter('message_id');
         $this->message = MessageTable::getInstance()->find($message_id);
         $this->forward404Unless($this->user && $this->message);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
         $this->sender = sfGuardUserTable::getInstance()->find($this->message->getSenderId());
     }
 
@@ -140,6 +154,8 @@ class emailActions extends sfActions
         $episode_id = $request->getParameter('episode_id');
         $this->episode = EpisodeTable::getInstance()->find($episode_id);
         $this->forward404Unless($this->user && $this->episode);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
     /**
@@ -155,6 +171,8 @@ class emailActions extends sfActions
         $api_id = $request->getParameter('api_id');
         $this->api = ApiKeyTable::getInstance()->find($api_id);
         $this->forward404Unless($this->user && $this->api);
+        $this->name = $this->user->getPreferredName() ?
+                $this->user->getPreferredName() : $this->user->getFullName();
     }
 
 }

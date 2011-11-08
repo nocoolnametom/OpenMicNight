@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ /* @var $api ApiKey */  ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>This is just a notice to inform you that you have authorized
 <?php $api->getApiAppName(); ?> with your user credentials to access

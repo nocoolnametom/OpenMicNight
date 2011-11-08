@@ -2,7 +2,7 @@
 /* @var $user sfGuardUser */
 /* @var $message Message */
 /* @var $sender sfGuardUser */ ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>You have been sent the following private message to your account on
 <?php echo $app_name; ?> by the user

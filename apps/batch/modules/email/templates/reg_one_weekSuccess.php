@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>It's been a week since you registered for an account at
 <?php echo $app_name; ?>.  You still need to verify your Reddit username,

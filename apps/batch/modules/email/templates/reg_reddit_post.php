@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ ?>
-<p> Dear <?php echo $user->getFullName() ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>Welcome to <?php echo $app_name; ?>!</p>
 

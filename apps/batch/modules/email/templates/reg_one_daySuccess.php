@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>We're hoping you still want to participate in <?php echo $app_name; ?>.  The
     only thing standing in your way is to verify your Reddit username by

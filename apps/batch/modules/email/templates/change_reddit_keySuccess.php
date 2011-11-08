@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>You need to authorize your Reddit username.  This is because you have either
     changed the email address or password of your account, or because you have

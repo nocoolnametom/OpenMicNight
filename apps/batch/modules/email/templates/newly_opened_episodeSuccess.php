@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ /* @var $episode Episode */  ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>You have been successfully paired with an empty episode slot!  Your episode
     will air on <?php echo $episode->getReleaseDate('l, F n, Y \a\t g:ia') ?>.

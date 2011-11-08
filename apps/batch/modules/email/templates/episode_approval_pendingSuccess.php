@@ -1,5 +1,5 @@
 <?php /* @var $user sfGuardUser */ /* @var $episode Episode */  ?>
-<p> Dear <?php echo $user->getFullName(); ?>,</p>
+<p> Dear <?php echo $name ?>,</p>
 
 <p>There is an episode that has been submitted for approval in the
 <?php $episode->getSubreddit()->getName() ?> subreddit.  Please take some time
