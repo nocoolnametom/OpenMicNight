@@ -28,6 +28,7 @@ class ApiKey extends BaseApiKey
         // Attempt to find user by email address
         $user = sfGuardUserTable::getInstance()
                 ->findOneByEmailAddress($email_address);
+        /* @var $user sfGuardUser */
         if (!$user)
             throw new sfException('The user does not exist in the database.');
         // Find out how many failures in the past two minutes - max of five
@@ -36,7 +37,7 @@ class ApiKey extends BaseApiKey
                                                    $user->getIncremented(), 120);
         if ($failures >= 6)
             throw new sfException('Too many failures. Please wait a few minutes and try again.');
-        if ($user && $user->checkPassword($password)) {
+        if ($user && $user->checkPassword($password) && $user->getIsAuthorized() && $user->isActive()) {
             $year = 31536000;
             $expires_in = $expires_in >= $year ? $year : $expires_in;
             $user_auth = new sfGuardUserAuthKey();

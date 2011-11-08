@@ -79,6 +79,7 @@ abstract class PluginsfGuardUser extends BasesfGuardUser
         $this->setIsValidated(false);
         $auth_hash = $this->buildEmailAuthorizationKeyHash();
         $this->setEmailAuthorizationKey($auth_hash);
+        $this->setIsAuthorized(false);
     }
 
     public function setUsername($username)

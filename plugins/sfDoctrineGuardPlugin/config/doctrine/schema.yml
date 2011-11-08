@@ -115,6 +115,10 @@ sfGuardUser:
   indexes:
     is_active_idx:
       fields: [is_active]
+    email_key_idx:
+      fields: [email_authorization_key]
+    reddit_key_idx:
+      fields: [reddit_validation_key]
   relations:
     Groups:
       class: sfGuardGroup

@@ -53,9 +53,19 @@ class ProjectConfiguration extends sfProjectConfiguration
         self::$awsLoaded = true;
     }
 
+    static public function getApplicationName()
+    {
+        return 'Herddit';
+    }
+    
+    static public function getFrontendAppLocation()
+    {
+        return 'http://openmicnight/';
+    }
+    
     static public function getAmazonBucketPrefix()
     {
-        return 'hreddit-';
+        return 'herddit-';
     }
 
     static public function getEpisodeAudioFileLocalDirectory()
@@ -67,5 +77,4 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return sfConfig::get('sf_web_dir') . '/uploads/';
     }
-
 }

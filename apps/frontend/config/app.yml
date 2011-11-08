@@ -6,7 +6,6 @@ all:
   sf_guard_plugin:
     only_login_with_email: true
     signin_form: sfGuardFormSigninApi
-
 # Remember to change the api key before using the app in production! Keep it
 # secret, keep it safe!
   web_app_api:

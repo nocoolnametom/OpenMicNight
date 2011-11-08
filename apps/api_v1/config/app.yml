@@ -4,6 +4,9 @@
 # Remember to change the api key before using the app in production! Keep it
 # secret, keep it safe!
 all:
+  reddit_validation:
+    post_location:  ~sf_data_dir~/test_file.json
+    local_file: true
   web_app_api:
     key: 75d32b53a0ccf8b92d7513c548351261d8d5cafe
     # 2 hours before regular login is revoked

@@ -52,6 +52,8 @@ class myUser extends sfGuardSecurityUser
     {
         if (!$this->_user_id) {
             $user_id = Api::getInstance()->setUser($this->getApiAuthKey())->get('user/token_user_id');
+            if (array_key_exists('body', $user_id) &&
+                    array_key_exists('user_id', $user_id['body']))
             $this->setApiUserId($user_id['body']['user_id']);
         }
         return $this->_user_id;
