@@ -95,4 +95,60 @@ class myUser extends sfGuardSecurityUser
         return $api->requestAuthKey($email_address, $password, $expires_in);
     }
 
+    public function sendMail($body_function, $additional_params = array())
+    {
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+
+        $user = $this->getGuardUser();
+        if (!$user)
+            return;
+        if (!$user->getReceiveNotificationOfEpisodeApprovalPending()
+                && $body_function == "EpisodeApprovalPending")
+            return;
+        if (!$user->getReceiveNotificationOfNewlyOpenedEpisodes()
+                && $body_function == "NewlyOpenedEpisode")
+            return;
+        if (!$user->getReceiveNotificationOfPrivateMessages()
+                && $body_function == "NewPrivateMessage")
+            return;
+
+        $prefer_html = $user->getPreferHtml();
+        $address = $user->getEmailAddress();
+        $name = ($user->getPreferredName() ?
+                        $user->getPreferredName() : $user->getFullName());
+        $user_id = $user->getIncremented();
+
+        $subject = forward_static_call_array(array(
+            'EmailSubject',
+            $body_function
+                ), array(
+            'user_id' => $user_id,
+            'additional_params' => $additional_params,
+                ));
+
+        $body = forward_static_call_array(array(
+            'EmailBody',
+            $body_function
+                ), array(
+            'user_id' => $user_id,
+            'additional_params' => $additional_params,
+                ));
+
+        if ($prefer_html) {
+            $mail->setBodyHtml($body);
+        }
+
+        $body = preg_replace('/<br??>/', "\n", $body);
+        $body = strip_tags($body);
+        $mail->setBodyText($body);
+        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->addTo($address, $name);
+        $mail->setSubject($subject);
+        if (sfConfig::get('sf_environment') == 'prod') {
+            $mail->send();
+        } else {
+            throw new sfException('Mail sent: ' . $mail->getBodyText());
+        }
+    }
 }

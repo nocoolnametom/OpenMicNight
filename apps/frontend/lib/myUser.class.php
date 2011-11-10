@@ -54,7 +54,7 @@ class myUser extends sfGuardSecurityUser
             $user_id = Api::getInstance()->setUser($this->getApiAuthKey())->get('user/token_user_id');
             if (array_key_exists('body', $user_id) &&
                     array_key_exists('user_id', $user_id['body']))
-            $this->setApiUserId($user_id['body']['user_id']);
+                $this->setApiUserId($user_id['body']['user_id']);
         }
         return $this->_user_id;
     }
@@ -135,6 +135,63 @@ class myUser extends sfGuardSecurityUser
         $expiration_age = sfConfig::get('app_sf_guard_plugin_remember_key_expiration_age', 15 * 24 * 3600);
         $remember_cookie = sfConfig::get('app_sf_guard_plugin_remember_cookie_name', 'sfRemember');
         sfContext::getInstance()->getResponse()->setCookie($remember_cookie, '', time() - $expiration_age);
+    }
+
+    public function sendMail($body_function, $additional_params = array())
+    {
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+
+        $user = $this->getGuardUser();
+        if (!$user)
+            return;
+        if (!$user->getReceiveNotificationOfEpisodeApprovalPending()
+                && $body_function == "EpisodeApprovalPending")
+            return;
+        if (!$user->getReceiveNotificationOfNewlyOpenedEpisodes()
+                && $body_function == "NewlyOpenedEpisode")
+            return;
+        if (!$user->getReceiveNotificationOfPrivateMessages()
+                && $body_function == "NewPrivateMessage")
+            return;
+
+        $prefer_html = $user->getPreferHtml();
+        $address = $user->getEmailAddress();
+        $name = ($user->getPreferredName() ?
+                        $user->getPreferredName() : $user->getFullName());
+        $user_id = $user->getIncremented();
+
+        $subject = forward_static_call_array(array(
+            'EmailSubject',
+            $body_function
+                ), array(
+            'user_id' => $user_id,
+            'additional_params' => $additional_params,
+                ));
+
+        $body = forward_static_call_array(array(
+            'EmailBody',
+            $body_function
+                ), array(
+            'user_id' => $user_id,
+            'additional_params' => $additional_params,
+                ));
+
+        if ($prefer_html) {
+            $mail->setBodyHtml($body);
+        }
+
+        $body = preg_replace('/<br??>/', "\n", $body);
+        $body = strip_tags($body);
+        $mail->setBodyText($body);
+        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->addTo($address, $name);
+        $mail->setSubject($subject);
+        if (sfConfig::get('sf_environment') == 'prod') {
+            $mail->send();
+        } else {
+            throw new sfException('Mail sent: ' . $mail->getBodyText());
+        }
     }
 
 }

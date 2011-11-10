@@ -8,6 +8,7 @@
  */
 class EmailBody
 {
+
     protected $app_name;
     protected $user;
     protected $name;
@@ -23,9 +24,17 @@ class EmailBody
                         $this->user->getPreferredName() : $this->user->getFullName());
     }
 
-    public static function ApiAuthRequest($user_id, $api_id)
+    /**
+     *
+     * @param int   $user_id
+     * @param array $additional_params  Requires a key of 'api_id' with a value
+     *                                   of the identifier of the ApiKey object
+     * @return string 
+     */
+    public static function ApiAuthRequest($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
+        $api_id = $additional_params['api_id'];
         $api = ApiKeyTable::getInstance()->find($api_id);
         if (!$api)
             throw new sfException('Cannot find ApiKey identified by ' . $api_id);
@@ -53,9 +62,7 @@ EOF;
             $app_pattern = '/~([^~]+)~/';
             $app_location = preg_match($app_pattern, $reddit_post, $matches);
             $app_location = $app_location[1];
-            $reddit_post = preg_replace($app_pattern,
-                                        sfConfig::get($app_location),
-                                                      $reddit_post);
+            $reddit_post = preg_replace($app_pattern, sfConfig::get($app_location), $reddit_post);
         }
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
@@ -79,10 +86,11 @@ EOF;
 EOF;
         return $this->output;
     }
-    
-    public static function EmailNewPassword($user_id, $new_password)
+
+    public static function EmailNewPassword($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
+        $new_password = $additional_params['new_password'];
         $valid_key = $this->user->getRedditValidationKey();
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
@@ -108,9 +116,10 @@ EOF;
         return $this->output;
     }
 
-    public static function EpisodeApprovalPending($user_id, $episode_id)
+    public static function EpisodeApprovalPending($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
+        $episode_id = $additional_params['episode_id'];
         $episode = EpisodeTable::getInstance()->find($episode_id);
         if (!$episode)
             throw new sfException('Cannot find Episode identified by ' . $episode_id);
@@ -140,13 +149,14 @@ EOF;
         return $this->output;
     }
 
-    public static function NewPrivateMessage($user_id, $message_id)
+    public static function NewPrivateMessage($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
+        $message_id = $additional_params['message_id'];
         $message = MessageTable::getInstance()->find($message_id);
         if (!$message)
             throw new sfException('Cannot find Message identified by ' . $message_id);
-        $sender = sfGuardUserTable::getInstance()->find($this->message->getSenderId());
+        $sender = sfGuardUserTable::getInstance()->find($message->getSenderId());
         $sender_username = $sender->getUsername();
         $message_text = $message->getText();
         $this->output = <<<EOF
@@ -164,9 +174,11 @@ EOF;
         return $this->output;
     }
 
-    public static function NewlyOpenedEpisode($user_id, $episode_id, $deadline)
+    public static function NewlyOpenedEpisode($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
+        $episode_id = $additional_params['episode_id'];
+        $deadline = $additional_params['deadline'];
         $episode = EpisodeTable::getInstance()->find($episode_id);
         $deadline = strtotime($deadline);
         if (!$message)
@@ -197,7 +209,7 @@ EOF;
     {
         $this->prepare($user_id);
         $authorization_key = $user->getEmailAuthorizationKey();
-        
+
         $frontend_app_location = ProjectConfiguration::getFrontendAppLocation();
         $frontendRouting = new sfPatternRouting(new sfEventDispatcher());
 
@@ -207,8 +219,7 @@ EOF;
         $frontendRouting->setRoutes($routes);
 
         $frontend_route = $frontend_app_location . $frontendRouting
-                        ->generate('@sf_guard_verify',
-                                   array(
+                        ->generate('@sf_guard_verify', array(
                             'key' => $authorization_key,
                         ));
 
@@ -307,4 +318,5 @@ EOF;
 EOF;
         return $this->output;
     }
+
 }
