@@ -22,6 +22,7 @@ class EmailBody
             throw new sfException('Cannot find User identified by ' . $user_id);
         $this->name = ($this->user->getPreferredName() ?
                         $this->user->getPreferredName() : $this->user->getFullName());
+        return $this;
     }
 
     /**
@@ -31,7 +32,7 @@ class EmailBody
      *                                   of the identifier of the ApiKey object
      * @return string 
      */
-    public static function ApiAuthRequest($user_id, $additional_params = array())
+    public function ApiAuthRequest($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
         $api_id = $additional_params['api_id'];
@@ -53,7 +54,7 @@ EOF;
         return $this->output;
     }
 
-    public static function ChangeRedditKey($user_id)
+    public function ChangeRedditKey($user_id)
     {
         $this->prepare($user_id);
         $valid_key = $this->user->getRedditValidationKey();
@@ -87,7 +88,7 @@ EOF;
         return $this->output;
     }
 
-    public static function EmailNewPassword($user_id, $additional_params = array())
+    public function EmailNewPassword($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
         $new_password = $additional_params['new_password'];
@@ -116,7 +117,7 @@ EOF;
         return $this->output;
     }
 
-    public static function EpisodeApprovalPending($user_id, $additional_params = array())
+    public function EpisodeApprovalPending($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
         $episode_id = $additional_params['episode_id'];
@@ -149,7 +150,7 @@ EOF;
         return $this->output;
     }
 
-    public static function NewPrivateMessage($user_id, $additional_params = array())
+    public function NewPrivateMessage($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
         $message_id = $additional_params['message_id'];
@@ -174,7 +175,7 @@ EOF;
         return $this->output;
     }
 
-    public static function NewlyOpenedEpisode($user_id, $additional_params = array())
+    public function NewlyOpenedEpisode($user_id, $additional_params = array())
     {
         $this->prepare($user_id);
         $episode_id = $additional_params['episode_id'];
@@ -205,7 +206,7 @@ EOF;
         return $this->output;
     }
 
-    public static function RegisterInitial($user_id)
+    public function RegisterInitial($user_id)
     {
         $this->prepare($user_id);
         $authorization_key = $user->getEmailAuthorizationKey();
@@ -237,7 +238,7 @@ EOF;
         return $this->output;
     }
 
-    public static function RegisterOneDay($user_id)
+    public function RegisterOneDay($user_id)
     {
         $this->prepare($user_id);
         $reddit_key = $user->getRedditValidationKey();
@@ -262,7 +263,7 @@ EOF;
         return $this->output;
     }
 
-    public static function RegisterOneWeek($user_id)
+    public function RegisterOneWeek($user_id)
     {
         $this->prepare($user_id);
         $reddit_key = $user->getRedditValidationKey();
@@ -293,7 +294,7 @@ EOF;
         return $this->output;
     }
 
-    public static function RegisterRedditPost($user_id)
+    public function RegisterRedditPost($user_id)
     {
         $this->prepare($user_id);
         $reddit_key = $user->getRedditValidationKey();

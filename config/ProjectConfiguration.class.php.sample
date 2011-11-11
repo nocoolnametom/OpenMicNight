@@ -8,6 +8,7 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static protected $cronLoaded = false;
     static protected $awsLoaded = false;
+    static protected $zendLoaded = false;
 
     public function setup()
     {
@@ -53,16 +54,28 @@ class ProjectConfiguration extends sfProjectConfiguration
         self::$awsLoaded = true;
     }
 
+    static public function registerZend()
+    {
+        if (self::$zendLoaded) {
+            return;
+        }
+
+        set_include_path(sfConfig::get('sf_lib_dir') . '/vendor' . PATH_SEPARATOR . get_include_path());
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/Zend/Loader/Autoloader.php';
+        Zend_Loader_Autoloader::getInstance();
+        self::$zendLoaded = true;
+    }
+
     static public function getApplicationName()
     {
         return 'Herddit';
     }
-    
+
     static public function getFrontendAppLocation()
     {
         return 'http://openmicnight/';
     }
-    
+
     static public function getAmazonBucketPrefix()
     {
         return 'herddit-';
@@ -77,4 +90,5 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return sfConfig::get('sf_web_dir') . '/uploads/';
     }
+
 }

@@ -97,6 +97,7 @@ class myUser extends sfGuardSecurityUser
 
     public function sendMail($body_function, $additional_params = array())
     {
+        ProjectConfiguration::registerZend();
         $mail = new Zend_Mail();
         $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
 
@@ -119,20 +120,22 @@ class myUser extends sfGuardSecurityUser
                         $user->getPreferredName() : $user->getFullName());
         $user_id = $user->getIncremented();
 
-        $subject = forward_static_call_array(array(
-            'EmailSubject',
+       $email_subject = new EmailSubject();
+        $subject = call_user_func_array(array(
+            $email_subject,
             $body_function
                 ), array(
-            'user_id' => $user_id,
-            'additional_params' => $additional_params,
+            $user_id,
+            $additional_params,
                 ));
 
-        $body = forward_static_call_array(array(
-            'EmailBody',
+        $email_body = new EmailBody();
+        $body = call_user_func_array(array(
+            $email_body,
             $body_function
                 ), array(
-            'user_id' => $user_id,
-            'additional_params' => $additional_params,
+            $user_id,
+            $additional_params,
                 ));
 
         if ($prefer_html) {
