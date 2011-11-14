@@ -75,7 +75,9 @@ class myUser extends sfGuardSecurityUser
 
     public function sendAuthRequestEmail(ApiKey $api)
     {
-        /* @todo  WE need this to send out an email notifying the user that they've logged in through an API. */
+        $this->sendMail('ApiAuthRequest', array(
+            'api_id' => $api->getIncremented(),
+        ));
         return;
     }
 
@@ -90,7 +92,7 @@ class myUser extends sfGuardSecurityUser
 
         $api = ApiKeyTable::getInstance()
                 ->findOneByApiKey($this->getAttribute('api_key'));
-        if (!$api->getApiKey() == sfConfig::get('app_web_app_api_key'))
+        if ($api->getApiKey() != sfConfig::get('app_web_app_api_key'))
             $this->sendAuthRequestEmail($api);
         return $api->requestAuthKey($email_address, $password, $expires_in);
     }
@@ -120,7 +122,7 @@ class myUser extends sfGuardSecurityUser
                         $user->getPreferredName() : $user->getFullName());
         $user_id = $user->getIncremented();
 
-       $email_subject = new EmailSubject();
+        $email_subject = new EmailSubject();
         $subject = call_user_func_array(array(
             $email_subject,
             $body_function
@@ -154,4 +156,5 @@ class myUser extends sfGuardSecurityUser
             throw new sfException('Mail sent: ' . $mail->getBodyText());
         }
     }
+
 }

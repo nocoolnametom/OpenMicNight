@@ -13,6 +13,7 @@ class EmailBody
     protected $user;
     protected $name;
     protected $output;
+    protected $reddit_post;
 
     public function prepare($user_id)
     {
@@ -22,6 +23,13 @@ class EmailBody
             throw new sfException('Cannot find User identified by ' . $user_id);
         $this->name = ($this->user->getPreferredName() ?
                         $this->user->getPreferredName() : $this->user->getFullName());
+        $this->reddit_post = sfConfig::get('app_email_reddit_validation_post_location');
+        if (sfConfig::get('app_email_reddit_validation_local_file', false)) {
+            $app_pattern = '/~([^~]+)~/';
+            $app_location = preg_match($app_pattern, $this->reddit_post, $matches);
+            $app_location = $app_location[1];
+            $this->reddit_post = preg_replace($app_pattern, sfConfig::get($app_location), $this->reddit_post);
+        }
         return $this;
     }
 
@@ -49,7 +57,8 @@ class EmailBody
    this authorized in your user preferences at $this->app_name. If this
    authorization is approved, feel free to disregard this email.</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -58,13 +67,6 @@ EOF;
     {
         $this->prepare($user_id);
         $valid_key = $this->user->getRedditValidationKey();
-        $reddit_post = sfConfig::get('app_email_reddit_validation_post_location');
-        if (sfConfig::get('app_email_reddit_validation_local_file', false)) {
-            $app_pattern = '/~([^~]+)~/';
-            $app_location = preg_match($app_pattern, $reddit_post, $matches);
-            $app_location = $app_location[1];
-            $reddit_post = preg_replace($app_pattern, sfConfig::get($app_location), $reddit_post);
-        }
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
 
@@ -77,13 +79,14 @@ EOF;
     activation key:</p>
 <blockquote>$valid_key</blockquote>
 <p> as a reply to the following post in the $this->app_name Subreddit:</p>
-<blockquote>$reddit_post</blockquote>
+<blockquote>$this->reddit_post</blockquote>
 
 <p>Once you've posted your key, verification shouldn't take more than an hour
     or two.  We'll do our best to let you know if there are any problems that
     might take longer.</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -112,7 +115,8 @@ EOF;
    your password has been changed, please let us know by replying to this
    email.</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -145,7 +149,8 @@ EOF;
     wouldn't be a moderator otherwise.  Have fun, and help someone else give
     their voice to the world!</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -170,7 +175,8 @@ EOF;
 <p>To view this message or reply to it, log into $this->app_name and view your
    Messages.</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -201,7 +207,8 @@ EOF;
 
 <p>Have fun!</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -209,9 +216,9 @@ EOF;
     public function RegisterInitial($user_id)
     {
         $this->prepare($user_id);
-        $authorization_key = $user->getEmailAuthorizationKey();
+        $authorization_key = $this->user->getEmailAuthorizationKey();
 
-        $frontend_app_location = ProjectConfiguration::getFrontendAppLocation();
+        $frontend_app_location = rtrim(ProjectConfiguration::getFrontendAppLocation(), '/');
         $frontendRouting = new sfPatternRouting(new sfEventDispatcher());
 
         $config = new sfRoutingConfigHandler();
@@ -220,7 +227,7 @@ EOF;
         $frontendRouting->setRoutes($routes);
 
         $frontend_route = $frontend_app_location . $frontendRouting
-                        ->generate('@sf_guard_verify', array(
+                        ->generate('sf_guard_verify', array(
                             'key' => $authorization_key,
                         ));
 
@@ -233,7 +240,8 @@ EOF;
 <p>This will be your only email containing this web address so don't lose it
     before you visit that link!</p>
 
-<p>Thanks,<br/> The $this->app_name Team</p>
+<p>Thanks,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -241,7 +249,7 @@ EOF;
     public function RegisterOneDay($user_id)
     {
         $this->prepare($user_id);
-        $reddit_key = $user->getRedditValidationKey();
+        $reddit_key = $this->user->getRedditValidationKey();
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
 
@@ -250,7 +258,7 @@ EOF;
    with your Reddit activation key:</p>
 <blockquote>$reddit_key</blockquote>
 <p> as a reply to the following post in the $this->app_name Subreddit:</p>
-<blockquote><?php echo $reddit_post; ?></blockquote>
+<blockquote><?php echo $this->reddit_post; ?></blockquote>
 
 <p>Once you've posted your key, verification shouldn't take more than an hour
     or two.  We'll do our best to let you know if there are any problems that
@@ -258,7 +266,8 @@ EOF;
 
 <p>We hope you enjoy using $this->app_name!  Have fun!</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -266,7 +275,7 @@ EOF;
     public function RegisterOneWeek($user_id)
     {
         $this->prepare($user_id);
-        $reddit_key = $user->getRedditValidationKey();
+        $reddit_key = $this->user->getRedditValidationKey();
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
 
@@ -275,7 +284,7 @@ EOF;
    posting your Reddit activation key:</p>
 <blockquote>$reddit_key</blockquote>
 <p> as a reply to the following post in the $this->app_name Subreddit:</p>
-<blockquote><?php echo $reddit_post; ?></blockquote>
+<blockquote><?php echo $this->reddit_post; ?></blockquote>
 
 <p>Once you've posted your key, verification shouldn't take more than an hour or
    two.  We'll do our best to let you know if there are any problems that might
@@ -289,7 +298,8 @@ EOF;
 
 <p>We hope you'll join us soon!</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }
@@ -297,7 +307,7 @@ EOF;
     public function RegisterRedditPost($user_id)
     {
         $this->prepare($user_id);
-        $reddit_key = $user->getRedditValidationKey();
+        $reddit_key = $this->user->getRedditValidationKey();
         $this->output = <<<EOF
 <p>Dear $this->name,</p>
 
@@ -307,7 +317,7 @@ EOF;
     paste in the following key:</p>
 <blockquote>$reddit_key</blockquote>
 <p> as a reply to the following post in the $this->app_name Subreddit:</p>
-<blockquote><?php echo $reddit_post; ?></blockquote>
+<blockquote><?php echo $this->reddit_post; ?></blockquote>
 
 <p>Once you've posted your reply, verification shouldn't take more than an hour
     or two.  We'll do our best to let you know if there are any problems that
@@ -315,7 +325,8 @@ EOF;
 
 <p>We hope you enjoy using $this->app_name!  Have fun!</p>
 
-<p>Sincerely,<br/> The $this->app_name Team</p>
+<p>Sincerely,<br/>
+The $this->app_name Team</p>
 EOF;
         return $this->output;
     }

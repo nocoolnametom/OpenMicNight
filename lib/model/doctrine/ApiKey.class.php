@@ -37,7 +37,7 @@ class ApiKey extends BaseApiKey
                                                    $user->getIncremented(), 120);
         if ($failures >= 6)
             throw new sfException('Too many failures. Please wait a few minutes and try again.');
-        if ($user && $user->checkPassword($password) && $user->getIsAuthorized() && $user->isActive()) {
+        if ($user && $user->checkPassword($password) && $user->getIsAuthorized() && $user->getIsActive()) {
             $year = 31536000;
             $expires_in = $expires_in >= $year ? $year : $expires_in;
             $user_auth = new sfGuardUserAuthKey();

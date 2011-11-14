@@ -16,7 +16,7 @@ class sfGuardUserAuthKey extends BasesfGuardUserAuthKey
     public function save(Doctrine_Connection $conn = null)
     {
         if ($this->isNew()) {
-            if (!$this->hasVerifiedUser())
+            if (!$this->hasAuthorizedUser())
                 $this->deleteWithException("Cannot create UserToken "
                         . "because sfGuardUser " . $this->getSfGuardUserId()
                         . " has not been validated yet.", 106);
@@ -34,9 +34,9 @@ class sfGuardUserAuthKey extends BasesfGuardUserAuthKey
      *
      * @return bool  Whether the user is marked as "validated". 
      */
-    public function hasVerifiedUser()
+    public function hasAuthorizedUser()
     {
-        return (bool) $this->getSfGuardUser()->getIsValidated();
+        return (bool) $this->getSfGuardUser()->getIsAuthorized();
     }
 
     /**
