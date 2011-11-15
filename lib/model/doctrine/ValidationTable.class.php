@@ -16,4 +16,19 @@ class ValidationTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Validation');
     }
+    
+    public static function storeNewKeys($values)
+    {
+        //@todo: The following is MySQL specific!  Not good!
+        $sql = 'INSERT IGNORE INTO `validation` (`reddit_key`) VALUES (';
+        $first = true;
+        foreach($values as $key => $value)
+        {
+            $sql .= ($first ? '' : '),(') . "'" . $key . "'";
+            $first = false;
+        }
+        $sql .= ');';
+        $q = Doctrine_Manager::getInstance()->getCurrentConnection();
+        $q->execute($sql);
+    }
 }

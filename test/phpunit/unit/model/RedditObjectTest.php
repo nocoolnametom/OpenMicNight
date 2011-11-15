@@ -21,7 +21,8 @@ class RedditObjectTest extends sfPHPUnitBaseTestCase
         $reddit = new RedditObject($reddit_json);
         $reddit->setLocation('http://www.reddit.com/comments/t3_' . $reddit_location . '/');
         $this->assertTrue($reddit instanceof RedditObject);
-        die(var_dump($reddit->setComments()->getComments()));
+        $reddit->setComments();
+        ValidationTable::getInstance()->storeNewKeys($reddit->getComments());
     }
 
 }

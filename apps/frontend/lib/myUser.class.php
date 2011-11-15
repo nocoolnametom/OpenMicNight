@@ -184,7 +184,7 @@ class myUser extends sfGuardSecurityUser
             $mail->setBodyHtml($body);
         }
 
-        $body = preg_replace('/<br??>/', "\n", $body);
+        $body = preg_replace('/<br\/?>/', "\n", $body);
         $body = strip_tags($body);
         $mail->setBodyText($body);
         $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));

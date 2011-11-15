@@ -70,7 +70,7 @@ class RedditObject
             if ($child['kind'] == 'more') {
                 $child_id = $child['data']['id'];
                 unset($this->children[$key]);
-                $this->getMoreData($child_id);
+                //$this->getMoreData($child_id);
                 return $this;
             }
             $body = $child['data']['body'];

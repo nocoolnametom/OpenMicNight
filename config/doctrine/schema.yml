@@ -22,8 +22,39 @@ AuthorType:
     description: { type: string(127) }
 
 Validation:
+  options:
+    symfony:
+      form: false
+      filter: false
+  columns:
+    reddit_key: { type: string(127), notnull: true }
+  indexes:
+    reddit_key: { fields: [reddit_key], type: unique}
+
+ValidationPost:
+  actAs:
+    Timestampable: ~
+  columns:
+    post_id: { type: string(255), notnull: true }
+
+EmailType:
+  actAs:
+    Timestampable: ~
   columns:
     type: { type: string(255), notnull: true }
+    description: { type: string(127) }
+
+Email:
+  actAs:
+    Timestampable: ~
+  columns:
+    email_type_id: { type: integer, notnull: true }
+    language: { type: string(31), notnull: true, default: 'en' }
+    subject: { type: string(255), notnull: true}
+    body_text_html: { type: string(4000) }
+    body_text: { type: string(4000) }
+  relations:
+    EmailType: { onDelete: CASCADE, local: email_type_id, foreign: id, foreignAlias: Emails }
 
 Membership:
   actAs:
