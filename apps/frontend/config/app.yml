@@ -7,8 +7,7 @@ all:
     only_login_with_email: true
     signin_form: sfGuardFormSigninApi
   reddit_validation:
-    post_location:  ~sf_data_dir~/test_file.json
-    local_file: true
+    post_location:  http://www.reddit.com/comments/kdxhb.json
 # Remember to change the api key before using the app in production! Keep it
 # secret, keep it safe!
   web_app_api:
