@@ -7,6 +7,7 @@
  */
 class EmailTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -16,4 +17,26 @@ class EmailTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('Email');
     }
+
+    /**
+     * Returns whether an Application for a given Subreddit and AuthorType is
+     * restricted until the previous AuthorType passes its Deadline.
+     *
+     * @param int $authortype_id The incremented ID of an AuthorType object
+     * @param int $subreddit_id  The incremented ID of a Subreddit object
+     * @return bool              Whether the Application record is restricted
+     */
+    public function getFirstByEmailTypeAndLanguage($email_type, $lang = "en")
+    {
+        $email_type = EmailTypeTable::getInstance()->findOneByType($email_type);
+        if (!$email_type)
+            return null;
+        $query = $this->createQuery()
+                ->where('email_type_id = ?', $email_type->getIncremented())
+                ->andWhere('language = ?', $lang)
+                ->execute()
+                ->getFirst();
+        return $query;
+    }
+
 }

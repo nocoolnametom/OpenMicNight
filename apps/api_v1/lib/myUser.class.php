@@ -121,31 +121,21 @@ class myUser extends sfGuardSecurityUser
         $name = ($user->getPreferredName() ?
                         $user->getPreferredName() : $user->getFullName());
         $user_id = $user->getIncremented();
-
-        $email_subject = new EmailSubject();
-        $subject = call_user_func_array(array(
-            $email_subject,
-            $body_function
-                ), array(
-            $user_id,
-            $additional_params,
-                ));
-
-        $email_body = new EmailBody();
-        $body = call_user_func_array(array(
-            $email_body,
-            $body_function
-                ), array(
-            $user_id,
-            $additional_params,
-                ));
-
-        if ($prefer_html) {
-            $mail->setBodyHtml($body);
+        if (!array_key_exists('user_id', $additional_params))
+        {
+            $additional_params['user_id'] = $user_id;
         }
 
-        $body = preg_replace('/<br??>/', "\n", $body);
-        $body = strip_tags($body);
+        if (array_key_exists('language', $additional_params))
+            $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage($body_function, $additional_params['language']);
+        else
+            $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage($body_function);
+        if (!$email)
+            throw new sfException("Cannot find email '$body_function' in language '$language'.");
+        
+        $subject = $email->generateSubject($additional_params);
+        $body = $email->generateBodyText($additional_params, $prefer_html);
+        
         $mail->setBodyText($body);
         $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
         $mail->addTo($address, $name);

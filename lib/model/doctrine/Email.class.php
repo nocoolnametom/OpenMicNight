@@ -28,7 +28,7 @@ class Email extends BaseEmail
 
     public function generateBodyText($parameters, $html = true)
     {
-        $this->prepare($paramaters['user_id']);
+        $this->prepare($parameters['user_id']);
 
         if ($html) {
             $body = $this->getBodyTextHtml();
@@ -42,10 +42,10 @@ class Email extends BaseEmail
 
         $pattern = '/~([a-z_\-]+)~/';
         preg_match_all($pattern, $body, $matches);
-        foreach ($matches as $match) {
-            $function = 'derive' . ucwords(str_replace('_', ' ', $match[1]));
+        foreach ($matches[1] as $key => $match) {
+            $function = 'derive' . str_replace(' ', '', ucwords(str_replace('_', ' ', $match)));
             $replacement = $this->{$function}($parameters);
-            $body = str_replace($match[0], $replacement, $body);
+            $body = str_replace($matches[0][$key], $replacement, $body);
         }
         
         return $body;
@@ -53,16 +53,16 @@ class Email extends BaseEmail
     
     public function generateSubject($parameters)
     {
-        $this->prepare($paramaters['user_id']);
+        $this->prepare($parameters['user_id']);
 
         $subject = $this->getSubject();
 
         $pattern = '/~([a-z_\-]+)~/';
         preg_match_all($pattern, $subject, $matches);
-        foreach ($matches as $match) {
-            $function = 'derive' . ucwords(str_replace('_', ' ', $match[1]));
+        foreach ($matches[1] as $key => $match) {
+            $function = 'derive' . str_replace(' ', '', ucwords(str_replace('_', ' ', $match)));
             $replacement = $this->{$function}($parameters);
-            $subject = str_replace($match[0], $replacement, $subject);
+            $subject = str_replace($matches[0][$key], $replacement, $subject);
         }
         
         return $subject;
