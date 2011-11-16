@@ -48,7 +48,6 @@ class sfGuardValidatorUserApi extends sfGuardValidatorUser
                 'expires_in' => $expires_in,
             );
             $response = Api::getInstance()->post('user/token', $package, false);
-            die(var_dump($response));
             if (array_key_exists('auth_key', $response['body'])
                     && $response['body']['auth_key']) {
                 $user = sfGuardUserTable::getInstance()->find($response['body']['user_id']);
@@ -59,6 +58,10 @@ class sfGuardValidatorUserApi extends sfGuardValidatorUser
                                 'remember' => $response['body']['auth_key'],
                             ));
                 }
+            }
+            if (array_key_exists('message', $response['body']))
+            {
+                throw new sfValidatorError($this, $response['body']['message']);
             }
         }
 
