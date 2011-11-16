@@ -44,6 +44,10 @@ sf_guard_register:
   url:   /register
   param: { module: sfGuardAuth, action: register }
 
+send_to_reddit_post:
+  url:   /verify/sendtoreddit
+  param: { module: sfGuardAuth, action: validate }
+
 sf_guard_verify:
   url:   /verify/:key
   param: { module: sfGuardAuth, action: verify }

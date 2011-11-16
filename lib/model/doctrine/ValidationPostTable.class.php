@@ -7,6 +7,7 @@
  */
 class ValidationPostTable extends Doctrine_Table
 {
+
     /**
      * Returns an instance of this class.
      *
@@ -15,5 +16,14 @@ class ValidationPostTable extends Doctrine_Table
     public static function getInstance()
     {
         return Doctrine_Core::getTable('ValidationPost');
+    }
+
+    public function getMostRecent()
+    {
+        return $this->createQuery()
+                        ->orderBy('ValidationPost.created_at DESC')
+                        ->where('ValidationPost.is_active = ?', true)
+                        ->execute()
+                        ->getFirst();
     }
 }

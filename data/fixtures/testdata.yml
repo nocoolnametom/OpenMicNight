@@ -12,6 +12,7 @@ sfGuardUser:
     username:       admin
     password:       admin
     is_validated:   true
+    is_authorized:  true
     full_name:      Tom Doggett
     preferred_name: Tom
     is_super_admin: true
@@ -23,3 +24,9 @@ Episode:
     is_nsfw:        false
     title:          Epsiode One
     description:    This is a test
+
+ValidationPost:
+  testpost:
+    post_address:   http://www.reddit.com/comments/kdxhb
+    post_id:        t3_kdxhb
+    is_active:         true

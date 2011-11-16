@@ -88,6 +88,9 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
                 $user = $this->form->user;
 
                 $new_password = substr(md5(time() . rand(0, 10000)), 0, 10);
+                
+                $user->setPassword($new_password);
+                $user->save();
 
                 $this->getUser()->setApiUserId($user->getIncremented());
                 $this->getUser()->sendMail('EmailNewPassword', array(
@@ -121,6 +124,12 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
                 $this->redirect('@homepage');
             }
         }
+    }
+    
+    public function executeValidate(sfWebRequest $request)
+    {
+        $url = ValidationPostTable::getInstance()->getMostRecent()->getPostAddress();
+        $this->redirect($url);
     }
 
 }

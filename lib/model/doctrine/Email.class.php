@@ -103,16 +103,20 @@ class Email extends BaseEmail
 
     protected function deriveRedditPost($parameters)
     {
-        $reddit_post = sfConfig::get('app_email_reddit_validation_post_location');
-        if (sfConfig::get('app_email_reddit_validation_local_file', false)) {
-            $app_pattern = '/~([^~]+)~/';
-            $app_location = preg_match($app_pattern, $reddit_post, $matches);
-            $app_location = $app_location[1];
-            $reddit_post = preg_replace($app_pattern,
-                                        sfConfig::get($app_location),
-                                                      $reddit_post);
-        }
-        return $reddit_post;
+        $authorization_key = $this->user->getEmailAuthorizationKey();
+
+        $frontend_app_location = rtrim(ProjectConfiguration::getFrontendAppLocation(),
+                                       '/');
+        $frontendRouting = new sfPatternRouting(new sfEventDispatcher());
+
+        $config = new sfRoutingConfigHandler();
+        $routes = $config->evaluate(array(sfConfig::get('sf_apps_dir') . '/frontend/config/routing.yml'));
+
+        $frontendRouting->setRoutes($routes);
+
+        $frontend_route = $frontend_app_location . $frontendRouting
+                        ->generate('send_to_reddit_post');
+        return $frontend_route;
     }
 
     protected function deriveSenderUsername($parameters)
@@ -127,7 +131,7 @@ class Email extends BaseEmail
 
     protected function deriveNewPassword($parameters)
     {
-        return $parameter['new_password'];
+        return $parameters['new_password'];
     }
 
     protected function deriveMessageText($parameters)

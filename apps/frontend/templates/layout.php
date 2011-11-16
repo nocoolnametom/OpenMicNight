@@ -9,6 +9,8 @@
     <?php include_javascripts() ?>
   </head>
   <body>
+    <div class="notice"><?php echo $sf_user->getFlash('notice'); ?></div>
+    <div class="error" style="color:red;"><?php echo $sf_user->getFlash('error'); ?></div>
     <?php echo $sf_content ?>
   </body>
 </html>
