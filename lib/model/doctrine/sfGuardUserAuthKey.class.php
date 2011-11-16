@@ -19,7 +19,7 @@ class sfGuardUserAuthKey extends BasesfGuardUserAuthKey
             if (!$this->hasAuthorizedUser())
                 $this->deleteWithException("Cannot create UserToken "
                         . "because sfGuardUser " . $this->getSfGuardUserId()
-                        . " has not been validated yet.", 106);
+                        . " has not been validated yet.", 406);
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
@@ -29,10 +29,9 @@ class sfGuardUserAuthKey extends BasesfGuardUserAuthKey
     }
 
     /**
-     * Checks if the User of the EpisodeAssignment has been validated as a
-     * member of Reddit yet.
+     * Checks if the User of the EpisodeAssignment has authorized their email address yet.
      *
-     * @return bool  Whether the user is marked as "validated". 
+     * @return bool  Whether the user is marked as "authorized". 
      */
     public function hasAuthorizedUser()
     {

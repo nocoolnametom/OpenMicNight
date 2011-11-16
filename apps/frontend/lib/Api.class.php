@@ -166,24 +166,24 @@ class Api
         }
     }
 
-    protected function doResponse()
+    protected function doResponse($remove_api_stuff = true)
     {
         $response = array(
             'headers' => $this->_responseInfo,
-            'body' => $this->parsePayload($this->_responseBody),
+            'body' => $this->parsePayload($this->_responseBody, $remove_api_stuff),
         );
         return $response;
     }
 
-    public function get($location)
+    public function get($location, $remove_api_stuff = true)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->makeUrl($location));
         $this->doExecute($ch);
-        return $this->doResponse();
+        return $this->doResponse($remove_api_stuff);
     }
 
-    public function post($location, $package = array())
+    public function post($location, $package = array(), $remove_api_stuff = true)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->makeUrl($location));
@@ -193,10 +193,10 @@ class Api
         curl_setopt($ch, CURLOPT_POST, 1);
 
         $this->doExecute($ch);
-        return $this->doResponse();
+        return $this->doResponse($remove_api_stuff);
     }
 
-    public function put($location, $package = array())
+    public function put($location, $package = array(), $remove_api_stuff = true)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->makeUrl($location));
@@ -216,40 +216,16 @@ class Api
         $this->doExecute($ch);
 
         fclose($fh);
-        return $this->doResponse();
+        return $this->doResponse($remove_api_stuff);
     }
 
-    public function delete($location)
+    public function delete($location, $remove_api_stuff = true)
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->makeUrl($location));
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
 
         $this->doExecute($ch);
-        return $this->doResponse();
+        return $this->doResponse($remove_api_stuff);
     }
-
-    public function requestAuthToken($email_address, $password, $expires_in)
-    {
-        $package = array(
-            'email_address' => $email_address,
-            'password' => $password,
-            'expires_in' => $expires_in,
-        );
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->makeUrl('user/token'));
-
-        $request = $this->packagePayload($package);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $request);
-        curl_setopt($ch, CURLOPT_POST, 1);
-
-        $this->doExecute($ch);
-        $response = array(
-            'headers' => $this->_responseInfo,
-            'body' => $this->parsePayload($this->_responseBody, false),
-        );
-        return $response;
-    }
-
 }

@@ -87,7 +87,7 @@ class myUser extends sfGuardSecurityUser
             $expires_in = sfConfig::get('app_web_app_api_auth_key_login_expiration');
 
         if (!self::apiIsAuthorized()) {
-            return $this->getAttribute('auth_key');
+            throw new sfException('API is not authorized to produce auth keys.');
         }
 
         $api = ApiKeyTable::getInstance()

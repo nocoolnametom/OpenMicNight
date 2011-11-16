@@ -21,29 +21,43 @@ class sfGuardValidatorUserApi extends sfGuardValidatorUser
 
     protected function doClean($values)
     {
-        $email = isset($values[$this->getOption('username_field')]) ? $values[$this->getOption('username_field')] : '';
-        $password = isset($values[$this->getOption('password_field')]) ? $values[$this->getOption('password_field')] : '';
-        $remember = isset($values[$this->getOption('remember_field')]) ? $values[$this->getOption('remember_field')] : '';
+        $email = isset($values[$this->getOption('username_field')]) ? $values[$this->getOption('username_field')]
+                    : '';
+        $password = isset($values[$this->getOption('password_field')]) ? $values[$this->getOption('password_field')]
+                    : '';
+        $remember = isset($values[$this->getOption('remember_field')]) ? $values[$this->getOption('remember_field')]
+                    : '';
 
-        $allowEmail = sfConfig::get('app_sf_guard_plugin_allow_login_with_email', true);
-        $onlyEmail = sfConfig::get('app_sf_guard_plugin_only_login_with_email', false);
+        $allowEmail = sfConfig::get('app_sf_guard_plugin_allow_login_with_email',
+                                    true);
+        $onlyEmail = sfConfig::get('app_sf_guard_plugin_only_login_with_email',
+                                   false);
         $expires_in = $remember ?
-                sfConfig::get('app_web_app_api_auth_key_remember_me_expiration', 1209600) :
+                sfConfig::get('app_web_app_api_auth_key_remember_me_expiration',
+                              1209600) :
                 sfConfig::get('app_web_app_api_auth_key_login_expiration', 7200);
 
-        $method = $onlyEmail ? 'retrieveByEmailAddress' : ($allowEmail ? 'retrieveByUsernameOrEmailAddress' : 'retrieveByUsername');
+        $method = $onlyEmail ? 'retrieveByEmailAddress' : ($allowEmail ? 'retrieveByUsernameOrEmailAddress'
+                            : 'retrieveByUsername');
 
         // don't allow to sign in with an empty username
         if ($email) {
-            $response = Api::getInstance()->requestAuthToken($email, $password, $expires_in);
+            $package = array(
+                'email_address' => $email,
+                'password' => $password,
+                'expires_in' => $expires_in,
+            );
+            $response = Api::getInstance()->post('user/token', $package, false);
+            die(var_dump($response));
             if (array_key_exists('auth_key', $response['body'])
                     && $response['body']['auth_key']) {
                 $user = sfGuardUserTable::getInstance()->find($response['body']['user_id']);
                 if ($user->getIsActive()) {
-                    return array_merge($values, array(
-                        'user' => $user,
-                        'remember' => $response['body']['auth_key'],
-                        ));
+                    return array_merge($values,
+                                       array(
+                                'user' => $user,
+                                'remember' => $response['body']['auth_key'],
+                            ));
                 }
             }
         }
@@ -54,5 +68,4 @@ class sfGuardValidatorUserApi extends sfGuardValidatorUser
 
         throw new sfValidatorErrorSchema($this, array($this->getOption('username_field') => new sfValidatorError($this, 'invalid')));
     }
-
 }

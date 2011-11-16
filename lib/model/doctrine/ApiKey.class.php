@@ -24,13 +24,13 @@ class ApiKey extends BaseApiKey
     public function requestAuthKey($email_address, $password, $expires_in = 7200)
     {
         if (!$this->getIsActive())
-            return false;
+            throw new sfException('API is inactive!');
         // Attempt to find user by email address
         $user = sfGuardUserTable::getInstance()
                 ->findOneByEmailAddress($email_address);
         /* @var $user sfGuardUser */
         if (!$user)
-            throw new sfException('The user does not exist in the database.');
+            throw new sfException('Email address or password is incorrect.');
         // Find out how many failures in the past two minutes - max of five
         $failures = AuthFailureTable::getInstance()
                 ->countFailuresMadeInRecentSeconds($this->getIncremented(),
@@ -53,7 +53,16 @@ class ApiKey extends BaseApiKey
         $failure->setSfGuardUser($user);
         $failure->setApiKey($this);
         $failure->save();
-        return false;
+        if (!$user)
+            throw new sfException('Email address or password is incorrect.');
+        elseif (!$user->getIsActive())
+            throw new sfException('Email address or password is incorrect.');
+        elseif (!$user->getIsAuthorized())
+            throw new sfException('User has not validated their email address yet');
+        elseif (!$user->checkPassword($password))
+            throw new sfException('Email address or password is incorrect.');
+        else
+            throw new sfException('An unexpected error occured.');
     }
 
 }
