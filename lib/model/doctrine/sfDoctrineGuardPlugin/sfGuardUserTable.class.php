@@ -35,4 +35,35 @@ WHERE `sf_guard_user`.`is_validated` = '0' OR `sf_guard_user`.`is_validated` IS 
                 ->execute();
         return $rows;
     }
+    
+    public function getOneDayEmailReminders()
+    {
+        $one_day = 86400;
+        $two_days = 86400 * 2;
+        $yesterday = date('Y-m-d H:i:s', time() - $one_day);
+        $day_before_yesterday = date('Y-m-d H:i:s', time() - $two_days);
+        
+        $query = $this->createQuery()
+                ->where('authorized_at <= ?', $yesterday)
+                ->andWhere('authorized_at >= ?', $day_before_yesterday)
+                ->andWhere('is_validated = ? OR is_validated IS NULL', 0)
+                ->execute();
+        return $query;
+    }
+    
+    public function getOneWeekEmailReminders()
+    {
+        $one_day = 86400;
+        $one_week = 604800;
+        $one_day_past_a_week = $one_week + $one_day;
+        $a_week_ago = date('Y-m-d H:i:s', time() - $one_week);
+        $a_week_and_a_day = date('Y-m-d H:i:s', time() - ($one_week + $one_day));
+        
+        $query = $this->createQuery()
+                ->where('authorized_at <= ?', $a_week_ago)
+                ->andWhere('authorized_at >= ?', $a_week_and_a_day)
+                ->andwhere('(is_validated = ? OR is_validated IS NULL)', array(0))
+                ->execute();
+        return $query;
+    }
 }

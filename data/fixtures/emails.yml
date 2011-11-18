@@ -1,10 +1,12 @@
 EmailType:
+  # The API auth request is now being sent by the API app
   apiauthrequest:
     type: ApiAuthRequest
     description: Sent when an API requests an authorization token.
   changeredditkey:
     type: ChangeRedditKey
     description: Sent for revalidation when a change to the Reddit key is made.
+  # The forgotten password email is sent by the application
   emailnewpassword:
     type: EmailNewPassword
     description: Sent when a password is forgotten, it changes the password.
@@ -17,15 +19,19 @@ EmailType:
   newlyopenedepisode:
     type: NewlyOpenedEpisode
     description: Sent when an EpisodeAssignment becomes valid for a user.
+  # The registration email is sent by the application when a user registers.
   registerinitial:
     type: RegisterInitial
     description: Sent when a user first registers for the app.
+  # The One day reminder email is now set up as a command-line task to be run once a day
   registeroneday:
     type: RegisterOneDay
     description: Sent when a day has passed since a user authorized, but has not yet validated their username.
+  # The One day reminder email is now set up as a command-line task to be run once a day
   registeroneweek:
     type: RegisterOneWeek
     description: Sent when a week has passed since a user authorized, but has not yet validated their username.
+  # The validation email is sent by the email authorization landing page
   registerredditpost:
     type: RegisterRedditPost
     description: Sent when a user has authorized their email and needs to validate their username.
@@ -61,7 +67,7 @@ Email:
       <p>You can verify your Reddit username by responding with the following Reddit
       activation key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to the following post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your key, verification shouldn't take more than an hour
@@ -184,7 +190,7 @@ Email:
       thing standing in your way is to verify your Reddit username by responding
       with your Reddit activation key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to the following post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your key, verification shouldn't take more than an hour
@@ -206,7 +212,7 @@ Email:
       still need to verify your Reddit username, however.  You can do this by
       posting your Reddit activation key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to the following post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your key, verification shouldn't take more than an hour or
@@ -235,7 +241,7 @@ Email:
       <p>You're almost ready to participate (we promise!).  Your final step is to
       paste in the following key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to the following post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your reply, verification shouldn't take more than an hour

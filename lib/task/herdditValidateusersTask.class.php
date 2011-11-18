@@ -14,6 +14,7 @@ class herdditValidateusersTask extends sfBaseTask
       new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
       new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'doctrine'),
       // add your own options here
+      //new sfCommandOption('quiet', 'q', sfCommandOption::PARAMETER_OPTIONAL, 'Silence output', 'false'),
     ));
 
     $this->namespace        = 'herddit';
@@ -38,15 +39,21 @@ EOF;
         
     $reddit = new RedditObject($reddit_location);
     
-    echo "Obtaining recent comments from $reddit_location...";
-    $reddit->appendData();
+    $quiet = (bool)$options['quiet'];
     
-    echo "\nStoring any new keys in the database...\n";
+    if (!$quiet)
+        echo "Obtaining the most recent comments from $reddit_location...";
+    $reddit->appendData();
+    $found_keys = count($reddit->getComments());
+    
+    if (!$quiet)
+        echo "\nFound $found_keys keys.  Updating keys in the database...";
     ValidationTable::getInstance()->storeNewKeys($reddit->getComments());
     
     // Now that new keys are stored in the database we need to update all applicable users
     $updated = sfGuardUserTable::getInstance()->getNewlyValidatedUsers();
     
-    echo "$updated users validated.\n";
+    if (!$quiet)
+        echo "\n$updated users validated.\n";
   }
 }

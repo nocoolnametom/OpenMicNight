@@ -36,6 +36,8 @@ EOF;
 
         // add your code here
         ProjectConfiguration::registerCron();
+        
+        $quiet = (bool)$options['quiet'];
 
         $subreddits = Doctrine::getTable('Subreddit')
                 ->getSubredditsNeedingEpisodeGeneration($arguments['subreddit']);
