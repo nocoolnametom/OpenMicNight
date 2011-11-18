@@ -28,16 +28,16 @@ Validation:
       filter: false
   columns:
     reddit_key: { type: string(127), notnull: true }
+    username: { type: string(127), notnull: true }
   indexes:
-    reddit_key: { fields: [reddit_key], type: unique}
+    reddit_key: { fields: [reddit_key, username], type: unique}
 
 ValidationPost:
   actAs:
     Timestampable: ~
   columns:
     post_address: { type: string(255), notnull: true }
-    post_id: { type: string(31), notnull: true }
-    is_active: {type: boolean, default: true }
+    is_active: { type: boolean, notnull: true, default: false }
 
 EmailType:
   actAs:

@@ -7,81 +7,83 @@
 
 /**
  * Description of RedditObject
+ * 
+ * Note: you can rely on the main Reddit comment list, but it'd be better to
+ * give a Subreddit to this object for extracting keys.  You'll have to run it
+ * less.  Running against the main Reddit feed should be redone every minute or
+ * so.  Against a subreddit, which has much less traffic, every five minutes
+ * will probably suffice.
  *
  * @author doggetto
  */
 class RedditObject
 {
     protected $location = '';
+    protected $iteration_strength;
     protected $data = array();
     protected $children = array();
     protected $comments = array();
 
-    public function RedditObject($data = '[{},{"data": ["children": {}]}]')
+    public function RedditObject($reddit_address = 'http://www.reddit.com/', $iteration_strength = 20)
     {
-        $this->setData($data);
+        $this->setLocation($reddit_address);
+        $this->setIterationStrength($iteration_strength);
+        //$this->appendData();
     }
 
-    public function setData($data)
+    public function appendData($after = null, $iteration = 1)
     {
-        $this->data = json_decode($data, true);
-        $this->children = $this->data[1]['data']['children'];
-        return $this;
-    }
-
-    public function appendData($data)
-    {
-        $append_data = json_decode($data, true);
-        $this->data = array_merge($this->data, $append_data);
-        $this->children = array_merge($this->children, $append_data[1]['data']['children']);
+        if ($iteration > $this->getIterationStrength())
+            return $this;
+        $after_query = $after ? '&after=' . $after : '';
+        $json_data = file_get_contents($this->getLocation() . '/comments.json?count=100' . $after_query);
+        $append_data = json_decode($json_data, true);
         
-        return $this;
+        $after = $this->extractComments($append_data);
+        
+        return $this->appendData($after, $iteration + 1);
     }
-
-    public function getData()
+    
+    public function getLocation()
     {
-        return $this->data;
-    }
-
-    public function getChildren()
-    {
-        return $this->children;
+        return $this->location;
     }
     
     public function setLocation($string)
     {
-        $this->location = $string;
+        $this->location = rtrim($string, '/');
         return $this;
     }
     
-    public function getMoreData($child_id)
+    public function setIterationStrength($iteration_strength)
     {
-        if (!$this->location)
-            return $this;
-        $further_data = file_get_contents($this->location . $child_id . '.json');
-        $this->appendData($further_data);
-        return $this;
+        $this->iteration_strength = $iteration_strength;
     }
-
-    public function setComments()
+    
+    public function getIterationStrength()
+    {
+        return $this->iteration_strength;
+    }
+    
+    public function extractComments($data_array)
     {
         $pattern = '/^[0-9a-f]{32}/i';
-        foreach ($this->getChildren() as $key => $child) {
-            if ($child['kind'] == 'more') {
-                $child_id = $child['data']['id'];
-                unset($this->children[$key]);
-                //$this->getMoreData($child_id);
-                return $this;
-            }
-            $body = $child['data']['body'];
+        
+        $children = $data_array['data']['children'];
+        $after = $data_array['data']['after'];
+        
+        foreach($children as $child)
+        {
+            $body = md5($child['data']['body']);
+            $author = $child['data']['author'];
             if (!preg_match($pattern, $body, $matches)) {
                 continue;
             }
-            $body = $matches[0];
-            $name = $child['data']['name'];
-            $this->comments[$body] = $name;
+            $key = $matches[0];
+            $this->comments[$key] = $author;
         }
-        return;
+        
+        return $after;
     }
     
     public function getComments()

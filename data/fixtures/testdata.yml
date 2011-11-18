@@ -27,6 +27,5 @@ Episode:
 
 ValidationPost:
   testpost:
-    post_address:   http://www.reddit.com/comments/kdxhb
-    post_id:        t3_kdxhb
-    is_active:         true
+    post_address:   http://www.reddit.com/r/secretsanta/comments/kdxhb/post_your_codes_in_here
+    is_active:       true

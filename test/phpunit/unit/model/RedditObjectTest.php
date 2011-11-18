@@ -10,18 +10,14 @@ class RedditObjectTest extends sfPHPUnitBaseTestCase
      */
     public function testCreate()
     {
-        $t = new RedditObject();
-        $this->assertTrue($t instanceof RedditObject);
+        /*$t = new RedditObject();
+        $this->assertTrue($t instanceof RedditObject);*/
         
-        $reddit_location = 'kdxhb';
+        $reddit_location = 'http://www.reddit.com/r/atheism';
         
-        $json_file = 'http://www.reddit.com/comments/' . $reddit_location . '.json';
-        $reddit_json = file_get_contents($json_file);
-        
-        $reddit = new RedditObject($reddit_json);
-        $reddit->setLocation('http://www.reddit.com/comments/t3_' . $reddit_location . '/');
+        $reddit = new RedditObject($reddit_location);
         $this->assertTrue($reddit instanceof RedditObject);
-        $reddit->setComments();
+        $reddit->appendData();
         ValidationTable::getInstance()->storeNewKeys($reddit->getComments());
     }
 

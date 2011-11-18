@@ -20,11 +20,11 @@ class ValidationTable extends Doctrine_Table
     public static function storeNewKeys($values)
     {
         //@todo: The following is MySQL specific!  Not good!
-        $sql = 'INSERT IGNORE INTO `validation` (`reddit_key`) VALUES (';
+        $sql = 'INSERT IGNORE INTO `validation` (`reddit_key`, `username`) VALUES (';
         $first = true;
-        foreach($values as $key => $value)
+        foreach($values as $key => $name)
         {
-            $sql .= ($first ? '' : '),(') . "'" . $key . "'";
+            $sql .= ($first ? '' : '),(') . "'" . $key . "', '" . $name . "'";
             $first = false;
         }
         $sql .= ');';
