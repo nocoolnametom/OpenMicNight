@@ -16,4 +16,23 @@ class sfGuardUserTable extends PluginsfGuardUserTable
     {
         return Doctrine_Core::getTable('sfGuardUser');
     }
+    
+    public function getNewlyValidatedUsers()
+    {
+        $sql = "SELECT `sf_guard_user`.`id`
+FROM `sf_guard_user`
+JOIN `validation` ON ( `validation`.`reddit_key` = `sf_guard_user`.`reddit_validation_key`
+AND `validation`.`username` = `sf_guard_user`.`username`)
+WHERE `sf_guard_user`.`is_validated` = '0' OR `sf_guard_user`.`is_validated` IS NULL";
+        
+        $q = Doctrine_Manager::getInstance()->getCurrentConnection();
+        $results = $q->fetchColumn($sql);
+        
+        $rows = $this->createQuery()
+                ->update()
+                ->set('sfGuardUser.is_validated', true)
+                ->whereIn('sfGuardUser.id', $results)
+                ->execute();
+        return $rows;
+    }
 }

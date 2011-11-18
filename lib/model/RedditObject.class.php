@@ -74,7 +74,7 @@ class RedditObject
         
         foreach($children as $child)
         {
-            $body = md5($child['data']['body']);
+            $body = $child['data']['body'];
             $author = $child['data']['author'];
             if (!preg_match($pattern, $body, $matches)) {
                 continue;
