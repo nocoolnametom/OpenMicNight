@@ -103,6 +103,7 @@ sfGuardUser:
     zip_code: { type: string(63) }
     country: { type: string(127) }
     display_location: { type: boolean, default: 0 }
+    preferred_language: { type: string(32), default: 'en' }
     receive_private_messages_from_profile_page: { type: boolean, default: 1 }
     receive_notification_of_private_messages: { type: boolean, default: 1 }
     receive_notification_of_newly_opened_episodes: { type: boolean, default: 1 }

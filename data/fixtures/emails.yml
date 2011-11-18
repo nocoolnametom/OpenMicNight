@@ -3,6 +3,7 @@ EmailType:
   apiauthrequest:
     type: ApiAuthRequest
     description: Sent when an API requests an authorization token.
+  # This email is sent when an existing user has their 'iv_validated' column set false.
   changeredditkey:
     type: ChangeRedditKey
     description: Sent for revalidation when a change to the Reddit key is made.
@@ -10,12 +11,15 @@ EmailType:
   emailnewpassword:
     type: EmailNewPassword
     description: Sent when a password is forgotten, it changes the password.
+  # 
   episodeapprovalpending:
     type: EpisodeApprovalPending
     description: Sent to moderators when an EpisodeAssignment is submitted for approval.
+  # 
   newprivatemessage:
     type: NewPrivateMessage
     description: Sent when a new private message has been received.
+  # 
   newlyopenedepisode:
     type: NewlyOpenedEpisode
     description: Sent when an EpisodeAssignment becomes valid for a user.
