@@ -62,3 +62,15 @@
             token void from that point on.</p>
     </li>
 </ol>
+
+<h2>Questions and Feedback</h2>
+<p>We (mostly) use the API within the web app of
+    <?php echo ProjectConfiguration::getApplicationName() ?>, so we care about
+    making sure that everything is working.  Our goal is to make almost all
+    aspects of the web application available to other developers (currently with
+    the exception of handling user registration and validation).  Of course
+    there are issues that stand in our way currently, and thus we're calling
+    this API version 1.0.  We'll do our best to keep developers involved in
+    future development, and for those who are frustrated with the API, rest
+    assured: there will be a version 2.0.
+</p>

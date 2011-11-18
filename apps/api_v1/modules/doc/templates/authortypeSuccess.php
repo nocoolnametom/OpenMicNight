@@ -4,13 +4,13 @@
 <blockquote><?php echo link_to(url_for('authortype/create', true), 'authortype/create') ?> (POST)</blockquote> 
 
 <h2>delete</h2>
-<blockquote><?php echo link_to(url_for('authortype/delete', true), 'authortype/delete') ?> (DELETE)</blockquote> 
+<blockquote><?php echo link_to(url_for('authortype/delete', true).'/[id]', 'authortype/delete') ?> (DELETE)</blockquote> 
 
 <h2>list</h2>
 <blockquote><?php echo link_to(url_for('authortype/index', true), 'authortype/index') ?> (GET)</blockquote> 
 
 <h2>show</h2>
-<blockquote><?php echo link_to(url_for('authortype/show', true), 'authortype/show') ?> (GET)</blockquote> 
+<blockquote><?php echo link_to(url_for('authortype/show', true).'/[id]', 'authortype/show') ?> (GET)</blockquote> 
 
 <h2>update</h2>
-<blockquote><?php echo link_to(url_for('authortype/update', true), 'authortype/update') ?> (PUT)</blockquote> 
+<blockquote><?php echo link_to(url_for('authortype/update', true).'/[id]', 'authortype/update') ?> (PUT)</blockquote> 
