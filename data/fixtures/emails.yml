@@ -11,7 +11,7 @@ EmailType:
   emailnewpassword:
     type: EmailNewPassword
     description: Sent when a password is forgotten, it changes the password.
-  # 
+  # An email is sent to all moderators when an episode is submitted.
   episodeapprovalpending:
     type: EpisodeApprovalPending
     description: Sent to moderators when an EpisodeAssignment is submitted for approval.

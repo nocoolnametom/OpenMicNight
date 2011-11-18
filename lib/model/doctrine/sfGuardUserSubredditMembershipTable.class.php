@@ -46,5 +46,17 @@ class sfGuardUserSubredditMembershipTable extends Doctrine_Table
                 ->getFirst();
         return $subreddit_membership;
     }
+    
+    public function getAllBySubredditAndMemberships($subreddit_id,
+                                                    $memberships = array())
+    {
+        $subreddit_memberships = $this->createQuery()
+                ->leftJoin('sfGuardUserSubredditMembership.Membership Membership')
+                ->andWhere('sfGuardUserSubredditMembership.subreddit_id = ?',
+                           $subreddit_id)
+                ->andWhereIn('Membership.type', $memberships)
+                ->execute();
+        return $subreddit_memberships;
+    }
 
 }

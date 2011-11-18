@@ -47,7 +47,7 @@ class Episode extends BaseEpisode
                 return;
             }
         }
-        
+
         // Make sure that the user has been validated as a emmber of Reddit!
         $user = sfGuardUserTable::getInstance()->find($user_id);
         if ($user && !$user->getIsValidated())
@@ -100,7 +100,7 @@ class Episode extends BaseEpisode
         );
         if (!$membership)
             return;
-        
+
         // Make sure that the user has been validated as a emmber of Reddit!
         $user = sfGuardUserTable::getInstance()->find($approver_id);
         if ($user && !$user->getIsValidated())
@@ -254,6 +254,54 @@ class Episode extends BaseEpisode
     public function getIsApproved()
     {
         return (bool) $this->_get('is_approved');
+    }
+
+    public function save(Doctrine_Connection $conn = null)
+    {
+        if (!$this->isNew() && in_array('is_submitted', $this->_modified) && $this->_get('is_submitted')) {
+            /* The episode has been submitted.  We need to send an email about
+             * it to the subreddit moderators.
+             */
+            $types = array(
+                'moderator',
+            );
+            $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(), $types);
+
+            foreach ($memberships as $membership) {
+                $user = $membership->getSfGuardUser();
+                
+                ProjectConfiguration::registerZend();
+                
+                $mail = new Zend_Mail();
+                $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+                $parameters = array(
+                    'user_id' => $membership->getSfGuardUserId(),
+                    'episode_id' => $this->getIncremented(),
+                );
+
+                $prefer_html = $user->getPreferHtml();
+                $address = $user->getEmailAddress();
+                $name = ($user->getPreferredName() ?
+                                $user->getPreferredName() : $user->getFullName());
+
+                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('EpisodeApprovalPending', $user->getPreferredLanguage());
+
+                $subject = $email->generateSubject($parameters);
+                $body = $email->generateBodyText($parameters, $prefer_html);
+
+                $mail->setBodyText($body);
+
+                $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+                $mail->addTo($address, $name);
+                $mail->setSubject($subject);
+                if (sfConfig::get('sf_environment') == 'prod') {
+                    $mail->send();
+                } else {
+                    throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                }
+            }
+        }
+        parent::save($conn);
     }
 
 }
