@@ -15,7 +15,7 @@ EmailType:
   episodeapprovalpending:
     type: EpisodeApprovalPending
     description: Sent to moderators when an EpisodeAssignment is submitted for approval.
-  # 
+  # Message is sent when a new private message is saved.
   newprivatemessage:
     type: NewPrivateMessage
     description: Sent when a new private message has been received.

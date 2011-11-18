@@ -25,21 +25,62 @@ class Message extends BaseMessage
 
     public function save(Doctrine_Connection $conn = null)
     {
+        $send_message = false;
+
         if ($this->isNew()) {
             if (!$this->hasVerifiedSender())
                 $this->deleteWithException("Cannot create Message "
-                        . "because sfGuardUser " . $this->getSenderId ()
+                        . "because sfGuardUser " . $this->getSenderId()
                         . " has not been validated yet.", 406);
             if (!$this->hasVerifiedRecipient())
                 $this->deleteWithException("Cannot create Message "
-                        . "because sfGuardUser " . $this->getSenderId ()
+                        . "because sfGuardUser " . $this->getSenderId()
                         . " has not been validated yet.", 406);
+
+            $send_message = true;
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
          * it on to the parent save function.
          */
         parent::save($conn);
+
+        if ($send_message) {
+            /* The following is for sending an email to the recipient to notify them that they've received a message.
+             */
+            $recipient = sfGuardUserTable::getInstance()->find($this->getRecipientId());
+            if ( !$recipient || !$recipient->getReceiveNotificationOfPrivateMessages())
+                return parent::save($conn);;
+
+            ProjectConfiguration::registerZend();
+            $mail = new Zend_Mail();
+            $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+            $parameters = array(
+                'user_id' => $this->getRecipientId(),
+                'message_id' => $this->getIncremented(),
+            );
+
+            $prefer_html = $recipient->getPreferHtml();
+            $address = $recipient->getEmailAddress();
+            $name = ($recipient->getPreferredName() ?
+                            $recipient->getPreferredName() : $recipient->getFullName());
+
+            $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewPrivateMessage', $recipient->getPreferredLanguage());
+
+            $subject = $email->generateSubject($parameters);
+            $body = $email->generateBodyText($parameters, $prefer_html);
+
+            $mail->setBodyText($body);
+
+            $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+            $mail->addTo($address, $name);
+            $mail->setSubject($subject);
+            if (sfConfig::get('sf_environment') == 'prod') {
+                $mail->send();
+            } else {
+                throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+            }
+        }
     }
 
     /**
@@ -52,7 +93,7 @@ class Message extends BaseMessage
     {
         return (bool) $this->getSfGuardUser()->getIsValidated();
     }
-    
+
     /**
      * Checks if the User of the EpisodeAssignment has been validated as a
      * member of Reddit yet.
