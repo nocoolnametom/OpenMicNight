@@ -4,7 +4,7 @@
 prod:
   .settings:
     no_script_name:         true
-    logging_enabled:        false
+    logging_enabled:        true
 
 dev:
   .settings:
@@ -24,6 +24,7 @@ test:
 
 all:
   .settings:
+    check_lock:              true
     # Form security secret (CSRF protection)
     csrf_secret:            aa87cbb195e8095043c012c8a8690b5a72e2924e
     
