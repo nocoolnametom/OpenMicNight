@@ -35,7 +35,7 @@ class DeadlineTable extends Doctrine_Table
                 ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
                 ->limit(1)
                 ->fetchArray();
-        return (count($seconds) ? $seconds[0]['seconds'] : 0);
+        return (count($seconds) ? $seconds[0]['seconds'] : false);
     }
 
     /**

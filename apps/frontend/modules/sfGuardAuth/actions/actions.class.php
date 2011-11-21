@@ -129,6 +129,10 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
     public function executeValidate(sfWebRequest $request)
     {
         $url = ValidationPostTable::getInstance()->getMostRecent()->getPostAddress();
+        if (stripos($url, 'http') !== 0)
+        {
+            $url = ProjectConfiguration::getDefaultSubredditAddress() . '/' . $url;
+        }
         $this->redirect($url);
     }
 

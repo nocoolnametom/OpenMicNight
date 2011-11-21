@@ -192,5 +192,30 @@ class Subreddit extends BaseSubreddit
 
         return $new_episodes;
     }
+    
+    public function advanceEpisodeAssignments()
+    {
+        $subreddit_author_types = $this->getApplications();
+        
+        $deadline_rules = array();
+        
+        foreach($subreddit_author_types as $application)
+        {
+            $application = new Application();
+            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit(
+                    $application->getAuthorTypeId(),
+                    $application->getSubredditId());
+            if ($seconds === false)
+                continue;
+            $deadline_rules[$application->getAuthorTypeId()] = $seconds;
+        }
+        
+        /* We now have an array that shows how many seconds a givn AuthorType is
+         * allowed before their Deadline passes for the Subreddit.  Now we need
+         * to find all of the EpisodeAssignments attached to future unapproved
+         * Episodes that havge passed their deadlines and are not so marked.
+         */
+        
+    }
 
 }

@@ -5,26 +5,21 @@ class herdditEmailremindersTask extends sfBaseTask
 
     protected function configure()
     {
-        // // add your own arguments here
-        // $this->addArguments(array(
-        //   new sfCommandArgument('my_arg', sfCommandArgument::REQUIRED, 'My argument'),
-        // ));
-
         $this->addOptions(array(
             new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
             new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
             new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'doctrine'),
-                // add your own options here
         ));
 
-        $this->namespace = 'herddit';
+        $this->namespace = str_replace(' ', '-', strtolower(ProjectConfiguration::getApplicationName()));
+        $namespace = $this->namespace;
         $this->name = 'email-reminders';
-        $this->briefDescription = '';
+        $this->briefDescription = 'Emails reminders for users to validate';
         $this->detailedDescription = <<<EOF
-The [herddit:email-reminders|INFO] task does things.
+The [$namespace:email-reminders|INFO] task emails reminders for users to validate their Reddit usernames.
 Call it with:
 
-  [php symfony herddit:email-reminders|INFO]
+  [php symfony $namespace:email-reminders|INFO]
 EOF;
     }
 
@@ -36,7 +31,6 @@ EOF;
         $applicationConfig = sfProjectConfiguration::getApplicationConfiguration('frontend', 'dev', true);
         $context = sfContext::createInstance($applicationConfig);
 
-        // add your code here
         $one_day_users = sfGuardUserTable::getInstance()->getOneDayEmailReminders();
         $one_week_users = sfGuardUserTable::getInstance()->getOneWeekEmailReminders();
 

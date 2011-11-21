@@ -102,6 +102,11 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                     ->getSecondsByAuthorAndSubreddit(
                     $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId()
             );
+            if ($deadline_seconds === false)
+                $this->deleteWithException("Cannot create EpisodeAssignment "
+                        . "because the deadline doesn't exist for AuthorType "
+                        . $this->getAuthorTypeId() . " within " . "Subreddit "
+                        . $this->getEpisode()->getSubredditId(), 107);
 
             /* Check to see if there *is* a previous AuthorType by Deadline
              * length.
