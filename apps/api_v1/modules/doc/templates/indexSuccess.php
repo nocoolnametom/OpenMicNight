@@ -8,7 +8,6 @@
     <li><?php echo link_to('membershiptype', 'doc/membershiptype') ?></li>
     <li><?php echo link_to('message', 'doc/message') ?></li>
     <li><?php echo link_to('subreddit', 'doc/subreddit') ?></li>
-    <li><?php echo link_to('subredditauthortype', 'doc/subredditauthortype') ?></li>
     <li><?php echo link_to('subredditdeadline', 'doc/subredditdeadline') ?></li>
     <li><?php echo link_to('subredditmembership', 'doc/subredditmembership') ?></li>
     <li><?php echo link_to('user', 'doc/user') ?></li>

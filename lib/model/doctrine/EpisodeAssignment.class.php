@@ -122,8 +122,8 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              * Episode (and has not expired) then we cannot allow the
              * current EpisodeAssignment to be saved.
              */
-                if (ApplicationTable::getInstance()
-                                ->getIfApplicationRestrictedByAuthorTypeAndSubreddit(
+                if (DeadlineTable::getInstance()
+                                ->getIfDeadlineRestrictedByAuthorTypeAndSubreddit(
                                         $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId())
                         && !$this->isBeforeDeadlineForAuthorType($previous_author_type_id))
                     $this->deleteWithException("Cannot create "

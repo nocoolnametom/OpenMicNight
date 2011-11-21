@@ -65,19 +65,6 @@ Membership:
     type: { type: string(255), notnull: true }
     description: { type: string(127) }
 
-Application:
-  actAs:
-    Timestampable: ~
-  columns:
-    author_type_id: { type: integer, notnull: true }
-    subreddit_id: { type: integer, notnull: true }
-    restricted_until_previous_misses_deadline: { type: boolean, default: 0 }
-  relations:
-    AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Applications }
-    Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Applications }
-  indexes:
-    oneOfEachAuthorTypePerSubreddit: { fields: [author_type_id, subreddit_id], type: unique}
-
 Deadline:
   actAs:
     Timestampable: ~
@@ -85,6 +72,7 @@ Deadline:
     author_type_id: { type: integer, notnull: true }
     subreddit_id: { type: integer, notnull: true }
     seconds: { type: integer, notnull = true }
+    restricted_until_previous_misses_deadline: { type: boolean, default: 0 }
   relations:
     AuthorType: { onDelete: CASCADE, local: author_type_id, foreign: id, foreignAlias: Deadlines }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Deadlines }

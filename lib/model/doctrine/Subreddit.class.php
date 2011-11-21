@@ -169,10 +169,13 @@ class Subreddit extends BaseSubreddit
 
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
 
-        $last_episode = new DateTime($this->getDateOfLastEpisode());
+        $last_episode = new DateTime($this->getDateOfLastEpisode()); // Jan 31 2011
+        
+        if ($last_episode->getTimestamp() < time())
+            $last_episode = new DateTime();
 
-        $stop_creating = $creation_schedule->getNextRunDate($last_episode);
-
+        $stop_creating = $creation_schedule->getNextRunDate($last_episode); // 01 Feb 2011
+        
         $episode_date = $last_episode;
 
         $new_episodes = array();
@@ -195,27 +198,36 @@ class Subreddit extends BaseSubreddit
     
     public function advanceEpisodeAssignments()
     {
-        $subreddit_author_types = $this->getApplications();
+        $deadlines = $this->getDeadlines();
         
         $deadline_rules = array();
         
-        foreach($subreddit_author_types as $application)
+        foreach($deadlines as $deadline)
         {
-            $application = new Application();
-            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit(
-                    $application->getAuthorTypeId(),
-                    $application->getSubredditId());
-            if ($seconds === false)
-                continue;
-            $deadline_rules[$application->getAuthorTypeId()] = $seconds;
+            $deadline_rules[(int)$deadline->getAuthorTypeId()] = $deadline->getSeconds();
         }
+        
+        die(var_dump($deadline_rules));
         
         /* We now have an array that shows how many seconds a givn AuthorType is
          * allowed before their Deadline passes for the Subreddit.  Now we need
          * to find all of the EpisodeAssignments attached to future unapproved
          * Episodes that havge passed their deadlines and are not so marked.
          */
-        die(var_dump($deadline_rules));
+        $sql = "
+SELECT episode_assignment.*
+FROM episode_assignment
+JOIN episode ON episode.id = episode_assignment.episode_id
+WHERE episode.release_date >= NOW()
+AND episode.is_approved <> 1Ivy
+AND episode.subreddit_id = 1
+AND episode_assignment.missed_deadline <> 1
+AND (
+  (episode_assignment.author_type_id = 1 AND NOW() >= (episode.release_date - 86400))
+  OR (episode_assignment.author_type_id = 2 AND NOW() >= (episode.release_date - 172800))
+  OR (episode_assignment.author_type_id = 3 AND NOW() >= (episode.release_date - 259200))
+  OR (episode_assignment.author_type_id = 4 AND NOW() >= (episode.release_date - 0))
+)";
     }
 
 }

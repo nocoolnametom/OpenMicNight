@@ -19,12 +19,10 @@ class EmailTable extends Doctrine_Table
     }
 
     /**
-     * Returns whether an Application for a given Subreddit and AuthorType is
-     * restricted until the previous AuthorType passes its Deadline.
      *
-     * @param int $authortype_id The incremented ID of an AuthorType object
-     * @param int $subreddit_id  The incremented ID of a Subreddit object
-     * @return bool              Whether the Application record is restricted
+     * @param type $email_type
+     * @param type $lang
+     * @return type 
      */
     public function getFirstByEmailTypeAndLanguage($email_type, $lang = "en")
     {

@@ -19,6 +19,28 @@ class DeadlineTable extends Doctrine_Table
     }
 
     /**
+     * Returns whether a Deadline for a given Subreddit and AuthorType is
+     * restricted until the previous AuthorType passes its Deadline.
+     *
+     * @param int $authortype_id The incremented ID of an AuthorType object
+     * @param int $subreddit_id  The incremented ID of a Subreddit object
+     * @return bool              Whether the Deadline record is restricted
+     */
+    public function getIfDeadlineRestrictedByAuthorTypeAndSubreddit($authortype_id,
+                                                                       $subreddit_id)
+    {
+        $deadline_restricted = $this->createQuery()
+                ->select('Deadline.restricted_until_previous_misses_deadline')
+                ->where('Deadline.author_type_id = ?', $authortype_id)
+                ->andWhere('Deadline.subreddit_id = ?', $subreddit_id)
+                ->limit(1)
+                ->fetchArray();
+
+        return (count($deadline_restricted) ? $deadline_restricted[0]['restricted_until_previous_misses_deadline']
+                            : false);
+    }
+
+    /**
      * Return the seconds of the Deadline identified by the given AuthorType and
      * Subreddit.
      *
