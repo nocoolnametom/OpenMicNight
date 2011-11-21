@@ -38,8 +38,7 @@ class Subreddit extends BaseSubreddit
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
-            $s3->create_bucket($name, AmazonS3::REGION_US_E1,
-                               AmazonS3::ACL_PUBLIC);
+            $s3->create_bucket($name, AmazonS3::REGION_US_E1, AmazonS3::ACL_PUBLIC);
             $exists = $s3->if_bucket_exists($name);
             while (!$exists) {
                 // Not yet? Sleep for 1 second, then check again
@@ -170,12 +169,12 @@ class Subreddit extends BaseSubreddit
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
 
         $last_episode = new DateTime($this->getDateOfLastEpisode()); // Jan 31 2011
-        
+
         if ($last_episode->getTimestamp() < time())
             $last_episode = new DateTime();
 
         $stop_creating = $creation_schedule->getNextRunDate($last_episode); // 01 Feb 2011
-        
+
         $episode_date = $last_episode;
 
         $new_episodes = array();
@@ -195,20 +194,19 @@ class Subreddit extends BaseSubreddit
 
         return $new_episodes;
     }
-    
+
     public function advanceEpisodeAssignments()
     {
         $deadlines = $this->getDeadlines();
-        
+
         $deadline_rules = array();
-        
-        foreach($deadlines as $deadline)
-        {
-            $deadline_rules[(int)$deadline->getAuthorTypeId()] = $deadline->getSeconds();
+
+        foreach ($deadlines as $deadline) {
+            $deadline_rules[(int) $deadline->getAuthorTypeId()] = $deadline->getSeconds();
         }
-        
-        die(var_dump($deadline_rules));
-        
+
+        //die(var_dump($deadline_rules));
+
         /* We now have an array that shows how many seconds a givn AuthorType is
          * allowed before their Deadline passes for the Subreddit.  Now we need
          * to find all of the EpisodeAssignments attached to future unapproved
@@ -219,7 +217,7 @@ SELECT episode_assignment.*
 FROM episode_assignment
 JOIN episode ON episode.id = episode_assignment.episode_id
 WHERE episode.release_date >= NOW()
-AND episode.is_approved <> 1Ivy
+AND episode.is_approved <> 1
 AND episode.subreddit_id = 1
 AND episode_assignment.missed_deadline <> 1
 AND (
@@ -228,6 +226,28 @@ AND (
   OR (episode_assignment.author_type_id = 3 AND NOW() >= (episode.release_date - 259200))
   OR (episode_assignment.author_type_id = 4 AND NOW() >= (episode.release_date - 0))
 )";
+        $rules_query = '';
+        $first = true;
+        foreach ($deadline_rules as $id => $seconds) {
+            $rules_query .= ($first ? '' : ' OR ') . "(ea.author_type_id = $id AND ('" . date('Y-m-d H:i:s', time() + $seconds) . "' >= e.release_date))";
+            $first = false;
+        }
+        $query = Doctrine_Query::create()
+                ->from('EpisodeAssignment ea')
+                ->leftJoin('ea.Episode e')
+                ->where('e.release_date >= ?', date('Y-m-d H:i:s'))
+                ->andWhere('e.is_approved <> 1')
+                ->andWhere('e.subreddit_id = ?', $this->getIncremented())
+                ->andWhere('ea.missed_deadline <> 1')
+                ->andWhere("($rules_query)");
+        $assignments = $query->execute();
+        
+        // We now have all assignments that are beyond their deadlines
+        foreach($assignments as $assignment)
+        {
+            /* @var $assignment EpisodeAssignment */
+            ;
+        }
     }
 
 }
