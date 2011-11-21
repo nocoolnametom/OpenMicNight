@@ -215,7 +215,7 @@ class Subreddit extends BaseSubreddit
          * to find all of the EpisodeAssignments attached to future unapproved
          * Episodes that havge passed their deadlines and are not so marked.
          */
-        
+        die(var_dump($deadline_rules));
     }
 
 }

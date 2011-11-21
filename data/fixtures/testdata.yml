@@ -17,6 +17,52 @@ sfGuardUser:
     preferred_name: Tom
     is_super_admin: true
 
+ValidationPost:
+  testpost:
+    post_address:   comments/kdxhb/post_your_codes_in_here
+    is_active:       true
+ 
+Application:
+  rexmo_squid:
+    AuthorType: squid
+    Subreddit: rexmo
+    restricted_until_previous_misses_deadline: false
+  rexmo_shark:
+    AuthorType: shark
+    Subreddit: rexmo
+    restricted_until_previous_misses_deadline: false
+  rexo_seahorse:
+    AuthorType: seahorse
+    Subreddit: rexmo
+    restricted_until_previous_misses_deadline: false
+  # The seahorse cannot be signed up for until the previous AuthorType has passed their expiration.
+  rexmo_blue_whale:
+    AuthorType: blue_whale
+    Subreddit: rexmo
+    restricted_until_previous_misses_deadline: true
+
+Deadline:
+  rexmo_seahorse:
+    AuthorType: seahorse
+    Subreddit:  rexmo
+    # Three Days before release date
+    seconds:    259200
+  rexmo_shark:
+    AuthorType: shark
+    Subreddit:  rexmo
+    # Two Days before release date
+  rexmo_squid:
+    AuthorType: squid
+    Subreddit:  rexmo
+    # One Day before release date
+    seconds:    86400
+    seconds:    172800
+  rexmo_blue_whale:
+    AuthorType: blue_whale
+    Subreddit:  rexmo
+    # Zero Seconds (valid up until release date)
+    seconds:    0
+
 Episode:
   episode_one:
     Subreddit:      rexmo
@@ -24,8 +70,3 @@ Episode:
     is_nsfw:        false
     title:          Epsiode One
     description:    This is a test
-
-ValidationPost:
-  testpost:
-    post_address:   comments/kdxhb/post_your_codes_in_here
-    is_active:       true

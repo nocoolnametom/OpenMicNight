@@ -1,14 +1,3 @@
-AuthorType:
-  first:
-    type:        first
-    description: First Pick
-  understudy:
-    type:        understudy
-    description: Understudy
-  dark_horse:
-    type:        dark_horse
-    description: Dark Horse
-
 Membership:
   pending:
     type:        pending
