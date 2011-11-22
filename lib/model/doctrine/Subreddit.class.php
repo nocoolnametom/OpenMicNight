@@ -195,7 +195,7 @@ class Subreddit extends BaseSubreddit
         return $new_episodes;
     }
 
-    public function advanceEpisodeAssignments()
+    public function getDeadlineRules()
     {
         $deadlines = $this->getDeadlines();
 
@@ -205,7 +205,12 @@ class Subreddit extends BaseSubreddit
             $deadline_rules[(int) $deadline->getAuthorTypeId()] = $deadline->getSeconds();
         }
 
-        //die(var_dump($deadline_rules));
+        return $deadline_rules;
+    }
+
+    public function advanceEpisodeAssignments()
+    {
+        $deadline_rules = $this->getDeadlineRules();
 
         /* We now have an array that shows how many seconds a givn AuthorType is
          * allowed before their Deadline passes for the Subreddit.  Now we need
@@ -241,12 +246,86 @@ AND (
                 ->andWhere('ea.missed_deadline <> 1')
                 ->andWhere("($rules_query)");
         $assignments = $query->execute();
-        
+
         // We now have all assignments that are beyond their deadlines
-        foreach($assignments as $assignment)
-        {
+        foreach ($assignments as $assignment) {
             /* @var $assignment EpisodeAssignment */
-            ;
+
+            // Set the EpisodeAssignment that it missed its deadline.
+            $assignment->setMissedDeadline(true);
+            $episode = $assignment->getEpisode();
+
+            $next_assignment = null;
+
+            if ($episode->getSfGuardUserId() == $assignment->getSfGuardUserId()) {
+                // Remove the current user from the Episode.           
+                $episode->setSfGuardUserId(null);
+
+                // Clean up the Episode for the new user.
+                $audio_file = $episode->getAudioFile();
+                $nice_filename = $episode->getNiceFilename();
+                $graphic_file = $episode->getGraphicFile();
+                $episode->setAudioFile(null);
+                $episode->setNiceFilename(null);
+                $episode->setGraphicFile(null);
+                $episode->setIsNsfw(false);
+                $episode->setTitle(null);
+                $episode->setDescription(null);
+                $episode->setIsSubmitted(false);
+                $episode->setSubmittedAt(null);
+                $episode->setFileIsRemote(null);
+                $episode->setRemoteUrl(null);
+                $episode->setRedditPostUrl(null);
+
+                // Find the next EpisodeAssignment in line for the Episode
+                $next_assignment = $episode->getCurrentEpisodeAssignmentByDeadline();
+
+                // Set the user for the Episode to the new user
+                $episode->setSfGuardUserId($next_assignment->getSfGuardUserId());
+            }
+            // Save everything
+            $episode->save();
+            $assignment->save();
+
+            if (!is_null($next_assignment) && $next_assignment instanceof EpisodeAssignment) {
+                // We assemble the deadline date for the EpisodeAssignment.
+                $release_date = $episode->getReleaseDate('U');
+                $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($next_assignment->getAuthorTypeId(), $episode->getSubredditId());
+                $deadline = $release_date - $seconds;
+
+                // Send an email to that user telling them their EpisodeAssignment is now valid
+                ProjectConfiguration::registerZend();
+
+                $mail = new Zend_Mail();
+                $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+                $parameters = array(
+                    'user_id' => $next_assignment->getSfGuardUserId(),
+                    'episode_id' => $episode->getIncremented(),
+                    'deadline' => $deadline,
+                );
+                $user = $next_assignment->getSfGuardUser();
+
+                $prefer_html = $user->getPreferHtml();
+                $address = $user->getEmailAddress();
+                $name = ($user->getPreferredName() ?
+                                $user->getPreferredName() : $user->getFullName());
+
+                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode', $user->getPreferredLanguage());
+
+                $subject = $email->generateSubject($parameters);
+                $body = $email->generateBodyText($parameters, $prefer_html);
+
+                $mail->setBodyText($body);
+
+                $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+                $mail->addTo($address, $name);
+                $mail->setSubject($subject);
+                if (sfConfig::get('sf_environment') == 'prod') {
+                    $mail->send();
+                } else {
+                    throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                }
+            }
         }
     }
 

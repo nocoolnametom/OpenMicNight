@@ -19,7 +19,7 @@ EmailType:
   newprivatemessage:
     type: NewPrivateMessage
     description: Sent when a new private message has been received.
-  # 
+  # Message is sent when an EpisodeAssignment is connected to an Episode by the advance-episodes task.
   newlyopenedepisode:
     type: NewlyOpenedEpisode
     description: Sent when an EpisodeAssignment becomes valid for a user.

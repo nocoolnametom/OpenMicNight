@@ -304,4 +304,36 @@ class Episode extends BaseEpisode
         parent::save($conn);
     }
 
+    public function getCurrentEpisodeAssignmentByDeadline()
+    {
+        $assignments = $this->getEpisodeAssignments();
+        
+        $subreddit_rules = $this->getSubreddit()->getDeadlineRules();
+        
+        $largest_seconds = 0;
+        $longest_deadline = null;
+        
+        foreach($subreddit_rules as $author_type_id => $seconds)
+        {
+            // If the deadline has passed, ignore it
+            if ($this->getReleaseDate('U') > (time() + $seconds))
+                unset($subreddit_rules[$author_type_id]);
+            if ($seconds > $largest_seconds)
+            {
+                $largest_seconds = $seconds;
+                $longest_deadline = $author_type_id;
+            }
+        }
+        
+       if (is_null($longest_deadline))
+           return null;
+       
+       foreach($assignments as $assignment)
+       {
+           if ($assignment->getAuthorTypeId() == $longest_deadline)
+               return $assignment;
+       }
+       
+       return null;
+    }
 }
