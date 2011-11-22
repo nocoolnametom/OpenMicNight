@@ -31,4 +31,15 @@ class sfGuardUserAuthKeyTable extends Doctrine_Table
                 ->getFirst();
         return $auth;
     }
+    
+    public function cleanUpTokens()
+    {
+        $query = $this->createQuery()
+                ->delete()
+                ->from('sfGuardUserAuthKey')
+                ->where('sfGuardUserAuthKey.expires_at <= ?',
+                        date('Y-m-d H:i:s', time()))
+                ->orWhere('sfGuardUserAuthKey.is_revoked = 1')
+                ->execute();
+    }
 }

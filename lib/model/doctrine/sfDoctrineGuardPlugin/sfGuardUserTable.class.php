@@ -17,6 +17,19 @@ class sfGuardUserTable extends PluginsfGuardUserTable
         return Doctrine_Core::getTable('sfGuardUser');
     }
     
+    public static function getIfValidatedUserHasUsername($username)
+    {
+        $query = Doctrine_Query::create()
+                ->select('COUNT(id) AS count')
+                ->from('sfGuardUser')
+                ->where('is_validated = 1')
+                ->andWhere('validated_at IS NOT NULL')
+                ->andWhere('username = ?', $username)
+                ->groupBy('id')
+                ->fetchArray();
+        return (count($query) ? true : false);
+    }
+    
     public function getNewlyValidatedUsers()
     {
         $sql = "SELECT `sf_guard_user`.`id`
