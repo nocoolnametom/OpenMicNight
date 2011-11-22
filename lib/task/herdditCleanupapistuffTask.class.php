@@ -20,7 +20,7 @@ class herdditCleanupapistuffTask extends sfBaseTask
         $this->namespace = str_replace(' ', '-', strtolower(ProjectConfiguration::getApplicationName()));
         $namespace = $this->namespace;
         $this->name = 'cleanup-api-stuff';
-        $this->briefDescription = '';
+        $this->briefDescription = 'Remove old API info from the database';
         $this->detailedDescription = <<<EOF
 The [$namespace:cleanup-api-stuff|INFO] task removes old information regarding API authorization from the database.
 Call it with:
