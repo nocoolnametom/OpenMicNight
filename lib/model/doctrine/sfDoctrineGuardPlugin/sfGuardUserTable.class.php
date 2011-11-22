@@ -23,7 +23,6 @@ class sfGuardUserTable extends PluginsfGuardUserTable
                 ->select('COUNT(id) AS count')
                 ->from('sfGuardUser')
                 ->where('is_validated = 1')
-                ->andWhere('validated_at IS NOT NULL')
                 ->andWhere('username = ?', $username)
                 ->groupBy('id')
                 ->fetchArray();
