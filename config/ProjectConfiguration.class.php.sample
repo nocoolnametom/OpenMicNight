@@ -20,6 +20,7 @@ class ProjectConfiguration extends sfProjectConfiguration
             'sfJqueryFormValidationPlugin',
             'sfPHPUnit2Plugin',
             'sfDoctrineRestGeneratorPlugin',
+            'sfReCaptchaPlugin',
         ));
     }
 

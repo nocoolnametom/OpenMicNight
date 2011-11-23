@@ -15,5 +15,6 @@ class sfGuardRequestForgotPasswordForm extends BasesfGuardRequestForgotPasswordF
    */
   public function configure()
   {
+    parent::configure();
   }
 }

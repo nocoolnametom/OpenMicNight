@@ -18,3 +18,14 @@ all:
     auth_key_login_expiration: 7200 
     # 2 weeks before a "Remember Me" login is revoked
     auth_key_remember_me_expiration: 1209600
+  recaptcha:
+    active:     false
+
+prod:
+  recaptcha:
+    active:     true
+    publickey:  "foo"
+    privatekey: "bar"
+  mailhide:
+    publickey:  "foo"
+    privatekey: "bar"
