@@ -21,6 +21,9 @@ class herdditCreateepisodesTask extends sfBaseTask
         $this->briefDescription = 'Generates Episodes for all Subreddits without future Episodes.';
         $this->detailedDescription = <<<EOF
 The [$namespace:create-episodes|INFO] task generates empty Episode objects for those Subreddits not having any future Episodes.  Calling with with a specific Subreddit name will generate Episode objects for only that Subreddit, assuming that it does not have future Episodes.
+
+It's recommended to run this task at least once a day and no more than once every half-hour.  Best for starting would be once every two hours.
+
 Call it with:
 
   [php symfony $namespace:create-episodes ]

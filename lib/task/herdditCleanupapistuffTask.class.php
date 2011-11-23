@@ -5,16 +5,10 @@ class herdditCleanupapistuffTask extends sfBaseTask
 
     protected function configure()
     {
-        // // add your own arguments here
-        // $this->addArguments(array(
-        //   new sfCommandArgument('my_arg', sfCommandArgument::REQUIRED, 'My argument'),
-        // ));
-
         $this->addOptions(array(
             new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
             new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
             new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'doctrine'),
-                // add your own options here
         ));
 
         $this->namespace = str_replace(' ', '-', strtolower(ProjectConfiguration::getApplicationName()));
@@ -23,6 +17,9 @@ class herdditCleanupapistuffTask extends sfBaseTask
         $this->briefDescription = 'Remove old API info from the database';
         $this->detailedDescription = <<<EOF
 The [$namespace:cleanup-api-stuff|INFO] task removes old information regarding API authorization from the database.
+
+It's recommended to run this task at least once a day and no more than once every fifteen minutes.  Best for starting would be once every six hours.
+
 Call it with:
 
   [php symfony $namespace:cleanup-api-stuff|INFO]

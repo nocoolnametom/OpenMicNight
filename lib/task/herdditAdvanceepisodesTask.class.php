@@ -22,6 +22,9 @@ class herdditAdvanceepisodesTask extends sfBaseTask
         $this->briefDescription = 'Advances EpisodeAssignments';
         $this->detailedDescription = <<<EOF
 The [$namespace:advance-episodes|INFO] task runs the "engine" of the app by advancing currenlt Episodes according to the rules defined by their subreddit admins.  It is also responsible for alerting users of when their connection with an Episode is valid.
+
+It's recommended to run this task at least once a day and no more than once every half-hour.  Best for starting would be once every two hours.
+
 Call it with:
 
   [php symfony $namespace:advance-episodes|INFO]

@@ -17,6 +17,9 @@ class herdditEmailremindersTask extends sfBaseTask
         $this->briefDescription = 'Emails reminders for users to validate';
         $this->detailedDescription = <<<EOF
 The [$namespace:email-reminders|INFO] task emails reminders for users to validate their Reddit usernames.
+
+It's recommended to run this task once a day.  Seriously, more than that will result in multiple emails.  Don't do that.
+
 Call it with:
 
   [php symfony $namespace:email-reminders|INFO]
