@@ -10,6 +10,11 @@
   </head>
   <body>
     <div class="notice"><?php echo $sf_user->getFlash('notice'); ?></div>
+    <?php if ($sf_user->hasFlash('login')): ?>
+    <?php foreach($sf_user->getFlash('login') as $login_message): ?>
+    <div class="notice"><?php echo $login_message; ?></div>
+    <?php endforeach; ?>
+    <?php endif; ?>
     <div class="error" style="color:red;"><?php echo $sf_user->getFlash('error'); ?></div>
     <?php echo $sf_content ?>
   </body>

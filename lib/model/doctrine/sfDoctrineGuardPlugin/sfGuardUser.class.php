@@ -18,8 +18,7 @@ class sfGuardUser extends PluginsfGuardUser
         if (is_null($this->_get('username')) && is_null($this->_get('email_address'))) {
             throw new sfException('Cannot save User with null username and email!');
         }
-        if ($this->isNew() && sfGuardUserTable::getIfValidatedUserHasUsername($this->_get('username')))
-        {
+        if ($this->isNew() && sfGuardUserTable::getIfValidatedUserHasUsername($this->_get('username'))) {
             throw new sfException('Cannot save user.  This username has already been validated with another user.');
         }
         if (!$this->isNew() && in_array('is_validated', $this->_modified) && !$this->_get('is_validated')) {
@@ -54,8 +53,28 @@ class sfGuardUser extends PluginsfGuardUser
             } else {
                 throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
+            $this->addLoginMessage('You have changed information relating to your Reddit user and will need to validate your Reddit username again.  Please see your email for more information.');
         }
         parent::save($conn);
+    }
+    
+    public function getUndisplayedLoginMessages()
+    {
+        return sfGuardUserTable::getInstance()->getUndisplayedByUserId($this->getIncremented());
+    }
+
+    /**
+     * Adds a login message to be displayed the next time the user logs in.
+     *
+     * @param string $message
+     */
+    public function addLoginMessage($message)
+    {
+        $login_message = new sfGuardLoginMessage();
+        $login_message->setUser($this);
+        $login_message->setDisplayed(false);
+        $login_message->setMessage($message);
+        $login_message->save();
     }
 
 }

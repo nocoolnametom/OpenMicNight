@@ -299,6 +299,7 @@ class Episode extends BaseEpisode
                 } else {
                     throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
                 }
+                $user->addLoginMessage('You have Episodes awaiting your approval.');
             }
         }
         parent::save($conn);

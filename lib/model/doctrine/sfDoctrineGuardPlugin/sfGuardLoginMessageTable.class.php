@@ -16,4 +16,13 @@ class sfGuardLoginMessageTable extends PluginsfGuardLoginMessageTable
     {
         return Doctrine_Core::getTable('sfGuardLoginMessage');
     }
+    
+    public function getUndisplayedByUserId($user_id)
+    {
+        $undisplayed = $this->createQuery()
+                ->where('user_id = ?', $user_id)
+                ->andWhere('displayed <> 1')
+                ->execute();
+        return $undisplayed;
+    }
 }

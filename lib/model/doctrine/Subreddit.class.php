@@ -325,6 +325,7 @@ AND (
                 } else {
                     throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
                 }
+                $user->addLoginMessage('You have an episode that you can work with!');
             }
         }
     }

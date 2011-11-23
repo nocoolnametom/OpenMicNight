@@ -100,6 +100,17 @@ class myUser extends sfGuardSecurityUser
         // save last login
         $user->setLastLogin(date('Y-m-d H:i:s'));
         $user->save($con);
+        
+        // Set login messages
+        $message = array();
+        foreach($user->getUndisplayedLoginMessages() as $message)
+        {
+            $messages[] = $message->getMessage();
+            $message->setDisplayed(true);
+            $message->save();
+        }
+        if (count($message) > 0)
+            $this->setFlash('login', $messages);
 
         // remember?
         if ($auth_key) {
