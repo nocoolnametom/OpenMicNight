@@ -17,9 +17,11 @@ class herdditValidateusersTask extends sfBaseTask
         $this->name = 'validate-users';
         $this->briefDescription = 'Validates users against keys taken from subreddits';
         $this->detailedDescription = <<<EOF
-The [$namespace:validate-users|INFO] task downloads a collection of validation keys from a subreddit to validate usernames.
+The [$namespace:validate-users|INFO] task downloads a collection of validation
+keys from a subreddit to validate usernames.
 
-It's recommended to run this task at least once a day and no more than once every fifteen minutes. Best for starting would be once every two hours.
+It's recommended to run this task at least once a day and no more than once
+every fifteen minutes. Best for starting would be once every two hours.
 
 Call it with:
 

@@ -16,9 +16,11 @@ class herdditCleanupapistuffTask extends sfBaseTask
         $this->name = 'cleanup-api-stuff';
         $this->briefDescription = 'Remove old API info from the database';
         $this->detailedDescription = <<<EOF
-The [$namespace:cleanup-api-stuff|INFO] task removes old information regarding API authorization from the database.
+The [$namespace:cleanup-api-stuff|INFO] task removes old information regarding
+API authorization from the database.
 
-It's recommended to run this task at least once a day and no more than once every fifteen minutes.  Best for starting would be once every six hours.
+It's recommended to run this task at least once a day and no more than once
+every fifteen minutes.  Best for starting would be once every six hours.
 
 Call it with:
 
