@@ -11,6 +11,7 @@ lib/model/doctrine/base/
 lib/filter/doctrine/sfDoctrineGuardPlugin/base/
 lib/form/doctrine/sfDoctrineGuardPlugin/base/
 lib/model/doctrine/sfDoctrineGuardPlugin/base/
+lib/vendor/symfony/
 log/
 web/sf
 web/sfDoctrinePlugin
