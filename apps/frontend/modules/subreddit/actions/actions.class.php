@@ -1,33 +1,33 @@
 <?php
 
 /**
- * episode actions.
+ * subreddit actions.
  *
  * @package    OpenMicNight
- * @subpackage episode
+ * @subpackage subreddit
  * @author     Tom Doggett
  * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
  */
-class episodeActions extends sfActions
+class subredditActions extends sfActions
 {
 
     public function executeIndex(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode', true);
-        $this->episodes = ApiDoctrine::createObjectArray('Episode', $episodes_data['body']);
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit', true);
+        $this->subreddits = ApiDoctrine::createObjectArray('Subreddit', $subreddit_data['body']);
     }
 
     public function executeNew(sfWebRequest $request)
     {
-        $this->form = new EpisodeForm();
+        $this->form = new SubredditForm();
     }
 
     public function executeCreate(sfWebRequest $request)
     {
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 
-        $this->form = new EpisodeForm();
+        $this->form = new SubredditForm();
 
         $this->processForm($request, $this->form);
 
@@ -37,11 +37,11 @@ class episodeActions extends sfActions
     public function executeEdit(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
-        $this->forward404Unless($episode && $episode->getId());
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'), true);
+        $subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $this->forward404Unless($subreddit && $subreddit->getId());
 
-        $this->form = new EpisodeForm($episode);
+        $this->form = new SubredditForm($subreddit);
     }
 
     public function executeUpdate(sfWebRequest $request)
@@ -49,11 +49,11 @@ class episodeActions extends sfActions
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
-        $this->forward404Unless($episode && $episode->getId());
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'), true);
+        $subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $this->forward404Unless($subreddit && $subreddit->getId());
 
-        $this->form = new EpisodeForm($episode);
+        $this->form = new SubredditForm($subreddit);
 
         $this->processForm($request, $this->form);
 
@@ -65,15 +65,15 @@ class episodeActions extends sfActions
         $request->checkCSRFProtection();
 
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'));
-        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
-        $this->forward404Unless($episode && $episode->getId());
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'), true);
+        $subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $this->forward404Unless($subreddit && $subreddit->getId());
 
-        //$episode->delete();
-        $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(), true);
+        //$subreddit->delete();
+        $result = Api::getInstance()->setUser($auth_key)->delete('subreddit/' . $subreddit->getId(), true);
         $this->checkHttpCode($result);
 
-        $this->redirect('episode/index');
+        $this->redirect('subreddit/index');
     }
 
     protected function processForm(sfWebRequest $request, sfForm $form)
@@ -84,30 +84,30 @@ class episodeActions extends sfActions
             if ($form->getValue('id')) {
                 // Update existing item.
                 $values = $form->getObject()->getModified();
-                $episode = $form->getObject();
+                $subreddit = $form->getObject();
                 unset($values['id']);
                 $id = $form->getValue('id');
-                $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id, $values);
+                $result = Api::getInstance()->setUser($auth_key)->put('subreddit/' . $id, $values);
                 $this->checkHttpCode($result);
-                $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
-                $episode = $test_episode ? $test_episode : $episode;
+                $test_subreddit = ApiDoctrine::createObject('Subreddit', $result['body']);
+                $subreddit = $test_subreddit ? $test_subreddit : $subreddit;
             } else {
                 // Create new item
                 $values = $form->getValues();
-                $episode = $form->getObject();
+                $subreddit = $form->getObject();
                 foreach ($values as $key => $value) {
                     if (is_null($value))
                         unset($values[$key]);
                 }
-                $result = Api::getInstance()->setUser($auth_key)->post('episode', $values);
+                $result = Api::getInstance()->setUser($auth_key)->post('subreddit', $values);
                 $this->checkHttpCode($result);
-                $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
-                $episode = $test_episode ? $test_episode : $episode;
-                if (is_null($episode->getIncremented()))
-                    $this->redirect('episode');
+                $test_subreddit = ApiDoctrine::createObject('Subreddit', $result['body']);
+                $subreddit = $test_subreddit ? $test_subreddit : $subreddit;
+                if (is_null($subreddit->getIncremented()))
+                    $this->redirect('subreddit');
             }
 
-            $this->redirect('episode/edit?id=' . $episode->getId());
+            $this->redirect('subreddit/edit?id=' . $subreddit->getId());
         }
     }
 

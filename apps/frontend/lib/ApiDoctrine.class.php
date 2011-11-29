@@ -16,6 +16,8 @@ class ApiDoctrine
      */
     public static function createObject($model_name, $data)
     {
+        if (is_null($data) || empty($data))
+            return null;
         $object = new $model_name;
         if (!($object instanceof sfDoctrineRecord))
             throw new sfException('Trying to hydrate a non-sfDoctrineRecord object!');
@@ -55,4 +57,5 @@ class ApiDoctrine
         }
         return $collection;
     }
+
 }

@@ -99,7 +99,7 @@ class Api
             $payload_array = array();
 
         if (!isset($payload_array) || !$payload_array) {
-            if ($payload == "")
+            if ($payload == "" || $payload == "[]" || $payload == "{}" || $payload = "()")
                 $payload_array = array();
             else
                 throw new sfException(sprintf('Could not parse payload, obviously not a valid %s data!', $format));
@@ -148,8 +148,16 @@ class Api
 
     protected function setCurlOpts(&$curlHandle, $package = null)
     {
+        // Set the timeout in seconds (removed because my Mac doesn't like this being so short)
         //curl_setopt($curlHandle, CURLOPT_TIMEOUT, 10);
+        
+        // Follow Redirects
+        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
+        
+        // Return the results of the command
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        
+        // Set the accept type to JSON
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array('Accept: application/json'));
     }
 
