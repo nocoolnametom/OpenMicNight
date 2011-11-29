@@ -41,7 +41,7 @@ class episodeActions extends autoepisodeActions
         parent::validateUpdate($payload, $request);
 
         $params = $this->parsePayload($payload);
-        
+
         $user = $this->getUser()->getGuardUser();
         if (!$user)
             throw new sfException('Action requires an auth token.', 401);
@@ -58,8 +58,7 @@ class episodeActions extends autoepisodeActions
                     ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
                                                             $episode->getSubredditId(),
                                                             array('moderator'));
-            if (!$admin)
-            {
+            if (!$admin) {
                 if (array_key_exists('sf_guard_user_id', $params)
                         && $params['sf_guard_user_id'] != $user->getIncremented())
                     throw new sfException('You are not allowed to change the User of the Episode!', 403);
@@ -71,4 +70,21 @@ class episodeActions extends autoepisodeActions
         }
     }
 
+    public function validateDelete($payload, sfWebRequest $request = null)
+    {
+        parent::validateDelete($payload, $request);
+        
+        $params = $this->parsePayload($payload);
+
+        $user = $this->getUser()->getGuardUser();
+        if (!$user)
+            throw new sfException('Action requires an auth token.', 401);
+
+        $primaryKey = $request->getParameter('id');
+        $episode = EpisodeTable::getInstance()->find($primaryKey);
+
+        if (!$this->getUser()->isSuperAdmin()) {
+            throw new sfException('You are not allowed to delete Episodes!', 403);
+        }
+    }
 }
