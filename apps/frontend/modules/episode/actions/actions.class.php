@@ -40,7 +40,6 @@ class episodeActions extends sfActions
                                                                                     true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $episode->setIncremented($episode->getId());
 
         $this->form = new EpisodeForm($episode);
     }
@@ -53,7 +52,6 @@ class episodeActions extends sfActions
                                                                                     true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $episode->setIncremented($episode->getId());
 
         $this->form = new EpisodeForm($episode);
 

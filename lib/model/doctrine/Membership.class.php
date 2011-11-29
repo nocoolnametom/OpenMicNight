@@ -21,4 +21,11 @@ class Membership extends BaseMembership
     {
         return $this->getDescription();
     }
+    
+    public function setIncremented($id)
+    {
+        $this->_id = array($id);
+        $this->set('id', $id, false);
+        $this->_lastModified = array();
+    }
 }

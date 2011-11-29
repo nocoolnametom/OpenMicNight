@@ -7,6 +7,7 @@
  */
 class ApiDoctrine
 {
+
     /**
      *
      * @param string $model_name
@@ -19,9 +20,11 @@ class ApiDoctrine
         if (!($object instanceof sfDoctrineRecord))
             throw new sfException('Trying to hydrate a non-sfDoctrineRecord object!');
         $object->fromArray($data);
+        if (array_key_exists('id', $data))
+            $object->setIncremented($data['id']);
         return $object;
     }
-    
+
     /**
      *
      * @param string $model_name
@@ -30,14 +33,14 @@ class ApiDoctrine
      */
     public static function createCollection($model_name, $data)
     {
-        
-        $collection = new Doctrine_Collection($model_name.'Table');
+
+        $collection = new Doctrine_Collection($model_name . 'Table');
         if (!($collection instanceof Doctrine_Collection))
             throw new sfException('Trying to hydrate a non-Doctrine_collection object!');
         $collection->setData($data);
         return $collection;
     }
-    
+
     /**
      *
      * @param string $model_name
@@ -47,8 +50,7 @@ class ApiDoctrine
     public static function createObjectArray($model_name, $data)
     {
         $collection = array();
-        foreach($data as $entry)
-        {
+        foreach ($data as $entry) {
             $collection[] = self::createObject($model_name, $entry);
         }
         return $collection;

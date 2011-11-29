@@ -22,6 +22,13 @@ class Message extends BaseMessage
     {
         return $this->getText();
     }
+    
+    public function setIncremented($id)
+    {
+        $this->_id = array($id);
+        $this->set('id', $id, false);
+        $this->_lastModified = array();
+    }
 
     public function save(Doctrine_Connection $conn = null)
     {
