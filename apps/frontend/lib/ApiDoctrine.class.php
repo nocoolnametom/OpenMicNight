@@ -7,6 +7,12 @@
  */
 class ApiDoctrine
 {
+    /**
+     *
+     * @param string $model_name
+     * @param array  $data
+     * @return sfDoctrineRecord 
+     */
     public static function createObject($model_name, $data)
     {
         $object = new $model_name;
@@ -16,5 +22,19 @@ class ApiDoctrine
         return $object;
     }
     
-    
+    /**
+     *
+     * @param string $model_name
+     * @param array  $data   
+     * @return Doctrine_Collection 
+     */
+    public static function createCollection($model_name, $data)
+    {
+        
+        $collection = new Doctrine_Collection($model_name.'Table', $keyColumn);
+        if (!($collection instanceof Doctrine_Collection))
+            throw new sfException('Trying to hydrate a non-Doctrine_collection object!');
+        $collection->setData($data);
+        return $collection;
+    }
 }

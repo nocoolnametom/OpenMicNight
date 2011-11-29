@@ -40,10 +40,12 @@ class Subreddit extends BaseSubreddit
         if (!$s3->if_bucket_exists($name)) {
             $s3->create_bucket($name, AmazonS3::REGION_US_E1, AmazonS3::ACL_PUBLIC);
             $exists = $s3->if_bucket_exists($name);
-            while (!$exists) {
+            $attempts = 0;
+            while (!$exists && $attempts < 10) {
                 // Not yet? Sleep for 1 second, then check again
                 sleep(1);
                 $exists = $s3->if_bucket_exists($name);
+                $attempts++;
             }
             return $name;
         }
