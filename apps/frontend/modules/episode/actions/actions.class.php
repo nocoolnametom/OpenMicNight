@@ -13,7 +13,8 @@ class episodeActions extends sfActions
 
     public function executeIndex(sfWebRequest $request)
     {
-        $episodes_data = Api::getInstance()->get('episode', true);
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode', true);
         $this->episodes = ApiDoctrine::createObjectArray('Episode',
                                                          $episodes_data['body']);
     }
@@ -36,7 +37,8 @@ class episodeActions extends sfActions
 
     public function executeEdit(sfWebRequest $request)
     {
-        $episode_data = Api::getInstance()->get('episode/' . $request->getParameter('id'),
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                     true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
@@ -48,7 +50,8 @@ class episodeActions extends sfActions
     {
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
-        $episode_data = Api::getInstance()->get('episode/' . $request->getParameter('id'),
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                     true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
@@ -64,12 +67,13 @@ class episodeActions extends sfActions
     {
         $request->checkCSRFProtection();
 
-        $episode_data = Api::getInstance()->get('episode/' . $request->getParameter('id'));
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'));
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
 
         //$episode->delete();
-        $result = Api::getInstance()->delete('episode/' . $episode->getId(),
+        $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(),
                                              true);
         $this->checkHttpCode($result);
 
@@ -81,17 +85,19 @@ class episodeActions extends sfActions
         $form->bind($request->getParameter($form->getName()),
                                            $request->getFiles($form->getName()));
         if ($form->isValid()) {
+            $auth_key = $this->getUser()->getApiAuthKey();
             if ($form->getValue('id')) {
                 // Update existing item.
                 $values = $form->getObject()->getModified();
+                //die(var_dump($values));
                 unset($values['id']);
                 $id = $form->getValue('id');
-                $result = Api::getInstance()->put('episode/' . $id, $values);
+                $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id, $values);
                 $this->checkHttpCode($result);
             } else {
                 // Create new item
                 $values = $values = $form->getObject()->getModified();
-                $result = Api::getInstance()->post('episode', $values);
+                $result = Api::getInstance()->setUser($auth_key)->post('episode', $values);
                 $this->checkHttpCode($result);
             }
 

@@ -12,6 +12,13 @@
  */
 class sfGuardUser extends PluginsfGuardUser
 {
+    
+    public function setIncremented($id)
+    {
+        $this->_id = array($id);
+        $this->set('id', $id, false);
+        $this->_lastModified = array();
+    }
 
     public function save(Doctrine_Connection $conn = null)
     {
@@ -60,7 +67,7 @@ class sfGuardUser extends PluginsfGuardUser
     
     public function getUndisplayedLoginMessages()
     {
-        return sfGuardUserTable::getInstance()->getUndisplayedByUserId($this->getIncremented());
+        return sfGuardLoginMessageTable::getInstance()->getUndisplayedByUserId($this->getIncremented());
     }
 
     /**
