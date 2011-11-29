@@ -42,18 +42,13 @@ class authortypeActions extends autoauthortypeActions
     public function validateDelete($payload, sfWebRequest $request = null)
     {
         parent::validateDelete($payload, $request);
-        
-        $params = $this->parsePayload($payload);
 
         $user = $this->getUser()->getGuardUser();
         if (!$user)
             throw new sfException('Action requires an auth token.', 401);
-
-        $primaryKey = $request->getParameter('id');
-        $episode = EpisodeTable::getInstance()->find($primaryKey);
-
         if (!$this->getUser()->isSuperAdmin()) {
-            throw new sfException('You are not allowed to delete AuthorTypes!', 403);
+            throw new sfException('Your user does not have permissions to "
+                    . "delete AuthorTypes.', 403);
         }
     }
 
