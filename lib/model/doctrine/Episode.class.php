@@ -22,10 +22,18 @@ class Episode extends BaseEpisode
     {
         return $this->getTitle();
     }
+    
+    public function setIncremented($id)
+    {
+        $this->_id = array($id);
+        $this->set('id', $id, false);
+        $this->_lastModified = array();
+    }
 
     public function setSfGuardUserId($user_id)
     {
         $user_found = false;
+        $episode_user_id = null;
         // Verify that the user exists in an EpisodeAssignment
         foreach ($this->getEpisodeAssignments() as $assignment) {
             /* @var $assignment EpisodeAssignment */
