@@ -26,6 +26,23 @@ class ApiDoctrine
             $object->setIncremented($data['id']);
         return $object;
     }
+    
+    public static function createQuickObject($data)
+    {
+        if (is_null($data) || empty($data))
+            return null;
+        $object = new ApiDoctrineQuick($data);
+        return $object;
+    }
+    
+    public static function createQuickObjectArray($data)
+    {
+        $collection = array();
+        foreach ($data as $entry) {
+            $collection[] = self::createQuickObject($entry);
+        }
+        return $collection;
+    }
 
     /**
      *
@@ -35,7 +52,6 @@ class ApiDoctrine
      */
     public static function createCollection($model_name, $data)
     {
-
         $collection = new Doctrine_Collection($model_name);
         if (!($collection instanceof Doctrine_Collection))
             throw new sfException('Trying to hydrate a non-Doctrine_collection object!');

@@ -15,7 +15,7 @@ class messageActions extends sfActions
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $messages_data = Api::getInstance()->setUser($auth_key)->get('message', true);
-        $this->messages = ApiDoctrine::createObjectArray('Message', $messages_data['body']);
+        $this->messages = ApiDoctrine::createQuickObjectArray($messages_data['body']);
     }
 
     public function executeNew(sfWebRequest $request)

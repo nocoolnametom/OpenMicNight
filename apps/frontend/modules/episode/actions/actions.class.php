@@ -15,7 +15,7 @@ class episodeActions extends sfActions
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode', true);
-        $this->episodes = ApiDoctrine::createObjectArray('Episode', $episodes_data['body']);
+        $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 
     public function executeNew(sfWebRequest $request)

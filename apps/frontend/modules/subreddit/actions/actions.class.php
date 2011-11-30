@@ -15,7 +15,7 @@ class subredditActions extends sfActions
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit', true);
-        $this->subreddits = ApiDoctrine::createObjectArray('Subreddit', $subreddit_data['body']);
+        $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
     }
 
     public function executeNew(sfWebRequest $request)
