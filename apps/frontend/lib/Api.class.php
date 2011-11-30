@@ -14,8 +14,8 @@ class Api
     /** @var string */
     protected $_location;
 
-    /** @var ApiKey */
-    protected $_object;
+    /** @var string */
+    protected $_shared_secret;
 
     /** @var string */
     protected $_auth_key;
@@ -41,8 +41,7 @@ class Api
     {
         $this->_key = sfConfig::get('app_web_app_api_key');
         $this->_location = sfConfig::get('app_web_app_api_location');
-        $this->_object = ApiKeyTable::getInstance()
-                ->findOneBy('api_key', $this->_key);
+        $this->_shared_secret = sfConfig::get('app_web_app_api_shared_secret');
     }
 
     public function setUser($auth_key)
@@ -57,7 +56,7 @@ class Api
         $output = array();
         $output['api_key'] = $this->_key;
         $output['time'] = $time;
-        $output['signature'] = sha1($this->_object->getSharedSecret() . $time);
+        $output['signature'] = sha1($this->_shared_secret . $time);
         if ($this->_auth_key)
             $output['auth_key'] = $this->_auth_key;
 

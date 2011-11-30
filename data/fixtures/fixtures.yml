@@ -22,6 +22,9 @@ Membership:
 # upon every login (which couldget annoying).  The config/app.yml also controls
 # the length of time that thelogin authkey is valid for each user, depending on
 # whether they select"Remember Me" or not.
+#
+# The web app also contains the same API key and shared secret in its
+# config/app.yml file.  Make sure to match the values here in there, as well.
 ApiKey:
   web_app:
     api_key: 75d32b53a0ccf8b92d7513c548351261d8d5cafe

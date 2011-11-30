@@ -8,10 +8,11 @@ all:
     signin_form: sfGuardFormSigninApi
   reddit_validation:
     post_location:  http://www.reddit.com/comments/kdxhb.json
-# Remember to change the api key before using the app in production! Keep it
-# secret, keep it safe!
+# Remember to change the api key and shared secret before using the app in
+# production! Keep it secret, keep it safe!
   web_app_api:
     key: 75d32b53a0ccf8b92d7513c548351261d8d5cafe
+    shared_secret: dbc39c8cecb3dda2146ae9ba0f0bdb0879755180
     location: http://api.openmicnight/v1/index.php/
     format: json
     # 2 hours before regular login is revoked
