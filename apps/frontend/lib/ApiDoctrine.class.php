@@ -36,10 +36,10 @@ class ApiDoctrine
     public static function createCollection($model_name, $data)
     {
 
-        $collection = new Doctrine_Collection($model_name . 'Table');
+        $collection = new Doctrine_Collection($model_name);
         if (!($collection instanceof Doctrine_Collection))
             throw new sfException('Trying to hydrate a non-Doctrine_collection object!');
-        $collection->setData($data);
+        $collection->fromArray($data);
         return $collection;
     }
 
