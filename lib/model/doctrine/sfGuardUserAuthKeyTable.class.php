@@ -17,6 +17,26 @@ class sfGuardUserAuthKeyTable extends Doctrine_Table
     {
         return Doctrine_Core::getTable('sfGuardUserAuthKey');
     }
+    
+    /**
+     * Retrieves all auth keys for a given user id that are not from APIs in the given array.
+     *
+     * @param int   $user_id
+     * @param array $excluded_array
+     * @return Doctrine_Collection 
+     */
+    public function getKeysByUserIdExcludingApiKeys($user_id, $excluded_array)
+    {
+        $auth = $this->createQuery()
+                ->leftJoin('sfGuardUserAuthKey.ApiKey ApiKey')
+                ->where('sfGuardUserAuthKey.sf_guard_user_id = ?', $user_id)
+                ->andWhereNotIn('ApiKey.api_key', $excluded_array)
+                ->andWhere('sfGuardUserAuthKey.is_revoked = 0')
+                ->andWhere('sfGuardUserAuthKey.expires_at >= NOW()')
+                ->orderBy('sfGuardUserAuthKey.created_at DESC')
+                ->execute();
+        return $auth;
+    }
 
     public function getMostRecentValidByApiKeyIdAndAuthKey($api_key_id,
                                                            $auth_key)

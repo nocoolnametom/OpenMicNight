@@ -83,5 +83,19 @@ class sfGuardUser extends PluginsfGuardUser
         $login_message->setMessage($message);
         $login_message->save();
     }
+    
+    /**
+     * Returns all auth keys for the users ignoring any given API key(s).
+     *
+     * @param string|array $excluded_api_keys  The ignored API key(s)
+     * @return Doctrine_Collection 
+     */
+    public function getAuthKeysExcluding($excluded_api_keys)
+    {
+        if (!is_array($excluded_api_keys))
+            $excluded_api_keys = array($excluded_api_keys);
+        $auth_keys = sfGuardUserAuthKeyTable::getInstance()->getKeysByUserIdExcludingApiKeys($this->getIncremented(), $excluded_api_keys);
+        return $auth_keys;
+    }
 
 }
