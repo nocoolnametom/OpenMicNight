@@ -1,3 +1,3 @@
-<h1>Edit Episode</h1>
+<h1>Edit Profile</h1>
 
 <?php include_partial('form', array('form' => $form)) ?>

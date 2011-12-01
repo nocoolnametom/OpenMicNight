@@ -20,6 +20,7 @@
     </tfoot>
     <tbody>
       <?php echo $form->renderGlobalErrors() ?>
+      <?php echo $form->renderUsing('table'); /* ?>
       <tr>
         <th><?php echo $form['sf_guard_user_id']->renderLabel() ?></th>
         <td>
@@ -97,6 +98,7 @@
           <?php echo $form['reddit_post_url'] ?>
         </td>
       </tr>
+      <?php */ ?>
     </tbody>
   </table>
 </form>

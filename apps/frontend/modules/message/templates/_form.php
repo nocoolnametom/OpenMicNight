@@ -20,6 +20,7 @@
     </tfoot>
     <tbody>
       <?php echo $form->renderGlobalErrors() ?>
+      <?php echo $form->renderUsing('table'); /* ?>
       <?php if (is_null($form->getObject()->getId())): ?>
       <tr>
         <th><?php echo $form['recipient_id']->renderLabel() ?></th>
@@ -50,6 +51,7 @@
           <?php echo $form['text'] ?>
         </td>
       </tr>
+      <?php */ ?>
     </tbody>
   </table>
 </form>

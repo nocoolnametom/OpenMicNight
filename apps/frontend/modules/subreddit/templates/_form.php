@@ -20,6 +20,7 @@
     </tfoot>
     <tbody>
       <?php echo $form->renderGlobalErrors() ?>
+      <?php echo $form->renderUsing('table'); /* ?>
       <tr>
         <th><?php echo $form['name']->renderLabel() ?></th>
         <td>
@@ -69,6 +70,7 @@
           <?php echo $form['bucket_name'] ?>
         </td>
       </tr>
+      <?php */ ?>
     </tbody>
   </table>
 </form>
