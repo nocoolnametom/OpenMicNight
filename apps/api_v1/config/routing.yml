@@ -107,6 +107,9 @@ episode:
     column:  id
     default_params:
       sf_format:  json
+released_episodes:
+  url:   /episode/released
+  param: { module: episode, action: released }
 subreddit:
   class:   sfObjectRouteCollection
   options:

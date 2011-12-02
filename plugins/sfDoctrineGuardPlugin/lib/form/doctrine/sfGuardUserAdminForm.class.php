@@ -15,5 +15,13 @@ class sfGuardUserAdminForm extends BasesfGuardUserAdminForm
    */
   public function configure()
   {
+      unset(
+              $this['is_validated'],
+              $this['reddit_validation_key'],
+              $this['is_authorized'],
+              $this['email_authorization_key'],
+              $this['authorized_at'],
+              $this['is_super_admin']
+              );
   }
 }

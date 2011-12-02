@@ -26,6 +26,11 @@ class profileActions extends sfActions
         $user_data = Api::getInstance()->get('user/' . $user_id);
         $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
         $this->form = new sfGuardUserAdminForm($user);
+        unset(
+                $this->form['is_active'],
+                $this->form['groups_list'],
+                $this->form['permissions_list']
+                );
     }
 
     public function executeUpdate(sfWebRequest $request)
@@ -36,6 +41,11 @@ class profileActions extends sfActions
         $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
 
         $this->form = new sfGuardUserAdminForm($user);
+        unset(
+                $this->form['is_active'],
+                $this->form['groups_list'],
+                $this->form['permissions_list']
+                );
 
         $this->processForm($request, $this->form);
 
@@ -59,8 +69,37 @@ class profileActions extends sfActions
         if ($form->isValid()) {
             $auth_key = $this->getUser()->getApiAuthKey();
             // Update existing item.
-            $values = $form->getObject()->getModified();
-            $user = $form->getObject();
+            $values = $form->getTaintedValues();
+            $user_id = $form->getValue('id') ? $form->getValue('id') : $this->getUser()->getApiUserId();
+            unset(
+                    $values['_csrf_token'],
+                    $values['is_active'],
+                    $values['password'],
+                    $values['password_again'],
+                    $values['groups_list'],
+                    $values['permissions_list'],
+                    $values['is_validated'],
+                    $values['reddit_validation_key'],
+                    $values['is_authorized'],
+                    $values['email_authorization_key'],
+                    $values['authorized_at'],
+                    $values['is_super_admin'],
+                    $values['algorithm'],
+                    $values['id'],
+                    $values['salt'],
+                    $values['last_login']
+                    );
+            if ($form->getValue('password'))
+                $values['password'] = $form->getValue('password');
+            $user_data = Api::getInstance()->get('user/' . $user_id);
+            $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
+            $user_values = $user->toArray();
+            foreach($values as $key => $value)
+            {
+                if ($value == $user_values[$key])
+                    unset($values[$key]);
+            }
+            
             if (array_key_exists('id', $values))
                 unset($values['id']);
             $id = $this->getUser()->getApiUserId();

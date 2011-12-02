@@ -17,6 +17,24 @@ class subredditActions extends sfActions
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit', true);
         $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
     }
+    
+    public function executeEpisodes(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->forward404Unless($request->getParameter('id') || $request->getParameter('domain'));
+        if ($request->getParameter('domain'))
+        {
+            $domain = $request->getParameter('domain');
+            $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit?domain=' . urlencode($domain), true);
+            $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+            $this->forward404Unless(count($this->subreddits));
+            $subreddit_id = $this->subreddits[0]['id'];
+        } else {
+            $subreddit_id = $request->getParameter('id');
+        }
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id, true);
+        $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
+    }
 
     public function executeNew(sfWebRequest $request)
     {

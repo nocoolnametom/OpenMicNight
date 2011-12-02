@@ -51,13 +51,9 @@ class episodeActions extends autoepisodeActions
 
         if (!$this->getUser()->isSuperAdmin()) {
             $admin = sfGuardUserSubredditMembershipTable::getInstance()
-                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                            $episode->getSubredditId(),
-                                                            array('admin'));
+                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $episode->getSubredditId(), array('admin'));
             $moderator = sfGuardUserSubredditMembershipTable::getInstance()
-                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                            $episode->getSubredditId(),
-                                                            array('moderator'));
+                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $episode->getSubredditId(), array('moderator'));
             if (!$admin) {
                 if (array_key_exists('sf_guard_user_id', $params)
                         && $params['sf_guard_user_id'] != $user->getIncremented())
@@ -82,4 +78,119 @@ class episodeActions extends autoepisodeActions
                     . "delete Episodes', 403);
         }
     }
+
+    /**
+     * Retrieves a  collection of Episode objects
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeReleased(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+
+        try {
+            $format = $this->getFormat();
+            //$this->validateApiAuth($request->getParameterHolder()->getAll());
+            $this->validateIndex($params, $request);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $q = Doctrine_Query::create()
+                ->from('Episode Episode')
+                ->where('Episode.is_approved = ?', true)
+                ->andWhere('Episode.release_date <= ?', date('Y-m-d H:i:s'));
+        
+        $this->customQueryExecute($q, $params);
+        $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
+        if ($isset_pk && count($this->objects) == 0) {
+            $request->setRequestFormat($format);
+            $this->forward404();
+        }
+
+
+        // configure the fields of the returned objects and eventually hide some
+        $this->setFieldVisibilityIndex();
+        $this->configureFields();
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $this->output = $serializer->serialize($this->objects, $this->model);
+        unset($this->objects);
+    }
+
+    /**
+     * Create the query for selecting objects, eventually along with related
+     * objects
+     *
+     * @param   array   $params  an array of criterions for the selection
+     */
+    public function addToQuery(Doctrine_Query $query, $params)
+    {
+        if (isset($sort)) {
+            $query->orderBy($sort);
+        }
+
+        if (isset($params['id'])) {
+            $values = explode(',', $params['id']);
+
+            if (count($values) == 1) {
+                $query->andWhere($this->model . '.id = ?', $values[0]);
+            } else {
+                $query->whereIn($this->model . '.id', $values);
+            }
+
+            unset($params['id']);
+        }
+
+        foreach ($params as $name => $value) {
+            $query->andWhere($this->model . '.' . $name . ' = ?', $value);
+        }
+
+        return $query;
+    }
+    
+    /**
+   * Execute the query for selecting a collection of objects, eventually
+   * along with related objects
+   *
+   * @param   array   $params  an array of criterions for the selection
+   */
+  public function customQueryExecute(Doctrine_Query $query, $params)
+  {
+    $this->objects = $this->dispatcher->filter(
+      new sfEvent(
+        $this,
+        'sfDoctrineRestGenerator.filter_results',
+        array()
+      ),
+      $this->addToQuery($query, $params)->execute(array(), Doctrine::HYDRATE_ARRAY)
+    )->getReturnValue();
+  }
+
 }
