@@ -29,9 +29,11 @@ class episodeassignmentActions extends autoepisodeassignmentActions
         if (!$user)
             throw new sfException('Action requires an auth token.', 401);
 
+        $episode = EpisodeTable::getInstance()->find($params['episode_id']);
+        
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                        $assignment->getEpisode()->getSubredditId(),
+                                                        $episode->getSubredditId(),
                                                         array('admin'));
 
         if (array_key_exists('sf_guard_user_id', $params)

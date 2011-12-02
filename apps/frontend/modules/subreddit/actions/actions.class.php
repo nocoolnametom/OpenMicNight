@@ -11,29 +11,64 @@
 class subredditActions extends sfActions
 {
 
+    protected function getSubredditId(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->getParameter('id') || $request->getParameter('domain'));
+        if ($request->getParameter('domain')) {
+            $auth_key = $this->getUser()->getApiAuthKey();
+            $domain = $request->getParameter('domain');
+            $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit?domain=' . urlencode($domain), true);
+            $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+            $this->forward404Unless(count($subreddits) && $subreddits[0]->getIncremented());
+            $subreddit_id = $subreddits[0]->getId();
+        } else {
+            $subreddit_id = $request->getParameter('id');
+        }
+        return $subreddit_id;
+    }
+
     public function executeIndex(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit', true);
         $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
     }
-    
+
     public function executeEpisodes(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $this->forward404Unless($request->getParameter('id') || $request->getParameter('domain'));
-        if ($request->getParameter('domain'))
-        {
-            $domain = $request->getParameter('domain');
-            $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit?domain=' . urlencode($domain), true);
-            $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
-            $this->forward404Unless(count($this->subreddits));
-            $subreddit_id = $this->subreddits[0]['id'];
-        } else {
-            $subreddit_id = $request->getParameter('id');
-        }
+        $subreddit_id = $this->getSubredditId($request);
         $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
+    }
+
+    public function executeSignup(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $subreddit_id = $this->getSubredditId($request);
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id, true);
+        $this->subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/future?subreddit_id=' . $subreddit_id, true);
+        $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $subreddit_id, true);
+        $this->deadlines = ApiDoctrine::createQuickObjectArray($deadline_data['body']);
+
+        //Cheating here... Need to fix to an API call...
+        $query = Doctrine_Query::create()
+                        ->select('EpisodeAssignment.author_type_id, EpisodeAssignment.episode_id')
+                        ->from('EpisodeAssignment EpisodeAssignment')
+                        ->leftJoin('Episode Episode')
+                        ->where('EpisodeAssignment.sf_guard_user_id = ?', $this->getUser()->getApiUserId())
+                        ->andWhere('Episode.subreddit_id = ? ', $subreddit_id)
+                        ->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
+                        ->fetchArray();
+        $this->assigned_author_types = array();
+        $this->assigned_episodes = array();
+        foreach($query as $entry)
+        {
+            $this->assigned_author_types[] = (string)$entry['author_type_id'];
+            $this->assigned_episodes[] = (string)$entry['episode_id'];
+        }
     }
 
     public function executeNew(sfWebRequest $request)
@@ -60,6 +95,15 @@ class subredditActions extends sfActions
         $this->forward404Unless($subreddit && $subreddit->getId());
 
         $this->form = new SubredditForm($subreddit);
+    }
+
+    public function executeShow(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $subreddit_id = $this->getSubredditId($request);
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id, true);
+        $this->subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $this->forward404Unless($this->subreddit && $this->subreddit->getId());
     }
 
     public function executeUpdate(sfWebRequest $request)

@@ -67,7 +67,7 @@ class Api
 
     protected function makeUrl($location)
     {
-        return rtrim($this->_location, '/') . '/' . $location . '?'
+        return rtrim($this->_location, '/') . '/' . $location . (strpos($location, '?') !== false ? '&' : '?')
                 . $this->assembleApiAuthentication();
     }
 

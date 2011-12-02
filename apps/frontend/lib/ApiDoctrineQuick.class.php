@@ -50,7 +50,9 @@ class ApiDoctrineQuick
 
     public function getIncremented()
     {
-        return array_key_exists('id', $this->_data) ? $this->_data['id'] : null;
+        if (is_string($this->_data))
+                die(var_dump($this->_data));
+        return (is_array($this->_data) && array_key_exists('id', $this->_data)) ? $this->_data['id'] : null;
     }
 
     protected function from_camel_case($str)

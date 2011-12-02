@@ -18,6 +18,27 @@ class episodeActions extends sfActions
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 
+    public function executeAssign(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->forward404Unless($request->getParameter('author_type_id') || $request->getParameter('episode_id'));
+        $author_type_id = $request->getParameter('author_type_id');
+        $episode_id = $request->getParameter('episode_id');
+        $episode = EpisodeTable::getInstance()->find($episode_id);
+        $user_id = $this->getUser()->getApiUserId();
+        $post_values = array(
+            'author_type_id' => $author_type_id,
+            'episode_id' => $episode_id,
+            'sf_guard_user_id' => $user_id,
+        );
+        $create = Api::getInstance()->setUser($auth_key)->post('episodeassignment', $post_values, false);
+        if ($create['headers']['http_code'] == 200)
+            $this->getUser()->setFlash('notice', 'Registered for Episode!');
+        else
+            $this->getUser()->setFlash('error', 'An error occured.');
+        $this->redirect('subreddit/signup?domain=' . $episode->getSubreddit()->getDomain());
+    }
+    
     public function executeNew(sfWebRequest $request)
     {
         $this->form = new EpisodeForm();
