@@ -18,7 +18,7 @@
   <tbody>
     <?php foreach ($subreddits as $subreddit): ?>
     <tr>
-      <td><a href="<?php echo url_for('subreddit/edit?id='.$subreddit->getId()) ?>"><?php echo $subreddit->getId() ?></a></td>
+      <td><a href="<?php echo url_for('subreddit/show?id='.$subreddit->getId()) ?>"><?php echo $subreddit->getId() ?></a></td>
       <td><?php echo $subreddit->getName() ?></td>
       <td><?php echo $subreddit->getDomain() ?></td>
       <td><?php echo $subreddit->getIsActive() ?></td>
@@ -32,5 +32,6 @@
     <?php endforeach; ?>
   </tbody>
 </table>
-
+<?php if ($sf_user->isAuthenticated()): ?>
   <a href="<?php echo url_for('subreddit/new') ?>">New</a>
+<?php endif; ?>

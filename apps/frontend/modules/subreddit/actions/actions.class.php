@@ -73,11 +73,13 @@ class subredditActions extends sfActions
 
     public function executeNew(sfWebRequest $request)
     {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
         $this->form = new SubredditForm();
     }
 
     public function executeCreate(sfWebRequest $request)
     {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
         $this->forward404Unless($request->isMethod(sfRequest::POST));
 
         $this->form = new SubredditForm();
@@ -89,6 +91,7 @@ class subredditActions extends sfActions
 
     public function executeEdit(sfWebRequest $request)
     {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
         $auth_key = $this->getUser()->getApiAuthKey();
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'), true);
         $subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
@@ -104,10 +107,13 @@ class subredditActions extends sfActions
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id, true);
         $this->subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
         $this->forward404Unless($this->subreddit && $this->subreddit->getId());
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id, true);
+        $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 
     public function executeUpdate(sfWebRequest $request)
     {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
         $auth_key = $this->getUser()->getApiAuthKey();
@@ -124,6 +130,7 @@ class subredditActions extends sfActions
 
     public function executeDelete(sfWebRequest $request)
     {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
         $request->checkCSRFProtection();
 
         $auth_key = $this->getUser()->getApiAuthKey();

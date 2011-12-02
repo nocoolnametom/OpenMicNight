@@ -1,6 +1,5 @@
 <?php /* @var $subreddit Subreddit */ ?>
-<h1>Grid</h1>
-<table border="1">
+<table class="subreddit_grid">
     <thead>
         <tr>
             <td>Date</td>
@@ -44,11 +43,13 @@
                         } else {
                             if (in_array($episode->getIncremented(), $sf_data->getRaw('assigned_episodes')) || in_array($deadline->getAuthorTypeId(), $sf_data->getRaw('assigned_author_types')))
                                 echo '<td class="unregisterable">&nbsp;';
-                            else
+                            else if ($sf_user->isAuthenticated())
                                 echo "<td>" . link_to('Register', 'episode/assign?episode_id=' . $episode->getIncremented() . '&author_type_id=' . $deadline->getAuthorTypeId(), array(
                                     'confirm' => "Are you sure? You cannot unregister, and the dealine to submit this Episode is by"
                                     . date('g:ia D j M, Y (T)', strtotime($episode->getReleaseDate()) - $deadline->getSeconds()) . ".",
                                 ));
+                            else
+                                echo "<td>Open";
                         }
                     }
                     ?>
