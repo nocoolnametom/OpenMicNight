@@ -30,3 +30,5 @@ prod:
   mailhide:
     publickey:  "foo"
     privatekey: "bar"
+  web_app_api:
+    location: http://api.openmicnight/v1/
