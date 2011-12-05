@@ -12,7 +12,6 @@
  */
 class ApiDoctrineQuick
 {
-
     private $_data;
 
     public function ApiDoctrineQuick($data)
@@ -39,8 +38,12 @@ class ApiDoctrineQuick
         if (isset($by)) {
             $key = trim($this->from_camel_case($by), '_');
 
-            if (array_key_exists($key, $this->_data)) {
-                return $this->_data[$key];
+            if ($this->array_key_exists_nc($key, $this->_data)) {
+                $array_key = $this->array_key_exists_nc($key, $this->_data);
+                if (is_array($this->_data[$array_key]))
+                    return new ApiDoctrineQuick($this->_data[$array_key]);
+                else
+                    return $this->_data[$array_key];
             }
             throw new sfException('Unknown key requested:' . $key);
         }
@@ -51,8 +54,9 @@ class ApiDoctrineQuick
     public function getIncremented()
     {
         if (is_string($this->_data))
-                die(var_dump($this->_data));
-        return (is_array($this->_data) && array_key_exists('id', $this->_data)) ? $this->_data['id'] : null;
+            die(var_dump($this->_data));
+        return (is_array($this->_data) && array_key_exists('id', $this->_data)) ? $this->_data['id']
+                    : null;
     }
 
     protected function from_camel_case($str)
@@ -62,4 +66,19 @@ class ApiDoctrineQuick
         return preg_replace_callback('/([A-Z])/', $func, $str);
     }
 
+    protected function array_key_exists_nc($key, $search)
+    {
+        if (array_key_exists($key, $search)) {
+            return $key;
+        }
+        if (!(is_string($key) && is_array($search) && count($search))) {
+            return false;
+        }
+        $key = strtolower($key);
+        foreach($search as $k => $v) {
+            if (strtolower($k) == $key) {
+                return $k;
+            }
+        }
+    }
 }

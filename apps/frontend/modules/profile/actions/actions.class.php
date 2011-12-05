@@ -51,6 +51,15 @@ class profileActions extends sfActions
 
         $this->setTemplate('edit');
     }
+    
+    public function executeEpisodes(sfWebRequest $request)
+    {
+        $user_id = $this->getUser()->getApiUserId();
+        $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id);
+        $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
+        $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
+        $this->future = ApiDoctrine::createQuickObjectArray($future_data['body']);
+    }
 
     public function executeAuth_revoke(sfWebRequest $request)
     {
