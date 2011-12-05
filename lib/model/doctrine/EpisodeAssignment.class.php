@@ -12,7 +12,7 @@
  */
 class EpisodeAssignment extends BaseEpisodeAssignment
 {
-    
+
     public function setIncremented($id)
     {
         $this->_id = array($id);
@@ -143,12 +143,33 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 $this->deleteWithException("Cannot create EpisodeAssignment "
                         . "because sfGuardUser " . $this->getSfGuardUserId()
                         . " has not been validated yet.", 106);
+
+            $isNew = true;
+        } else {
+            $isNew = false;
         }
 
         /* If the obejct is not new or has passed all rules for saving, we pass
          * it on to the parent save function.
          */
         parent::save($conn);
+        
+        if ($isNew)
+        {
+            /* Now that we have a new EpisodeAssignment that has passed all
+             * rules, let's set it to be valid if it belongs to the first
+             * Deadline and send an email to the user about it.
+             */
+            $deadline = DeadlineTable::getInstance()->find($this->getEpisode()->getSubreddit()->getFirstDeadlineId());
+            if ($deadline) {
+                if ($author_type_id == $deadline->getAuthorTypeId()) {
+                    $release_date = $this->getEpisode()->getReleaseDate('U');
+                    $seconds = $deadline->getSeconds();
+                    $deadline = $release_date - $seconds;
+                    $this->getEpisode()->getSubreddit()->sendEmail($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
+                }
+            }
+        }
     }
 
     /**

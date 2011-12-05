@@ -216,6 +216,19 @@ class Subreddit extends BaseSubreddit
 
         return $deadline_rules;
     }
+    
+    public function getFirstDeadlineId()
+    {
+        $longest = 0;
+        $longest_id = null;
+        foreach ($deadline_rules as $id => $seconds) {
+            if ($seconds > $longest) {
+                $longest = $seconds;
+                $longest_id = $id;
+            }
+        }
+        return $longest_id;
+    }
 
     public function advanceEpisodeAssignments()
     {
@@ -225,14 +238,7 @@ class Subreddit extends BaseSubreddit
          * we need to assign Episodes to the first Deadline assignment if they
          * haven't yet been so assigned.
          */
-        $longest = 0;
-        $longest_id = null;
-        foreach ($deadline_rules as $id => $seconds) {
-            if ($seconds > $longest) {
-                $longest = $seconds;
-                $longest_id = $id;
-            }
-        }
+        $longest_id = $this->getFirstDeadlineId();
 
         $sql = "
 SELECT episode_assignment.*
@@ -358,7 +364,7 @@ AND (
         }
     }
 
-    protected function sendEmail($user_id, $episode_id, $deadline)
+    public function sendEmail($user_id, $episode_id, $deadline)
     {
         // Send an email to that user telling them their EpisodeAssignment is now valid
         ProjectConfiguration::registerZend();

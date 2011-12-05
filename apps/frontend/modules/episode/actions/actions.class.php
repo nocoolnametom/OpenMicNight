@@ -36,6 +36,7 @@ class episodeActions extends sfActions
             $this->getUser()->setFlash('notice', 'Registered for Episode!');
         else
             $this->getUser()->setFlash('error', 'An error occured.');
+        
         $this->redirect('subreddit/signup?domain=' . $episode->getSubreddit()->getDomain());
     }
     
