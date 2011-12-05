@@ -22,7 +22,7 @@ class Subreddit extends BaseSubreddit
     {
         return $this->getName();
     }
-    
+
     public function setIncremented($id)
     {
         $this->_id = array($id);
@@ -221,6 +221,56 @@ class Subreddit extends BaseSubreddit
     {
         $deadline_rules = $this->getDeadlineRules();
 
+        /* Before beginning the process of movign Episodes to new Assignments, 
+         * we need to assign Episodes to the first Deadline assignment if they
+         * haven't yet been so assigned.
+         */
+        $longest = 0;
+        $longest_id = null;
+        foreach ($deadline_rules as $id => $seconds) {
+            if ($seconds > $longest) {
+                $longest = $seconds;
+                $longest_id = $id;
+            }
+        }
+
+        $sql = "
+SELECT episode_assignment.*
+FROM episode_assignment
+JOIN episode ON episode.id = episode_assignment.episode_id
+WHERE episode.release_date >= NOW()
+AND episode.is_approved <> 1
+AND episode.subreddit_id = 1
+AND episode_assignment.missed_deadline <> 1
+AND episode.sf_guard_user_id IS NULL
+AND episode_assignment.author_type_id = $longest_id;
+        ";
+        $query = Doctrine_Query::create()
+                ->from('EpisodeAssignment ea')
+                ->leftJoin('ea.Episode e')
+                ->where('e.release_date >= ?', date('Y-m-d H:i:s'))
+                ->andWhere('e.is_approved <> 1')
+                ->andWhere('e.subreddit_id = ?', $this->getIncremented())
+                ->andWhere('ea.missed_deadline <> 1')
+                ->andWhere('e.sf_guard_user_id IS NULL')
+                ->andWhere('ea.author_type_id = ?', $longest_id);
+        $to_be_assigned = $query->execute();
+
+        foreach ($to_be_assigned as $assignment) {
+            /** @var $assignment EpisodeAssignment */
+            $episode = $assignment->getEpisode();
+            $episode->setSfGuardUserId($assignment->getSfGuardUserId());
+            $episode->save();
+
+            $release_date = $episode->getReleaseDate('U');
+            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($longest_id, $episode->getSubredditId());
+            $deadline = $release_date - $seconds;
+
+            // Send an email to that user telling them their EpisodeAssignment is now valid
+            $this->sendEmail($assignment->getSfGuardUserId(), $episode->getIncremented(), $deadline);
+        }
+
+
         /* We now have an array that shows how many seconds a givn AuthorType is
          * allowed before their Deadline passes for the Subreddit.  Now we need
          * to find all of the EpisodeAssignments attached to future unapproved
@@ -303,40 +353,46 @@ AND (
                 $deadline = $release_date - $seconds;
 
                 // Send an email to that user telling them their EpisodeAssignment is now valid
-                ProjectConfiguration::registerZend();
-
-                $mail = new Zend_Mail();
-                $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
-                $parameters = array(
-                    'user_id' => $next_assignment->getSfGuardUserId(),
-                    'episode_id' => $episode->getIncremented(),
-                    'deadline' => $deadline,
-                );
-                $user = $next_assignment->getSfGuardUser();
-
-                $prefer_html = $user->getPreferHtml();
-                $address = $user->getEmailAddress();
-                $name = ($user->getPreferredName() ?
-                                $user->getPreferredName() : $user->getFullName());
-
-                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode', $user->getPreferredLanguage());
-
-                $subject = $email->generateSubject($parameters);
-                $body = $email->generateBodyText($parameters, $prefer_html);
-
-                $mail->setBodyText($body);
-
-                $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
-                $mail->addTo($address, $name);
-                $mail->setSubject($subject);
-                if (sfConfig::get('sf_environment') == 'prod') {
-                    $mail->send();
-                } else {
-                    throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
-                }
-                $user->addLoginMessage('You have an episode that you can work with!');
+                $this->sendEmail($next_assignment->getSfGuardUserId(), $episode->getIncremented(), $deadline);
             }
         }
+    }
+
+    protected function sendEmail($user_id, $episode_id, $deadline)
+    {
+        // Send an email to that user telling them their EpisodeAssignment is now valid
+        ProjectConfiguration::registerZend();
+
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+        $parameters = array(
+            'user_id' => $user_id,
+            'episode_id' => $episode_id,
+            'deadline' => $deadline,
+        );
+        $user = sfGuardUserTable::getInstance()->find($user_id);
+
+        $prefer_html = $user->getPreferHtml();
+        $address = $user->getEmailAddress();
+        $name = ($user->getPreferredName() ?
+                        $user->getPreferredName() : $user->getFullName());
+
+        $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode', $user->getPreferredLanguage());
+
+        $subject = $email->generateSubject($parameters);
+        $body = $email->generateBodyText($parameters, $prefer_html);
+
+        $mail->setBodyText($body);
+
+        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->addTo($address, $name);
+        $mail->setSubject($subject);
+        if (sfConfig::get('sf_environment') == 'prod') {
+            $mail->send();
+        } else {
+            throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+        }
+        $user->addLoginMessage('You have an episode that you can work with!');
     }
 
 }
