@@ -219,6 +219,8 @@ class Subreddit extends BaseSubreddit
     
     public function getFirstDeadlineId()
     {
+        $deadline_rules = $this->getDeadlineRules();
+        
         $longest = 0;
         $longest_id = null;
         foreach ($deadline_rules as $id => $seconds) {
