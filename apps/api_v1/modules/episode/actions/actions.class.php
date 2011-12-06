@@ -11,6 +11,21 @@
  */
 class episodeActions extends autoepisodeActions
 {
+    
+    protected function doSave($params = array())
+  {
+    $this->object->save();
+
+    // Set a Location header with the path to the new / updated object
+    $this->getResponse()->setHttpHeader('Location', $this->getController()->genUrl(
+      array_merge(array(
+        'sf_route' => 'episode_show',
+        'sf_format' => $this->getFormat(),
+      ), $this->object->identifier(), $params)
+    ));
+
+    return sfView::NONE;
+  }
 
     public function checkApiAuth($parameters, $content = null)
     {

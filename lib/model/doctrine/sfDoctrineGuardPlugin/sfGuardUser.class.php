@@ -23,7 +23,7 @@ class sfGuardUser extends PluginsfGuardUser
     public function save(Doctrine_Connection $conn = null)
     {
         if (is_null($this->_get('username')) && is_null($this->_get('email_address'))) {
-            throw new sfException('Cannot save User with null username and email!');
+            return;//throw new sfException('Cannot save User with null username and email!');
         }
         if ($this->isNew() && sfGuardUserTable::getIfValidatedUserHasUsername($this->_get('username'))) {
             throw new sfException('Cannot save user.  This username has already been validated with another user.');

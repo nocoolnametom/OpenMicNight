@@ -59,6 +59,15 @@ class profileActions extends sfActions
         $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
         $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
         $this->future = ApiDoctrine::createQuickObjectArray($future_data['body']);
+        $this->current = array();
+        foreach($this->future as $key => $assignment)
+        {
+            if ($assignment->getEpisode()->getSfGuardUserId() == $assignment->getSfGuardUserId())
+            {
+                $this->current[] = $assignment;
+                unset($this->future[$key]);
+            }
+        }
     }
 
     public function executeAuth_revoke(sfWebRequest $request)

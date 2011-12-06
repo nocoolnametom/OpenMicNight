@@ -39,31 +39,56 @@ class episodeActions extends sfActions
         
         $this->redirect('subreddit/signup?domain=' . $episode->getSubreddit()->getDomain());
     }
-    
-    public function executeNew(sfWebRequest $request)
-    {
-        $this->form = new EpisodeForm();
-    }
-
-    public function executeCreate(sfWebRequest $request)
-    {
-        $this->forward404Unless($request->isMethod(sfRequest::POST));
-
-        $this->form = new EpisodeForm();
-
-        $this->processForm($request, $this->form);
-
-        $this->setTemplate('new');
-    }
 
     public function executeEdit(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
+        // Cheating for this one for now.
+        //$episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $episode = EpisodeTable::getInstance()->find($request->getParameter('id'));
+        $this->forward404Unless($episode && $episode->getId());
+        $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        
+        $this->is_submitted = (bool)$episode->getIsSubmitted();
+        $this->is_approved = (bool)$episode->getIsApproved();
+        
+        $this->form = new EpisodeForm($episode);
+        unset($this->form['sf_guard_user_id']);
+        unset($this->form['file_is_remote']);
+        unset($this->form['remote_url']);
+        unset($this->form['approved_at']);
+    }
+    
+    public function executeApprove(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-
+        $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        
         $this->form = new EpisodeForm($episode);
+        unset($this->form['sf_guard_user_id']);
+        unset($this->form['file_is_remote']);
+        unset($this->form['remote_url']);
+        unset($this->form['approved_at']);
+    }
+    
+    public function executeSubmit(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
+        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $this->forward404Unless($episode && $episode->getId());
+        $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        
+        $submission_change = array(
+            'is_submitted' => 1,
+        );
+        $result = $episode_data = Api::getInstance()->setUser($auth_key)->put('episode/' . $episode->getIncremented(), $submission_change, true);
+        $this->checkHttpCode($result);
+        $this->redirect('episode/edit?id=' . $episode->getId());
     }
 
     public function executeUpdate(sfWebRequest $request)
@@ -76,6 +101,10 @@ class episodeActions extends sfActions
         $this->forward404Unless($episode && $episode->getId());
 
         $this->form = new EpisodeForm($episode);
+        unset($this->form['sf_guard_user_id']);
+        unset($this->form['file_is_remote']);
+        unset($this->form['remote_url']);
+        unset($this->form['approved_at']);
 
         $this->processForm($request, $this->form);
 
@@ -105,30 +134,27 @@ class episodeActions extends sfActions
             $auth_key = $this->getUser()->getApiAuthKey();
             if ($form->getValue('id')) {
                 // Update existing item.
-                $values = $form->getObject()->getModified();
+                $values = $form->getTaintedValues();
+                unset(
+                    $values['_csrf_token'],
+                    $values['id']
+                );
                 $episode = $form->getObject();
-                unset($values['id']);
-                $id = $form->getValue('id');
+                if (!array_key_exists('is_nsfw', $values) && $episode->getIsNsfw())
+                        $values['is_nsfw'] = '0';
+                foreach($values as $key => $value)
+                {
+                    if ($value == "on")
+                        $values[$key] = 1;
+                    if ($value == "off")
+                        $values[$key] = 0;
+                }
+                $id = $episode->getId();
                 $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id, $values);
                 $this->checkHttpCode($result);
                 $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
                 $episode = $test_episode ? $test_episode : $episode;
-            } else {
-                // Create new item
-                $values = $form->getValues();
-                $episode = $form->getObject();
-                foreach ($values as $key => $value) {
-                    if (is_null($value))
-                        unset($values[$key]);
-                }
-                $result = Api::getInstance()->setUser($auth_key)->post('episode', $values);
-                $this->checkHttpCode($result);
-                $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
-                $episode = $test_episode ? $test_episode : $episode;
-                if (is_null($episode->getIncremented()))
-                    $this->redirect('episode');
             }
-
             $this->redirect('episode/edit?id=' . $episode->getId());
         }
     }
