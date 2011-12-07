@@ -55,10 +55,16 @@ class profileActions extends sfActions
     public function executeEpisodes(sfWebRequest $request)
     {
         $user_id = $this->getUser()->getApiUserId();
+        $subreddit_ids = array();
         $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id);
         $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
         $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
         $this->future = ApiDoctrine::createQuickObjectArray($future_data['body']);
+        foreach($this->future as $assignment)
+        {
+            if (!in_array($assignment->getEpisode()->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $assignment->getEpisode()->getSubredditId();
+        }
         $this->current = array();
         foreach($this->future as $key => $assignment)
         {
@@ -67,6 +73,21 @@ class profileActions extends sfActions
                 $this->current[] = $assignment;
                 unset($this->future[$key]);
             }
+        }
+        
+        foreach($this->released as $episode)
+        {
+            if (!in_array($episode->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $episode->getSubredditId();
+        }
+        
+        $subreddit_data = Api::getInstance()->get('subreddit?id=' . implode(',', $subreddit_ids), true);
+        
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        $this->subreddits = array();
+        foreach($subreddits as $subreddit)
+        {
+            $this->subreddits[$subreddit->getId()] = $subreddit;
         }
     }
 
