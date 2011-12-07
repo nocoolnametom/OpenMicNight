@@ -21,6 +21,7 @@ class ProjectConfiguration extends sfProjectConfiguration
             'sfPHPUnit2Plugin',
             'sfDoctrineRestGeneratorPlugin',
             'sfReCaptchaPlugin',
+            'sfHtml5FormPlugin',
         ));
     }
 
@@ -71,7 +72,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return 'Herddit';
     }
-    
+
     static public function getDefaultSubredditAddress()
     {
         return 'http://www.reddit.com/r/secretsanta';
