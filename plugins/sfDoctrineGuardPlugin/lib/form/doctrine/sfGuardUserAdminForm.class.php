@@ -23,5 +23,8 @@ class sfGuardUserAdminForm extends BasesfGuardUserAdminForm
               $this['authorized_at'],
               $this['is_super_admin']
               );
+      
+      $this->widgetSchema['website'] = new sfWidgetFormInputUrl();
+      $this->widgetSchema['email_address'] = new sfWidgetFormInputEmail();
   }
 }

@@ -122,7 +122,9 @@ class profileActions extends sfActions
                 unset($values['id']);
             $id = $this->getUser()->getApiUserId();
             $result = Api::getInstance()->setUser($auth_key)->put('user/' . $id, $values);
-            $this->checkHttpCode($result);
+            $success = $this->checkHttpCode($result);
+            if ($success)
+                $this->getUser()->setFlash('notice', 'Profile was edited successfully.');
 
             $this->redirect('profile');
         }
@@ -135,8 +137,9 @@ class profileActions extends sfActions
             $message = array_key_exists('message', $result['body']) ? $result['body']['message'] : 'An error occured.';
             $message = array_key_exists(0, $result['body']) && array_key_exists('message', $result['body'][0]) ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+            return false;
         } else {
-            $this->getUser()->setFlash('notice', 'Action was completed successfully.');
+            return true;
         }
     }
 

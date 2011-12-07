@@ -149,13 +149,11 @@ class Api
     {
         // Set the timeout in seconds (removed because my Mac doesn't like this being so short)
         //curl_setopt($curlHandle, CURLOPT_TIMEOUT, 10);
-        
         // Follow Redirects
-        curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
-        
+        //curl_setopt($curlHandle, CURLOPT_FOLLOWLOCATION, true);
         // Return the results of the command
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
-        
+
         // Set the accept type to JSON
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array('Accept: application/json'));
     }
@@ -166,9 +164,16 @@ class Api
             $this->setCurlOpts($curlHandle);
             $this->_responseBody = curl_exec($curlHandle);
             $this->_responseInfo = curl_getinfo($curlHandle);
+
             curl_close($curlHandle);
+            
+            if (in_array($this->_responseInfo['http_code'], array(301, 302)) && strlen($this->_responseInfo['redirect_url']) > 0) {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $this->_responseInfo['redirect_url']);
+                $this->doExecute($ch);
+            }
         } catch (Exception $e) {
-            curl_close($ch);
+            curl_close($curlHandle);
             throw $e;
         }
     }
@@ -235,4 +240,5 @@ class Api
         $this->doExecute($ch);
         return $this->doResponse($remove_api_stuff);
     }
+
 }

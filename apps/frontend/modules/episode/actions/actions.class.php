@@ -32,11 +32,10 @@ class episodeActions extends sfActions
             'sf_guard_user_id' => $user_id,
         );
         $create = Api::getInstance()->setUser($auth_key)->post('episodeassignment', $post_values, false);
-        if ($create['headers']['http_code'] == 200)
+        $success = $this->checkHttpCode($result);
+        if ($success)
             $this->getUser()->setFlash('notice', 'Registered for Episode!');
-        else
-            $this->getUser()->setFlash('error', 'An error occured.');
-        
+
         $this->redirect('subreddit/signup?domain=' . $episode->getSubreddit()->getDomain());
     }
 
@@ -50,16 +49,28 @@ class episodeActions extends sfActions
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
         
-        $this->is_submitted = (bool)$episode->getIsSubmitted();
-        $this->is_approved = (bool)$episode->getIsApproved();
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $episode->getIncremented() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
+        $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
+        $author_type_id = $assignment->getAuthorTypeId();
         
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
+        $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
+        $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
+        
+        $this->deadline = strtotime($episode->getReleaseDate()) - $deadline->getSeconds();
+
+        $this->is_submitted = (bool) $episode->getIsSubmitted();
+        $this->is_approved = (bool) $episode->getIsApproved();
+        
+
         $this->form = new EpisodeForm($episode);
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
     }
-    
+
     public function executeApprove(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
@@ -67,14 +78,14 @@ class episodeActions extends sfActions
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
-        
+
         $this->form = new EpisodeForm($episode);
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
     }
-    
+
     public function executeSubmit(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
@@ -82,12 +93,14 @@ class episodeActions extends sfActions
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
-        
+
         $submission_change = array(
             'is_submitted' => 1,
         );
         $result = $episode_data = Api::getInstance()->setUser($auth_key)->put('episode/' . $episode->getIncremented(), $submission_change, true);
-        $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result);
+        if ($success)
+            $this->getUser()->setFlash('notice', 'Episode was submitted for approval.');
         $this->redirect('episode/edit?id=' . $episode->getId());
     }
 
@@ -122,7 +135,9 @@ class episodeActions extends sfActions
 
         //$episode->delete();
         $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(), true);
-        $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result);
+        if ($success)
+            $this->getUser()->setFlash('notice', 'Episode was deleted successfully.');
 
         $this->redirect('episode/index');
     }
@@ -136,14 +151,12 @@ class episodeActions extends sfActions
                 // Update existing item.
                 $values = $form->getTaintedValues();
                 unset(
-                    $values['_csrf_token'],
-                    $values['id']
+                        $values['_csrf_token'], $values['id']
                 );
                 $episode = $form->getObject();
                 if (!array_key_exists('is_nsfw', $values) && $episode->getIsNsfw())
-                        $values['is_nsfw'] = '0';
-                foreach($values as $key => $value)
-                {
+                    $values['is_nsfw'] = '0';
+                foreach ($values as $key => $value) {
                     if ($value == "on")
                         $values[$key] = 1;
                     if ($value == "off")
@@ -151,7 +164,9 @@ class episodeActions extends sfActions
                 }
                 $id = $episode->getId();
                 $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id, $values);
-                $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result);
+                if ($success)
+                    $this->getUser()->setFlash('notice', 'Episode was saved successfully.');
                 $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
                 $episode = $test_episode ? $test_episode : $episode;
             }
@@ -166,8 +181,9 @@ class episodeActions extends sfActions
             $message = array_key_exists('message', $result['body']) ? $result['body']['message'] : 'An error occured.';
             $message = array_key_exists(0, $result['body']) && array_key_exists('message', $result['body'][0]) ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+            return false;
         } else {
-            $this->getUser()->setFlash('notice', 'Action was completed successfully.');
+            return true;
         }
     }
 

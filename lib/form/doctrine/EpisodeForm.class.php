@@ -15,6 +15,8 @@ class EpisodeForm extends BaseEpisodeForm
     {
         unset($this['profile_id'], $this['subreddit_id'], $this['release_date'], $this['approved_by'], $this['is_approved'], $this['is_submitted'], $this['submitted_at']);
         
+        $this->widgetSchema['reddit_post_url'] = new sfWidgetFormInputUrl();
+        
         $this->widgetSchema['graphic_file'] = new sfWidgetFormInputFileEditable(array(
                     'label' => 'Upload Graphic',
                     'file_src' => '',

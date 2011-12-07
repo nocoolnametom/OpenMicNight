@@ -73,7 +73,9 @@ class messageActions extends sfActions
 
         //$message->delete();
         $result = Api::getInstance()->setUser($auth_key)->delete('message/' . $message->getId(), true);
-        $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result);
+        if ($success)
+                    $this->getUser()->setFlash('notice', 'Message was deleted successfuly.');
 
         $this->redirect('message/index');
     }
@@ -90,7 +92,9 @@ class messageActions extends sfActions
                 unset($values['id']);
                 $id = $form->getValue('id');
                 $result = Api::getInstance()->setUser($auth_key)->put('message/' . $id, $values);
-                $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result);
+                if ($success)
+                    $this->getUser()->setFlash('notice', 'Message was edited successfully.');
                 $test_message = ApiDoctrine::createObject('Message', $result['body']);
                 $message = $test_message ? $test_message : $message;
             } else {
@@ -102,7 +106,9 @@ class messageActions extends sfActions
                         unset($values[$key]);
                 }
                 $result = Api::getInstance()->setUser($auth_key)->post('message', $values);
-                $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result);
+                if ($success)
+                    $this->getUser()->setFlash('notice', 'Message was sent successfully.');
                 $test_message = ApiDoctrine::createObject('Message', $result['body']);
                 $message = $test_message ? $test_message : $message;
                 if (is_null($message->getIncremented()))
@@ -120,8 +126,9 @@ class messageActions extends sfActions
             $message = array_key_exists('message', $result['body']) ? $result['body']['message'] : 'An error occured.';
             $message = array_key_exists(0, $result['body']) && array_key_exists('message', $result['body'][0]) ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+            return false;
         } else {
-            $this->getUser()->setFlash('notice', 'Action was completed successfully.');
+            return true;
         }
     }
 
