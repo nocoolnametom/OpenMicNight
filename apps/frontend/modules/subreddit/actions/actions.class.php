@@ -30,7 +30,10 @@ class subredditActions extends sfActions
     public function executeIndex(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit', true);
+        $page = $this->page = (int)$request->getParameter('page', 1);
+        $this->forward404Unless(is_integer($page));
+        $page = ($page == 1 || $page == 0) ? '' : '?page=' . $page;
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit' . $page, true);
         $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
     }
 
@@ -129,11 +132,14 @@ class subredditActions extends sfActions
     public function executeShow(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
+        $page = $this->page = (int)$request->getParameter('page', 1);
+        $this->forward404Unless(is_integer($page));
+        $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;
         $subreddit_id = $this->getSubredditId($request);
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id, true);
         $this->subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
         $this->forward404Unless($this->subreddit && $this->subreddit->getId());
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id, true);
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id . $page, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 

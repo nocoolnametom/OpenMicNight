@@ -31,11 +31,11 @@ generator:
 #        max_items:                     0       # uncomment to fix an absolute limit to the number of items in the response
 #        object_additional_fields:      []      # list here additionnal calculated fields
         # set to true to activate the pagination
-        pagination_enabled:            false
+        pagination_enabled:            true
         # set to true to allow the client to pass a page_size parameter
-        pagination_custom_page_size:   false
+        pagination_custom_page_size:   true
         # the default number of items in a page
-        pagination_page_size:          100
+        pagination_page_size:          50
         # set to true to allow the client to pass a sort_by and a sort_order parameter
         sort_custom:                   false
         # set to [column, asc|desc] in order to sort on a column

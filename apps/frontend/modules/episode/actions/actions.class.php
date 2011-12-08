@@ -14,7 +14,10 @@ class episodeActions extends sfActions
     public function executeIndex(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released', true);
+        $page = $this->page = (int)$request->getParameter('page', 1);
+        $this->forward404Unless(is_integer($page));
+        $page = ($page == 1 || $page == 0) ? '' : '?page=' . $page;
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released' . $page, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 

@@ -55,8 +55,11 @@ class profileActions extends sfActions
     public function executeEpisodes(sfWebRequest $request)
     {
         $user_id = $this->getUser()->getApiUserId();
+        $page = $this->page = (int)$request->getParameter('page', 1);
+        $this->forward404Unless(is_integer($page));
+        $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;
         $subreddit_ids = array();
-        $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id);
+        $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id . $page);
         $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
         $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
         $this->future = ApiDoctrine::createQuickObjectArray($future_data['body']);
