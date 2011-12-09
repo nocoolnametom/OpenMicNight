@@ -71,6 +71,13 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                         . " has a blocked Membership within Subreddit "
                         . $this->getEpisode()->getSubredditId(), 101);
 
+            /* If the Subreddit doesn't allow pending users to post, then we fail if the user is a pending member of the Subreddit. */
+            if ($this->subredditBlocksPendingUsers())
+                $this->deleteWithException("Cannot create EpisodeAssignment "
+                        . "because sfGuardUser " . $this->getSfGuardUserId()
+                        . " has a pending Membership within Subreddit "
+                        . $this->getEpisode()->getSubredditId(), 101);
+            
             /* Only one sfGuardUser can sign up for one Episode with the same
              * AuthorType for each Application period.
              */
@@ -187,6 +194,27 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array('blocked')
         );
         return ($membership ? true : false);
+    }
+    
+    /**
+     * Checks if the User of the EpisodeAssignment has a "blocked" Membership in
+     * the Subreddit.
+     * 
+     * @see sfGuardUserSubredditMembership::getFirstByUserSubredditAndMemberships()
+     *
+     * @return bool Whether the user has a "blocked" Membership
+     */
+    public function subredditBlocksPendingUsers()
+    {
+        $pending_membership = Doctrine::getTable('sfGuardUserSubredditMembership')
+                ->getFirstByUserSubredditAndMemberships(
+                $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array('pending')
+        );
+        if ($pending_membership)
+        {
+            return ($this->getEpisode()->getSubreddit->getPreferredUsersAreFullMembers() ? false : true);
+        }
+        return false;
     }
 
     /**

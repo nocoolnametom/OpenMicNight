@@ -14,6 +14,7 @@ class profileActions extends sfActions
     public function executeIndex(sfWebRequest $request)
     {
         $user_id = $this->getUser()->getApiUserId();
+        $this->forward404Unless($user_id);
         $user_data = Api::getInstance()->get('user/' . $user_id);
         $this->user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
 
@@ -23,6 +24,7 @@ class profileActions extends sfActions
     public function executeEdit(sfWebRequest $request)
     {
         $user_id = $this->getUser()->getApiUserId();
+        $this->forward404Unless($user_id);
         $user_data = Api::getInstance()->get('user/' . $user_id);
         $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
         $this->form = new sfGuardUserAdminForm($user);
@@ -37,6 +39,7 @@ class profileActions extends sfActions
     {
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
         $user_id = $this->getUser()->getApiUserId();
+        $this->forward404Unless($user_id);
         $user_data = Api::getInstance()->get('user/' . $user_id);
         $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
 
@@ -55,6 +58,7 @@ class profileActions extends sfActions
     public function executeEpisodes(sfWebRequest $request)
     {
         $user_id = $this->getUser()->getApiUserId();
+        $this->forward404Unless($user_id);
         $page = $this->page = (int)$request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;

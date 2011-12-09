@@ -30,7 +30,7 @@ class subredditActions extends sfActions
     public function executeIndex(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $page = $this->page = (int)$request->getParameter('page', 1);
+        $page = $this->page = (int) $request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '?page=' . $page;
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit' . $page, true);
@@ -43,6 +43,43 @@ class subredditActions extends sfActions
         $subreddit_id = $this->getSubredditId($request);
         $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
+    }
+
+    public function executeJoin(sfWebREquest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $user_id = $this->getUser()->getApiUserId();
+        $this->forward404Unless($auth_key && $user_id);
+        $subreddit_id = $this->getSubredditId($request);
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id, true);
+        $subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $user_id . '&subreddit_id=' . $subreddit_id, true);
+        $memberships = ApiDoctrine::createQuickObjectArray($membership_data['body']);
+
+        // If a membership already exists we can't do anything.  Go back to the Subreddit page.
+        if (count($memberships)) {
+            $this->getUser()->setFlash('error', "Can't create membership; one already exists!");
+        } else {
+
+            $membership_data = Api::getInstance()->setUser($auth_key)->get('membershiptype?type=pending', true);
+            $pending_membership = ApiDoctrine::createQuickObject($membership_data['body'][0]);
+
+            $new_membership = array(
+                'sf_guard_user_id' => $user_id,
+                'subreddit_id' => $subreddit_id,
+                'membership_id' => $pending_membership->getIncremented(),
+            );
+
+            $create = Api::getInstance()->setUser($auth_key)->post('subredditmembership', $new_membership, false);
+            $success = $this->checkHttpCode($create);
+            if ($success) {
+                if ($subreddit->getPreferredUsersAreFullMembers())
+                    $this->getUser()->setFlash('notice', 'Joined subreddit!');
+                else
+                    $this->getUser()->setFlash('notice', 'Subreddit membership is pending approval.  Please wait to sign up for episodes.');
+            }
+        }
+        $this->redirect('subreddit/show?domain=' . $subreddit->getDomain());
     }
 
     public function executeSignup(sfWebRequest $request)
@@ -132,7 +169,7 @@ class subredditActions extends sfActions
     public function executeShow(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $page = $this->page = (int)$request->getParameter('page', 1);
+        $page = $this->page = (int) $request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;
         $subreddit_id = $this->getSubredditId($request);
@@ -141,6 +178,8 @@ class subredditActions extends sfActions
         $this->forward404Unless($this->subreddit && $this->subreddit->getId());
         $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id . $page, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $subreddit_id, true);
+        $this->membership = (array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null);
     }
 
     public function executeUpdate(sfWebRequest $request)
@@ -186,16 +225,23 @@ class subredditActions extends sfActions
             $auth_key = $this->getUser()->getApiAuthKey();
             if ($form->getValue('id')) {
                 // Update existing item.
-                $values = $form->getObject()->getModified();
-                $subreddit = $form->getObject();
-                unset($values['id']);
+                $values = $form->getValues();
                 $id = $form->getValue('id');
-                $result = Api::getInstance()->setUser($auth_key)->put('subreddit/' . $id, $values);
-                $success = $this->checkHttpCode($result);
-                if ($success)
-                    $this->getUser()->setFlash('notice', 'Subreddit was edited successfully.');
-                $test_subreddit = ApiDoctrine::createObject('Subreddit', $result['body']);
-                $subreddit = $test_subreddit ? $test_subreddit : $subreddit;
+                $subreddit = $form->getObject();
+                $subreddit_array = $subreddit->toArray();
+                foreach ($subreddit_array as $key => $value)
+                    if (array_key_exists($key, $values) && ($values[$key] == $subreddit_array[$key]))
+                        unset($values[$key]);
+                if (array_key_exists('is_active', $values))
+                    $values['is_active'] = (bool) $values['is_active'] ? 1 : 0;
+                if (count($values)) {
+                    $result = Api::getInstance()->setUser($auth_key)->put('subreddit/' . $id, $values);
+                    $success = $this->checkHttpCode($result);
+                    if ($success)
+                        $this->getUser()->setFlash('notice', 'Subreddit was edited successfully.');
+                    $test_subreddit = ApiDoctrine::createObject('Subreddit', $result['body']);
+                    $subreddit = $test_subreddit ? $test_subreddit : $subreddit;
+                }
             } else {
                 // Create new item
                 $values = $form->getValues();

@@ -1,9 +1,18 @@
 <h1><?php echo $subreddit ?></h1>
 <?php if ($sf_user->isAuthenticated()): ?>
-    <?php echo link_to('Edit', 'subreddit/edit?id=' . $subreddit->getIncremented()); ?>
-<?php endif; ?>
-<?php if ($sf_user->isAuthenticated()): ?>
-    <?php echo link_to('Signup for Upcoming Episodes', 'subreddit/signup?id=' . $subreddit->getIncremented()); ?>
+    <?php if (in_array($membership->getMembership()->getType(), array('moderator', 'admin'))): ?>
+        <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?id=' . $subreddit->getIncremented()); ?></a>
+    <?php endif; ?>
+    <div class=""membership">
+    <?php if (is_null($membership)): ?>
+        <?php echo link_to('Join Subreddit', 'subreddit/join?domain=' . $subreddit->getDomain()) ?>
+    <?php else: ?>
+             You have a <?php echo $membership->getMembership()->getDescription() ?> membership in this Subreddit.
+         <?php endif; ?>
+    </div>
+    <div class="subreddit_episode_signup_link">
+        <?php echo link_to('Signup for Upcoming Episodes', 'subreddit/signup?domain=' . $subreddit->getDomain()); ?>
+    </div>
 <?php endif; ?>
 
 <h2>Released Episodes</h2>
