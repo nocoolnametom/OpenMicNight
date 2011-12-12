@@ -1,9 +1,10 @@
 <h1><?php echo $subreddit ?></h1>
 <?php if ($sf_user->isAuthenticated()): ?>
-    <?php if ($membership && in_array($membership->getMembership()->getType(), array('moderator', 'admin'))): ?>
-        <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?id=' . $subreddit->getIncremented()); ?></a>
+    <?php if ($membership && in_array($membership->getMembership()->getType(), array('admin'))): ?>
+        <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?domain=' . $subreddit->getDomain()); ?></div>
+        <div class="subreddit_users_link"><?php echo link_to('User Memberships', 'subreddit/users?domain=' . $subreddit->getDomain()); ?></div>
     <?php endif; ?>
-    <div class=""membership">
+    <div class="membership">
     <?php if (is_null($membership)): ?>
         <?php echo link_to('Join Subreddit', 'subreddit/join?domain=' . $subreddit->getDomain()) ?>
     <?php else: ?>
@@ -14,6 +15,9 @@
         <?php echo link_to('Signup for Upcoming Episodes', 'subreddit/signup?domain=' . $subreddit->getDomain()); ?>
     </div>
 <?php endif; ?>
+        <div class="subreddit_episode_signup_link">
+            <?php echo link_to('Deadlines', 'subreddit/deadlines?domain=' . $subreddit->getDomain()); ?>
+        </div>
 
 <h2>Released Episodes</h2>
 <ul>

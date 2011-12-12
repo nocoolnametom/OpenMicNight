@@ -21,22 +21,29 @@ class subredditActions extends sfActions
                                                                                                           true);
             $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
             $this->forward404Unless(count($subreddits) && $subreddits[0]->getIncremented());
-            $subreddit_id = $subreddits[0]->getId();
+            $this->subreddit = ApiDoctrine::createObject('Subreddit',
+                                                         $subreddit_data['body'][0]);
+            $this->subreddit_id = $subreddits[0]->getId();
         } else {
-            $subreddit_id = $request->getParameter('id');
+            $auth_key = $this->getUser()->getApiAuthKey();
+            $this->subreddit_id = $request->getParameter('id');
+            $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->subreddit_id,
+                                                                          true);
+            $this->subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+            $this->forward404Unless($this->subreddit->getIncremented());
         }
-        return $subreddit_id;
+        return $this->subreddit_id;
     }
 
     public function executeUsers(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_id = $this->getSubredditId($request);
-        $members_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?subreddit_id=' . $subreddit_id,
+        $this->getSubredditId($request);
+        $members_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?subreddit_id=' . $this->subreddit_id,
                                                                     true);
         $this->members = ApiDoctrine::createQuickObjectArray($members_data['body']);
 
-        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $subreddit_id,
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
                                                                        true);
         $membership = is_array($membership_data['body']) && array_key_exists(0,
                                                                              $membership_data['body'])
@@ -69,6 +76,9 @@ class subredditActions extends sfActions
               $this->form['display_membership']);
 
         $this->subreddit_id = $membership->getSubredditId();
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->subreddit_id,
+                                                                       true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
                                                                           true);
@@ -95,7 +105,11 @@ class subredditActions extends sfActions
         $membership = ApiDoctrine::createObject('sfGuardUserSubredditMembership',
                                                 $membership_data['body']);
         $this->forward404Unless($membership && $membership->getId());
-        $subreddit_id = $membership->getSubredditId();
+        
+        $this->subreddit_id = $membership->getSubredditId();
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->subreddit_id,
+                                                                       true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $subreddit_id,
                                                                           true);
@@ -116,7 +130,7 @@ class subredditActions extends sfActions
 
         $this->processMembershipForm($request, $this->form);
 
-        $this->setTemplate('edit');
+        $this->setTemplate('edit_membership');
     }
 
     public function executeIndex(sfWebRequest $request)
@@ -133,8 +147,8 @@ class subredditActions extends sfActions
     public function executeEpisodes(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_id = $this->getSubredditId($request);
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id,
+        $this->getSubredditId($request);
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $this->subreddit_id,
                                                                      true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
@@ -144,11 +158,8 @@ class subredditActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $user_id = $this->getUser()->getApiUserId();
         $this->forward404Unless($auth_key && $user_id);
-        $subreddit_id = $this->getSubredditId($request);
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id,
-                                                                      true);
-        $subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
-        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $user_id . '&subreddit_id=' . $subreddit_id,
+        $this->getSubredditId($request);
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $user_id . '&subreddit_id=' . $this->subreddit_id,
                                                                        true);
         $memberships = ApiDoctrine::createQuickObjectArray($membership_data['body']);
 
@@ -164,7 +175,7 @@ class subredditActions extends sfActions
 
             $new_membership = array(
                 'sf_guard_user_id' => $user_id,
-                'subreddit_id' => $subreddit_id,
+                'subreddit_id' => $this->subreddit_id,
                 'membership_id' => $pending_membership->getIncremented(),
             );
 
@@ -173,14 +184,14 @@ class subredditActions extends sfActions
                                                                    false);
             $success = $this->checkHttpCode($create);
             if ($success) {
-                if ($subreddit->getPreferredUsersAreFullMembers())
+                if ($this->subreddit->getPreferredUsersAreFullMembers())
                     $this->getUser()->setFlash('notice', 'Joined subreddit!');
                 else
                     $this->getUser()->setFlash('notice',
                                                'Subreddit membership is pending approval.  Please wait to sign up for episodes.');
             }
         }
-        $this->redirect('subreddit/show?domain=' . $subreddit->getDomain());
+        $this->redirect('subreddit/show?domain=' . $this->subreddit->getDomain());
     }
 
     public function executeSignup(sfWebRequest $request)
@@ -188,18 +199,15 @@ class subredditActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
 
         // Get Subreddit info
-        $subreddit_id = $this->getSubredditId($request);
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id,
-                                                                      true);
-        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        $this->getSubredditId($request);
 
         // Get unreleased Episodes
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/future?subreddit_id=' . $subreddit_id,
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/future?subreddit_id=' . $this->subreddit_id,
                                                                      true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
 
         // Get the Deadlines for this Subreddit
-        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $subreddit_id,
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $this->subreddit_id,
                                                                      true);
         $this->deadlines = ApiDoctrine::createQuickObjectArray($deadline_data['body']);
 
@@ -208,7 +216,7 @@ class subredditActions extends sfActions
         foreach ($this->deadlines as $deadline) {
             $search_authortypes[] = $deadline->getAuthorTypeId();
         }
-        $authortype_data = Api::getInstance()->get('authortype?id=' . implode(',',
+        $authortype_data = Api::getInstance()->setUser($auth_key)->get('authortype?id=' . implode(',',
                                                                               $search_authortypes),
                                                                               true);
         $authortypes = ApiDoctrine::createQuickObjectArray($authortype_data['body']);
@@ -222,7 +230,7 @@ class subredditActions extends sfActions
         foreach ($this->episodes as $episode) {
             $search_assignments[] = $episode->getIncremented();
         }
-        $assignment_data = Api::getInstance()->get('episodeassignment?episode_id='
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id='
                 . implode(',', $search_assignments) . '&missed_deadline=0', true);
         $assignments = ApiDoctrine::createQuickObjectArray($assignment_data['body']);
 
@@ -243,6 +251,211 @@ class subredditActions extends sfActions
         }
     }
 
+    public function executeDeadlines(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->getSubredditId($request);
+
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $this->subreddit_id,
+                                                                     true);
+        $this->deadlines = ApiDoctrine::createQuickObjectArray($deadline_data['body']);
+
+        $this->deadline_display = array();
+        foreach ($this->deadlines as $deadline) {
+            $seconds = $deadline->getSeconds();
+            $days = (int) ($seconds / 86400);
+            $plural = $days > 1 ? 'days' : 'day';
+            $hours = (int) (($seconds - ($days * 86400)) / 3600);
+            $mins = (int) (($seconds - $days * 86400 - $hours * 3600) / 60);
+            $secs = (int) ($seconds - ($days * 86400) - ($hours * 3600) - ($mins * 60));
+            $display = ($days ? "$days $plural" : '')
+                    . ($hours ? ", $hours hours" : '')
+                    . ($mins ? ", $mins minutes" : '')
+                    . ($secs ? ", $secs seconds" : '');
+            if ($seconds == 0)
+                $display = "No deadline";
+            $this->deadline_display[$deadline->getIncremented()] = $display;
+        }
+
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                       true);
+        $membership = is_array($membership_data['body']) && array_key_exists(0,
+                                                                             $membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($membership_data['body'][0])
+                    : null;
+        $this->editable = $membership && in_array($membership->getMembership()->getType(),
+                                            array(
+                    'admin',
+                )) ? true : false;
+    }
+    
+    public function executeAdd_deadline(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->getSubredditId($request);
+        
+        // Check if the current user has permission to edit the deadline.
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                       true);
+        $membership = is_array($membership_data['body']) && array_key_exists(0,
+                                                                             $membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($membership_data['body'][0])
+                    : null;
+        // @todo: uncomment the following lines so that the deadline editing is limited.
+        /*$this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
+                                            array(
+                    'admin',
+                )));
+         */
+        
+        $deadline = new Deadline();
+        $deadline->setSubredditId($this->subreddit_id);
+        
+        $this->form = new DeadlineForm($deadline);
+        unset($this->form['subreddit_id']);
+    }
+    
+    public function executeEdit_deadline(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline/' . $request->getParameter('id'), true);
+        $deadline = ApiDoctrine::createObject('Deadline', $deadline_data['body']);
+        $this->forward404Unless($deadline && $deadline->getIncremented());
+        
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $deadline->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        
+        // Check if the current user has permission to edit the deadline.
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                       true);
+        $membership = is_array($membership_data['body']) && array_key_exists(0,
+                                                                             $membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($membership_data['body'][0])
+                    : null;
+        // @todo: uncomment the following lines so that the deadline editing is limited.
+        /*$this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
+                                            array(
+                    'admin',
+                )));
+         */
+        
+        $this->form = new DeadlineForm($deadline);
+        unset($this->form['subreddit_id']);
+        
+    }
+    
+    public function executeDelete_deadline(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline/' . $request->getParameter('id'), true);
+        $deadline = ApiDoctrine::createObject('Deadline', $deadline_data['body']);
+        $this->forward404Unless($deadline->getIncremented());
+        
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $deadline->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        
+        // Check if the current user has permission to edit the deadline.
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                       true);
+        $membership = is_array($membership_data['body']) && array_key_exists(0,
+                                                                             $membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($membership_data['body'][0])
+                    : null;
+        // @todo: uncomment the following lines so that the deadline editing is limited.
+        /*$this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
+                                            array(
+                    'admin',
+                )));
+         */
+        
+        $result = Api::getInstance()->setUser($auth_key)->delete('subredditdeadline/' . $deadline->getId(),
+                                                                 true);
+        $success = $this->checkHttpCode($result);
+        if ($success)
+            $this->getUser()->setFlash('notice',
+                                       'Deadline was deleted successfully.');
+
+        $this->redirect('subreddit/deadlines?domain=' . $this->subreddit->getDomain());
+    }
+    
+    public function executeUpdatedeadline(sfWebRequest $request)
+    {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
+        $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
+
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline/' . $request->getParameter('id'),
+                                                                                                                       true);
+        $deadline = ApiDoctrine::createObject('Deadline',
+                                                $deadline_data['body']);
+        if (!$deadline || !$deadline->getId())
+        {
+            $deadline = new Deadline();
+            $deadline->setSubredditId($request->getParameter('subreddit_id'));
+        }
+        
+        $this->subreddit_id = $deadline->getSubredditId();
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->subreddit_id,
+                                                                       true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+
+        $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                          true);
+        $my_membership = is_array($my_membership_data['body']) && array_key_exists(0,
+                                                                                   $my_membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($my_membership_data['body'][0])
+                    : null;
+        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
+        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
+          array(
+          'admin',
+          )
+         * )); */
+
+        $this->form = new DeadlineForm($deadline);
+        unset($this->form['subreddit_id']);
+
+        $this->processDeadlineForm($request, $this->form);
+
+        if ($deadline && $deadline->getIncremented())
+            $this->setTemplate('edit_deadline');
+        else
+            $this->setTemplate('add_deadline');
+    }
+
+    public function executeCreatedeadline(sfWebRequest $request)
+    {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
+        $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
+
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('subreddit_id'),
+                                                                                                                       true);
+        $subreddit = ApiDoctrine::createObject('Subreddit',
+                                                $subreddit_data['body']);
+        $this->forward404Unless($this->subreddit && $this->subreddit->getId());
+
+        $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
+                                                                          true);
+        $my_membership = is_array($my_membership_data['body']) && array_key_exists(0,
+                                                                                   $my_membership_data['body'])
+                    ? ApiDoctrine::createQuickObject($my_membership_data['body'][0])
+                    : null;
+        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
+        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
+          array(
+          'admin',
+          )
+         * )); */
+
+        $this->form = new DeadlineForm();
+        unset($this->form['subreddit_id']);
+
+        $this->processDeadlineForm($request, $this->form);
+
+        $this->setTemplate('edit_deadline');
+    }
+    
     public function executeNew(sfWebRequest $request)
     {
         $this->forward404Unless($this->getUser()->isAuthenticated());
@@ -265,13 +478,9 @@ class subredditActions extends sfActions
     {
         $this->forward404Unless($this->getUser()->isAuthenticated());
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'),
-                                                                                                            true);
-        $subreddit = ApiDoctrine::createObject('Subreddit',
-                                               $subreddit_data['body']);
-        $this->forward404Unless($subreddit && $subreddit->getId());
+        $this->getSubredditId($request);
 
-        $this->form = new SubredditForm($subreddit);
+        $this->form = new SubredditForm($this->subreddit);
     }
 
     public function executeShow(sfWebRequest $request)
@@ -280,16 +489,11 @@ class subredditActions extends sfActions
         $page = $this->page = (int) $request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;
-        $subreddit_id = $this->getSubredditId($request);
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $subreddit_id,
-                                                                      true);
-        $this->subreddit = ApiDoctrine::createObject('Subreddit',
-                                                     $subreddit_data['body']);
-        $this->forward404Unless($this->subreddit && $this->subreddit->getId());
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $subreddit_id . $page,
+        $this->getSubredditId($request);
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released?subreddit_id=' . $this->subreddit_id . $page,
                                                                      true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
-        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $subreddit_id,
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id,
                                                                        true);
         $this->membership = (array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0])
                             : null);
@@ -301,13 +505,10 @@ class subredditActions extends sfActions
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'),
-                                                                                                            true);
-        $subreddit = ApiDoctrine::createObject('Subreddit',
-                                               $subreddit_data['body']);
-        $this->forward404Unless($subreddit && $subreddit->getId());
 
-        $this->form = new SubredditForm($subreddit);
+        $this->getSubredditId($request);
+
+        $this->form = new SubredditForm($this->subreddit);
 
         $this->processForm($request, $this->form);
 
@@ -320,14 +521,11 @@ class subredditActions extends sfActions
         $request->checkCSRFProtection();
 
         $auth_key = $this->getUser()->getApiAuthKey();
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'),
-                                                                                                            true);
-        $subreddit = ApiDoctrine::createObject('Subreddit',
-                                               $subreddit_data['body']);
-        $this->forward404Unless($subreddit && $subreddit->getId());
+
+        $this->getSubredditId($request);
 
         //$subreddit->delete();
-        $result = Api::getInstance()->setUser($auth_key)->delete('subreddit/' . $subreddit->getId(),
+        $result = Api::getInstance()->setUser($auth_key)->delete('subreddit/' . $this->subreddit->getId(),
                                                                  true);
         $success = $this->checkHttpCode($result);
         if ($success)
@@ -390,6 +588,58 @@ class subredditActions extends sfActions
         }
     }
     
+    protected function processDeadlineForm(sfWebRequest $request, sfForm $form)
+    {
+        $form->bind($request->getParameter($form->getName()),
+                                           $request->getFiles($form->getName()));
+        if ($form->isValid()) {
+            $auth_key = $this->getUser()->getApiAuthKey();
+            if ($form->getValue('id')) {
+                // Update existing item.
+                $values = $form->getValues();
+                $id = $form->getValue('id');
+                $deadline = $form->getObject();
+                $deadline_array = $deadline->toArray();
+                foreach ($deadline_array as $key => $value)
+                    if (array_key_exists($key, $values) && ($values[$key] == $deadline_array[$key]))
+                        unset($values[$key]);
+                if (array_key_exists('restricted_until_previous_misses_deadline', $values))
+                    $values['restricted_until_previous_misses_deadline'] = (bool) $values['restricted_until_previous_misses_deadline'] ? 1 : 0;
+                if (count($values)) {
+                    $result = Api::getInstance()->setUser($auth_key)->put('subredditdeadline/' . $id,
+                                                                          $values);
+                    $success = $this->checkHttpCode($result);
+                    if ($success)
+                        $this->getUser()->setFlash('notice',
+                                                   'Deadline was edited successfully.');
+                }
+            } else {
+                // Create new item
+                $values = $form->getValues();
+                $deadline = $form->getObject();
+                $subreddit_id = $request->getParameter('subreddit_id');
+                foreach ($values as $key => $value) {
+                    if (is_null($value))
+                        unset($values[$key]);
+                }
+                $values['subreddit_id'] = $subreddit_id;
+                $result = Api::getInstance()->setUser($auth_key)->post('subredditdeadline',
+                                                                       $values);
+                $success = $this->checkHttpCode($result);
+                if ($success)
+                {
+                    $this->getUser()->setFlash('notice',
+                                               'Deadline was created successfully.');
+                }
+            }
+
+            $deadline = ApiDoctrine::createQuickObject(
+                                                $result['body']);
+            
+            $this->redirect('subreddit/edit_deadline?id=' . $deadline->getId());
+        }
+    }
+
     protected function processMembershipForm(sfWebRequest $request, sfForm $form)
     {
         $form->bind($request->getParameter($form->getName()),
@@ -406,7 +656,8 @@ class subredditActions extends sfActions
                     if (array_key_exists($key, $values) && ($values[$key] == $membership_array[$key]))
                         unset($values[$key]);
                 if (array_key_exists('display_membership', $values))
-                    $values['display_membership'] = (bool) $values['display_membership'] ? 1 : 0;
+                    $values['display_membership'] = (bool) $values['display_membership']
+                                ? 1 : 0;
                 if (count($values)) {
                     $result = Api::getInstance()->setUser($auth_key)->put('subredditmembership/' . $id,
                                                                           $values);
@@ -430,6 +681,7 @@ class subredditActions extends sfActions
                                                                                 $result['body'][0])
                         ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+            die(var_dump($result));
         } else {
             $this->getUser()->setFlash('notice',
                                        'Action was completed successfully.');

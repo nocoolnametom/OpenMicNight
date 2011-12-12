@@ -1,16 +1,17 @@
-<h1>Edit Membership for <?php echo $username ?></h1>
+<h1>Edit Deadline</h1>
 
 <?php use_stylesheets_for_form($form) ?>
 <?php use_javascripts_for_form($form) ?>
 
-<form action="<?php echo url_for('subreddit/updatemembership?id='.$form->getObject()->getId()) ?>" method="post" <?php $form->isMultipart() and print 'enctype="multipart/form-data" ' ?>>
+<form action="<?php echo url_for('subreddit/updatedeadline?id='.$form->getObject()->getId()) ?>" method="post" <?php $form->isMultipart() and print 'enctype="multipart/form-data" ' ?>>
 <input type="hidden" name="sf_method" value="put" />
   <table>
     <tfoot>
       <tr>
         <td colspan="2">
           <?php echo $form->renderHiddenFields(false) ?>
-          <a href="<?php echo url_for('subreddit/users?domain=' . $subreddit->getDomain()) ?>">Back to list</a>
+          <a href="<?php echo url_for('subreddit/deadlines?domain=' . $subreddit->getDomain()) ?>">Back to Deadlines</a>
+          &nbsp;<a href="<?php echo url_for('subreddit/delete_deadline?id=' . $form->getObject()->getId()) ?>">Delete Deadline</a>
           <input type="submit" value="Save" />
         </td>
       </tr>

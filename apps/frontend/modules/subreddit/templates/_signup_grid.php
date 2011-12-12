@@ -7,17 +7,17 @@ $assigned_author_types = $sf_data->getRaw('assigned_author_types');
 <table class="subreddit_grid">
     <thead>
         <tr>
-            <td>Date</td>
+            <th>Date</th>
             <?php $columns = 0; ?>
             <?php foreach ($deadlines as $deadline): ?>
                 <?php /* @var $deadline Deadline */ ?>
-                <td><?php
+                <th><?php
             $authortype = $authortypes[$deadline->getAuthorTypeId()];
             /* @var $authortype AuthorType */
             echo ucwords(str_replace('_', ' ', $authortype->getType()));
             $columns++;
 
-                ?></td>
+                ?></th>
             <?php endforeach; ?>
         </tr>
     </thead>

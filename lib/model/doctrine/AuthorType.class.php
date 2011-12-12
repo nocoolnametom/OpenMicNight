@@ -19,7 +19,8 @@ class AuthorType extends BaseAuthorType
      */
     public function __toString()
     {
-        return $this->getDescription();
+        //return $this->getDescription();
+        return ucwords(str_replace('_', ' ', $this->getType()));
     }
     
     public function setIncremented($id)
