@@ -16,9 +16,9 @@ generator:
 #        default_format:                json    # the default format of the response. If not set, will default to json. accepted values are "json", "xml" or "yaml"
 #        display:                       []      # list here the fields to render in the response
 # list here relations to embed in the response
-        embed_relations:               [ Membership ]
-#        embedded_relations_hide:
-#          Category:                    [id]    # you can hide fields inside a certain embedded relation
+        embed_relations:               [ sfGuardUser, Membership ]
+        embedded_relations_hide:
+          sfGuardUser:                 [ password, salt, algorithm, reddit_validation_key, is_super_admin, is_active, is_validated, last_logged_in, updated_at, email_authorization_key, authorized_at, is_authorized ]
 #        global_additional_fields:      []      # list here additionnal calculated global fields
 #        hide:                          [id]    # list here the fields you don't want to expose
 #        max_items:                     0       # uncomment to fix an absolute limit to the number of items in the response

@@ -1,6 +1,6 @@
 <h1><?php echo $subreddit ?></h1>
 <?php if ($sf_user->isAuthenticated()): ?>
-    <?php if (in_array($membership->getMembership()->getType(), array('moderator', 'admin'))): ?>
+    <?php if ($membership && in_array($membership->getMembership()->getType(), array('moderator', 'admin'))): ?>
         <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?id=' . $subreddit->getIncremented()); ?></a>
     <?php endif; ?>
     <div class=""membership">

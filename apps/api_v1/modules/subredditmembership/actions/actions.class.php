@@ -21,6 +21,24 @@ class subredditmembershipActions extends autosubredditmembershipActions
         return true;
     }
 
+    /**
+     * Returns the list of validators for an update request.
+     * @return  array  an array of validators
+     */
+    public function getUpdateValidators()
+    {
+        $validators =  $this->getCreateValidators();
+        $validators['sf_guard_user_id'] = new sfValidatorDoctrineChoice(array(
+            'model' => Doctrine_Core::getTable('sfGuardUserSubredditMembership')->getRelation('sfGuardUser')->getAlias(),
+            'required' => false
+            ));
+        $validators['subreddit_id'] = new sfValidatorDoctrineChoice(array(
+            'model' => Doctrine_Core::getTable('sfGuardUserSubredditMembership')->getRelation('Subreddit')->getAlias(),
+            'required' => false
+            ));
+        return $validators;
+    }
+
     public function validateCreate($payload, sfWebRequest $request = null)
     {
         $params = $this->parsePayload($payload);
@@ -111,5 +129,4 @@ class subredditmembershipActions extends autosubredditmembershipActions
             throw new sfException("Your user does not have permissions to "
                     . "update user memberships in this Subreddit.", 403);
     }
-
 }

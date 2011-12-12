@@ -36,6 +36,14 @@ class ApiDoctrineQuick
         }
 
         if (isset($by)) {
+            if (array_key_exists($by, $this->_data))
+            {
+                if (is_array($this->_data[$by]))
+                    return new ApiDoctrineQuick($this->_data[$by]);
+                else
+                    return $this->_data[$by];
+            }
+            
             $key = trim($this->from_camel_case($by), '_');
 
             if ($this->array_key_exists_nc($key, $this->_data)) {

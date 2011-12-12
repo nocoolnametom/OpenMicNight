@@ -30,14 +30,16 @@ class Subreddit extends BaseSubreddit
         $this->_lastModified = array();
     }
 
-    public function setName($name)
+    public function save(Doctrine_Connection $conn = null)
     {
-        $this->_set('name', $name);
-        if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
-            $bucket_name = $this->createAmazonBucketName(
-                    ProjectConfiguration::getAmazonBucketPrefix() . $name);
-            $this->setBucketName($bucket_name);
+        if ($this->isNew() || (in_array('name', $this->_modified) && $this->_get('name'))) {
+            if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
+                $bucket_name = $this->createAmazonBucketName(
+                        ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
+                $this->setBucketName($bucket_name);
+            }
         }
+        parent::save($conn);
     }
 
     public function createAmazonBucketName($name)
@@ -45,7 +47,8 @@ class Subreddit extends BaseSubreddit
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
-            $s3->create_bucket($name, AmazonS3::REGION_US_E1, AmazonS3::ACL_PUBLIC);
+            $s3->create_bucket($name, AmazonS3::REGION_US_E1,
+                               AmazonS3::ACL_PUBLIC);
             $exists = $s3->if_bucket_exists($name);
             $attempts = 0;
             while (!$exists && $attempts < 10) {
@@ -216,11 +219,11 @@ class Subreddit extends BaseSubreddit
 
         return $deadline_rules;
     }
-    
+
     public function getFirstDeadlineId()
     {
         $deadline_rules = $this->getDeadlineRules();
-        
+
         $longest = 0;
         $longest_id = null;
         foreach ($deadline_rules as $id => $seconds) {
@@ -271,11 +274,13 @@ AND episode_assignment.author_type_id = $longest_id;
             $episode->save();
 
             $release_date = $episode->getReleaseDate('U');
-            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($longest_id, $episode->getSubredditId());
+            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($longest_id,
+                                                                                    $episode->getSubredditId());
             $deadline = $release_date - $seconds;
 
             // Send an email to that user telling them their EpisodeAssignment is now valid
-            $this->sendEmail($assignment->getSfGuardUserId(), $episode->getIncremented(), $deadline);
+            $this->sendEmail($assignment->getSfGuardUserId(),
+                             $episode->getIncremented(), $deadline);
         }
 
 
@@ -301,7 +306,8 @@ AND (
         $rules_query = '';
         $first = true;
         foreach ($deadline_rules as $id => $seconds) {
-            $rules_query .= ($first ? '' : ' OR ') . "(ea.author_type_id = $id AND ('" . date('Y-m-d H:i:s', time() + $seconds) . "' >= e.release_date))";
+            $rules_query .= ($first ? '' : ' OR ') . "(ea.author_type_id = $id AND ('" . date('Y-m-d H:i:s',
+                                                                                              time() + $seconds) . "' >= e.release_date))";
             $first = false;
         }
         $query = Doctrine_Query::create()
@@ -357,11 +363,13 @@ AND (
             if (!is_null($next_assignment) && $next_assignment instanceof EpisodeAssignment) {
                 // We assemble the deadline date for the EpisodeAssignment.
                 $release_date = $episode->getReleaseDate('U');
-                $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($next_assignment->getAuthorTypeId(), $episode->getSubredditId());
+                $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($next_assignment->getAuthorTypeId(),
+                                                                                        $episode->getSubredditId());
                 $deadline = $release_date - $seconds;
 
                 // Send an email to that user telling them their EpisodeAssignment is now valid
-                $this->sendEmail($next_assignment->getSfGuardUserId(), $episode->getIncremented(), $deadline);
+                $this->sendEmail($next_assignment->getSfGuardUserId(),
+                                 $episode->getIncremented(), $deadline);
             }
         }
     }
@@ -372,7 +380,8 @@ AND (
         ProjectConfiguration::registerZend();
 
         $mail = new Zend_Mail();
-        $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+        $mail->addHeader('X-MailGenerator',
+                         ProjectConfiguration::getApplicationName());
         $parameters = array(
             'user_id' => $user_id,
             'episode_id' => $episode_id,
@@ -385,14 +394,18 @@ AND (
         $name = ($user->getPreferredName() ?
                         $user->getPreferredName() : $user->getFullName());
 
-        $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode', $user->getPreferredLanguage());
+        $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode',
+                                                                           $user->getPreferredLanguage());
 
         $subject = $email->generateSubject($parameters);
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $mail->setBodyText($body);
 
-        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->setFrom(sfConfig::get('app_email_address',
+                                     'donotreply@' . ProjectConfiguration::getApplicationName()),
+                                     sfconfig::get('app_email_name',
+                                                   ProjectConfiguration::getApplicationName() . 'Team'));
         $mail->addTo($address, $name);
         $mail->setSubject($subject);
         if (sfConfig::get('sf_environment') == 'prod') {
@@ -402,5 +415,4 @@ AND (
         }
         $user->addLoginMessage('You have an episode that you can work with!');
     }
-
 }

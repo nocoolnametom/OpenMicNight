@@ -73,4 +73,8 @@ class sfGuardUserSubredditMembership extends BasesfGuardUserSubredditMembership
         throw new sfException($message, $code, $previous);
     }
 
+    public function getFullName()
+    {
+        return $this->getSfGuardUser()->getFullName();
+    }
 }
