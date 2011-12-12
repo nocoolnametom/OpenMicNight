@@ -20,13 +20,13 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
     {
         $validators = $this->getCreateValidators();
         $validators['author_type_id'] = new sfValidatorDoctrineChoice(array(
-            'model' => Doctrine_Core::getTable('Deadline')->getRelation('AuthorType')->getAlias(),
-            'required' => false,
-            ));
+                    'model' => Doctrine_Core::getTable('Deadline')->getRelation('AuthorType')->getAlias(),
+                    'required' => false,
+                ));
         $validators['subreddit_id'] = new sfValidatorDoctrineChoice(array(
-            'model' => Doctrine_Core::getTable('Deadline')->getRelation('Subreddit')->getAlias(),
-            'required' => false,
-            ));
+                    'model' => Doctrine_Core::getTable('Deadline')->getRelation('Subreddit')->getAlias(),
+                    'required' => false,
+                ));
         return $validators;
     }
 
@@ -52,9 +52,7 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
         $subreddit_id = $params['subreddit_id'];
 
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
-                ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                        $subreddit_id,
-                                                        array(
+                ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $subreddit_id, array(
             'admin',
                 ));
 
@@ -78,9 +76,7 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
         $subreddit_id = $deadline->getSubredditId();
 
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
-                ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                        $subreddit_id,
-                                                        array(
+                ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $subreddit_id, array(
             'admin',
                 ));
 
@@ -93,8 +89,6 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
     {
         parent::validateUpdate($payload, $request);
 
-        $params = $this->parsePayload($payload);
-
         $primaryKey = $request->getParameter('id');
 
         $params = $this->parsePayload($payload);
@@ -103,14 +97,12 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
         if (!$user)
             throw new sfException('Action requires an auth token.', 401);
 
-        $subredditmembership = sfGuardUserSubredditMembershipTable::getInstance()->find($primaryKey);
+        $deadline = DeadlineTable::getInstance()->find($request->getParameter('id'));
 
-        $subreddit_id = $subredditmembership->getSubredditId();
+        $subreddit_id = $deadline->getSubredditId();
 
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
-                ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
-                                                        $subreddit_id,
-                                                        array(
+                ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $subreddit_id, array(
             'admin',
                 ));
 
@@ -118,4 +110,5 @@ class subredditdeadlineActions extends autosubredditdeadlineActions
             throw new sfException("Your user does not have permissions to "
                     . "update Deadlines in this Subreddit.", 403);
     }
+
 }

@@ -631,12 +631,15 @@ class subredditActions extends sfActions
                     $this->getUser()->setFlash('notice',
                                                'Deadline was created successfully.');
                 }
+                $deadline = ApiDoctrine::createQuickObject(
+                                                $result['body']);
+                if (!$deadline || !$deadline->getIncremented())
+                    $this->redirect('subreddit/deadlines?id=' . $subreddit_id);
             }
 
-            $deadline = ApiDoctrine::createQuickObject(
-                                                $result['body']);
             
-            $this->redirect('subreddit/edit_deadline?id=' . $deadline->getId());
+            
+            $this->redirect('subreddit/edit_deadline?id=' . $id);
         }
     }
 
@@ -681,7 +684,6 @@ class subredditActions extends sfActions
                                                                                 $result['body'][0])
                         ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
-            die(var_dump($result));
         } else {
             $this->getUser()->setFlash('notice',
                                        'Action was completed successfully.');
