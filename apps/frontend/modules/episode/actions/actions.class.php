@@ -34,7 +34,7 @@ class episodeActions extends sfActions
             'episode_id' => $episode_id,
             'sf_guard_user_id' => $user_id,
         );
-        $create = Api::getInstance()->setUser($auth_key)->post('episodeassignment', $post_values, false);
+        $result = Api::getInstance()->setUser($auth_key)->post('episodeassignment', $post_values, false);
         $success = $this->checkHttpCode($result);
         if ($success)
             $this->getUser()->setFlash('notice', 'Registered for Episode!');

@@ -1,20 +1,15 @@
 <?php use_stylesheets_for_form($form) ?>
 <?php use_javascripts_for_form($form) ?>
 
-<form action="<?php echo url_for('episode/' . (is_null($form->getObject()->getId()) ? 'create' : 'update') . (!is_null($form->getObject()->getId()) ? '?id=' . $form->getObject()->getId() : '')) ?>" method="post" <?php $form->isMultipart() and print 'enctype="multipart/form-data" ' ?>>
-    <?php if (!is_null($form->getObject()->getId())): ?>
-        <input type="hidden" name="sf_method" value="put" />
-    <?php endif; ?>
+<form action="<?php echo url_for('episode/update?id=' . $form->getObject()->getId()) ?>" method="post" <?php $form->isMultipart() and print 'enctype="multipart/form-data" ' ?>>
+    <input type="hidden" name="sf_method" value="put" />
     <table>
         <tfoot>
             <tr>
                 <td colspan="2">
                     <?php echo $form->renderHiddenFields(false) ?>
                     &nbsp;<a href="<?php echo url_for('profile/episodes') ?>">Back to Episodes</a>
-                    <?php if (!is_null($form->getObject()->getId())): ?>
-
-                        &nbsp;<?php echo (($is_submitted ? '<span class="submitted">Waiting for Approval</span>' : link_to('Submit For Approval', 'episode/submit?id=' . $form->getObject()->getId(), array('confirm' => 'Are you sure?')))) ?>
-                    <?php endif; ?>
+                    &nbsp;<?php echo (($is_submitted ? '<span class="submitted">Waiting for Approval</span>' : link_to('Submit For Approval', 'episode/submit?id=' . $form->getObject()->getId(), array('confirm' => 'Are you sure?')))) ?>
                     &nbsp;<?php echo link_to('Preview', 'episode/show?id=' . $form->getObject()->getId()) ?>
                     <input type="submit" value="Save" />
                 </td>
