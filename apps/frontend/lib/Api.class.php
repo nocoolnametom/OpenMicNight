@@ -7,6 +7,7 @@
  */
 class Api
 {
+
     /** @var string */
     protected $_key;
 
@@ -66,9 +67,7 @@ class Api
 
     protected function makeUrl($location)
     {
-        return rtrim($this->_location, '/') . '/' . $location . (strpos($location,
-                                                                        '?') !== false
-                            ? '&' : '?')
+        return rtrim($this->_location, '/') . '/' . $location . (strpos($location, '?') !== false ? '&' : '?')
                 . $this->assembleApiAuthentication();
     }
 
@@ -80,8 +79,7 @@ class Api
         $payload = $serializer->serialize($payload_array);
 
         if (!isset($payload) || !$payload) {
-            throw new sfException(sprintf('Could not package payload as %s data!',
-                                          $format));
+            throw new sfException(sprintf('Could not package payload as %s data!', $format));
         }
 
         return $payload;
@@ -103,13 +101,11 @@ class Api
             if ($payload == "" || $payload == "[]" || $payload == "{}" || $payload = "()")
                 $payload_array = array();
             else
-                throw new sfException(sprintf('Could not parse payload, obviously not a valid %s data!',
-                                              $format));
+                throw new sfException(sprintf('Could not parse payload, obviously not a valid %s data!', $format));
         }
 
         if ($remove_api_stuff) {
-            $payload_array = array_diff_key($payload_array,
-                                            array(
+            $payload_array = array_diff_key($payload_array, array(
                 'api_key' => 'api_key',
                 'time' => 'time',
                 'signature' => 'signature',
@@ -124,14 +120,12 @@ class Api
     {
         if (!isset($this->_format)) {
             $format = sfConfig::get('app_web_app_api_format', 'json');
-            if (!in_array($format,
-                          array(
+            if (!in_array($format, array(
                         0 => 'json',
                         1 => 'xml',
                         2 => 'yaml',
                     ))) {
-                throw new sfException(sprintf('This API does not support the format %s',
-                                              $format));
+                throw new sfException(sprintf('This API does not support the format %s', $format));
             }
             $this->_format = $format;
         }
@@ -161,8 +155,7 @@ class Api
         curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
 
         // Set the accept type to JSON
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER,
-                    array('Accept: application/json'));
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, array('Accept: application/json'));
     }
 
     protected function doExecute(&$curlHandle, $iterator = 0)
@@ -175,14 +168,11 @@ class Api
             curl_close($curlHandle);
 
             if ($iterator < 4) {
-                if (in_array($this->_responseInfo['http_code'], array(301, 302)) && array_key_exists('redirect_url',
-                                                                                                     $this->_responseInfo) && strlen($this->_responseInfo['redirect_url']) > 0) {
+                if (in_array($this->_responseInfo['http_code'], array(301, 302)) && array_key_exists('redirect_url', $this->_responseInfo) && strlen($this->_responseInfo['redirect_url']) > 0) {
                     $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL,
-                                $this->_responseInfo['redirect_url']);
+                    curl_setopt($ch, CURLOPT_URL, $this->_responseInfo['redirect_url']);
                     $this->doExecute($ch, ++$iterator);
-                } elseif (in_array($this->_responseInfo['http_code'],
-                                   array(301, 302))) {
+                } elseif (in_array($this->_responseInfo['http_code'], array(301, 302))) {
                     $ch = curl_init();
                     curl_setopt($ch, CURLOPT_URL, $this->_responseInfo['url']);
                     $this->doExecute($ch, ++$iterator);
@@ -198,8 +188,7 @@ class Api
     {
         $response = array(
             'headers' => $this->_responseInfo,
-            'body' => $this->parsePayload($this->_responseBody,
-                                          $remove_api_stuff),
+            'body' => $this->parsePayload($this->_responseBody, $remove_api_stuff),
         );
         return $response;
     }
@@ -209,6 +198,14 @@ class Api
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $this->makeUrl($location));
         $this->doExecute($ch);
+        
+        $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, 'application.log', array(
+                    'priority' => ($this->_responseInfo['http_code'] == 200 ? sfLogger::INFO : sfLogger::WARNING),
+                    'getpost~GET|location~'.$location.'|url~' . $this->_responseInfo['url'] . '|' . 'http_code~' . $this->_responseInfo['http_code'] . '|response~' . $this->_responseBody,
+                )));
+        
         return $this->doResponse($remove_api_stuff);
     }
 
@@ -222,6 +219,14 @@ class Api
         curl_setopt($ch, CURLOPT_POST, 1);
 
         $this->doExecute($ch);
+        
+        $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, 'application.log', array(
+                    'priority' => ($this->_responseInfo['http_code'] == 200 ? sfLogger::INFO : sfLogger::WARNING),
+                    'getpost~POST|location~'.$location.'|url~' . $this->_responseInfo['url'] . '|' . 'http_code~' . $this->_responseInfo['http_code'] . '|response~' . $this->_responseBody . '|request~' . $request,
+                )));
+        
         return $this->doResponse($remove_api_stuff);
     }
 
@@ -243,6 +248,13 @@ class Api
         curl_setopt($ch, CURLOPT_PUT, true);
 
         $this->doExecute($ch);
+        
+        $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, 'application.log', array(
+                    'priority' => ($this->_responseInfo['http_code'] == 200 ? sfLogger::INFO : sfLogger::WARNING),
+                    'getpost~PUT|location~'.$location.'|url~' . $this->_responseInfo['url'] . '|' . 'http_code~' . $this->_responseInfo['http_code'] . '|response~' . $this->_responseBody . '|request~' . $request,
+                )));
 
         fclose($fh);
         return $this->doResponse($remove_api_stuff);
@@ -255,6 +267,15 @@ class Api
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
 
         $this->doExecute($ch);
+        
+        $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+        $dispatcher->notify(new sfEvent($this, 'application.log', array(
+                    'priority' => ($this->_responseInfo['http_code'] == 200 ? sfLogger::INFO : sfLogger::WARNING),
+                    'getpost~DELETE|location~'.$location.'|url~' . $this->_responseInfo['url'] . '|' . 'http_code~' . $this->_responseInfo['http_code'] . '|response~' . $this->_responseBody,
+                )));
+        
         return $this->doResponse($remove_api_stuff);
     }
+
 }
