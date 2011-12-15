@@ -72,6 +72,21 @@ class episodeActions extends sfActions
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
+        
+        // File storage location help
+        if ($episode->getGraphicFile()) {
+            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
+            $this->form->getWidget('graphic_file')->setOption('file_src', image_path('/uploads/graphics/' . $episode->getGraphicFile()));
+            $this->form->getWidget('graphic_file')->setLabel("Change Graphic");
+        }
+        $this->form->getValidator('graphic_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/graphics/');
+        
+        if ($episode->getAudioFile()) {
+            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
+            $this->form->getWidget('audio_file')->setOption('file_src', image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
+            $this->form->getWidget('audio_file')->setLabel("Change Graphic");
+        }
+        $this->form->getValidator('audio_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
     }
 
     public function executeApprove(sfWebRequest $request)
@@ -121,6 +136,21 @@ class episodeActions extends sfActions
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
+        
+        // File storage location help
+        if ($episode->getGraphicFile()) {
+            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
+            $this->form->getWidget('graphic_file')->setOption('file_src', image_path('/uploads/graphics/' . $episode->getGraphicFile()));
+            $this->form->getWidget('graphic_file')->setLabel("Change Graphic");
+        }
+        $this->form->getValidator('graphic_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/graphics/');
+        
+        if ($episode->getAudioFile()) {
+            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
+            $this->form->getWidget('audio_file')->setOption('file_src', image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
+            $this->form->getWidget('audio_file')->setLabel("Change Graphic");
+        }
+        $this->form->getValidator('audio_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
 
         $this->processForm($request, $this->form);
 
@@ -145,10 +175,11 @@ class episodeActions extends sfActions
         $this->redirect('episode/index');
     }
 
-    protected function processForm(sfWebRequest $request, sfForm $form)
+    protected function processForm(sfWebRequest $request, EpisodeForm $form)
     {
         $form->bind($request->getParameter($form->getName()), $request->getFiles($form->getName()));
         if ($form->isValid()) {
+            $form->processValues($form->getValues());
             $auth_key = $this->getUser()->getApiAuthKey();
             if ($form->getValue('id')) {
                 // Update existing item.
