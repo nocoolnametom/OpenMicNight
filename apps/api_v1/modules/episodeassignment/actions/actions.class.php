@@ -144,7 +144,32 @@ class episodeassignmentActions extends autoepisodeassignmentActions
 
         $this->object = $this->createObject();
         $this->object->importFrom('array', $object_params);
-        return $this->doSave($params);
+        
+        try {
+            $return = $this->doSave($params);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            $this->setTemplate('index');
+            return sfView::SUCCESS;
+        }
+        return $return;
     }
 
     /**

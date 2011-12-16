@@ -10,6 +10,23 @@
  */
 class messageActions extends sfActions
 {
+    
+    public function preExecute()
+    {
+        parent::preExecute();
+        $request = $this->getRequest();
+        if ($request->hasAttribute('api_log'))
+        {
+            $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+            $string = $request->getAttribute('api_log');
+            $dispatcher->notify(new sfEvent($this, 'application.log', array(
+                    'priority' =>  sfLogger::WARNING,
+                    $string
+                )));
+            $request->getAttributeHolder()->remove('api_log');
+        }
+    }
 
     public function executeIndex(sfWebRequest $request)
     {
@@ -73,7 +90,7 @@ class messageActions extends sfActions
 
         //$message->delete();
         $result = Api::getInstance()->setUser($auth_key)->delete('message/' . $message->getId(), true);
-        $success = $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result, 'delete', 'message/' . $message->getId());
         if ($success)
                     $this->getUser()->setFlash('notice', 'Message was deleted successfuly.');
 
@@ -92,7 +109,7 @@ class messageActions extends sfActions
                 unset($values['id']);
                 $id = $form->getValue('id');
                 $result = Api::getInstance()->setUser($auth_key)->put('message/' . $id, $values);
-                $success = $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result, 'put', 'message/' . $id, json_encode($values));
                 if ($success)
                     $this->getUser()->setFlash('notice', 'Message was edited successfully.');
                 $test_message = ApiDoctrine::createObject('Message', $result['body']);
@@ -106,7 +123,7 @@ class messageActions extends sfActions
                         unset($values[$key]);
                 }
                 $result = Api::getInstance()->setUser($auth_key)->post('message', $values);
-                $success = $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result, 'post', 'message', json_encode($values));
                 if ($success)
                     $this->getUser()->setFlash('notice', 'Message was sent successfully.');
                 $test_message = ApiDoctrine::createObject('Message', $result['body']);
@@ -119,13 +136,28 @@ class messageActions extends sfActions
         }
     }
 
-    protected function checkHttpCode($result)
+    protected function checkHttpCode($result, $getpost = null, $location = null,
+                                     $request = null)
     {
         $http_code = $result['headers']['http_code'];
         if ($http_code != 200) {
-            $message = array_key_exists('message', $result['body']) ? $result['body']['message'] : 'An error occured.';
-            $message = array_key_exists(0, $result['body']) && array_key_exists('message', $result['body'][0]) ? $result['body'][0]['message'] : $message;
+            $message = array_key_exists('message', $result['body']) ? $result['body']['message']
+                        : 'An error occured.';
+            $message = array_key_exists(0, $result['body']) && array_key_exists('message',
+                                                                                $result['body'][0])
+                        ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+
+            $data = array(
+                'getpost' => strtoupper($getpost),
+                'location' => $location,
+                'url' => $result['headers']['url'],
+                'http_code' => $http_code,
+                'response' => json_encode($result['body']),
+            );
+            if ($request)
+                $data['request'] = $request;
+            $this->getUser()->setAttribute('api_log', Api::buildLogString($data));
             return false;
         } else {
             return true;

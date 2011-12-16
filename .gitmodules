@@ -7,3 +7,6 @@
 [submodule "plugins/sfDoctrineRestGeneratorPlugin"]
 	path = plugins/sfDoctrineRestGeneratorPlugin
 	url = git://github.com/xavierlacot/sfDoctrineRestGeneratorPlugin.git
+[submodule "plugins/sfPluploadPlugin"]
+	path = plugins/sfPluploadPlugin
+	url = git://github.com/kevindew/sfPluploadPlugin.git

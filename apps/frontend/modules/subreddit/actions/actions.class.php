@@ -10,6 +10,22 @@
  */
 class subredditActions extends sfActions
 {
+    
+    public function preExecute()
+    {
+        parent::preExecute();
+        if ($this->getUser()->hasAttribute('api_log'))
+        {
+            $dispatcher = sfApplicationConfiguration::getActive()
+                ->getEventDispatcher();
+            $string = $this->getUser()->getAttribute('api_log');
+            $dispatcher->notify(new sfEvent('Api', 'application.log', array(
+                    'priority' =>  sfLogger::WARNING,
+                    $string
+                )));
+            $this->getUser()->getAttributeHolder()->remove('api_log');
+        }
+    }
 
     protected function getSubredditId(sfWebRequest $request)
     {
@@ -182,7 +198,8 @@ class subredditActions extends sfActions
             $create = Api::getInstance()->setUser($auth_key)->post('subredditmembership',
                                                                    $new_membership,
                                                                    false);
-            $success = $this->checkHttpCode($create);
+            $success = $this->checkHttpCode($create, 'post', 'subredditmembership',
+                                        json_encode($new_membership));
             if ($success) {
                 if ($this->subreddit->getPreferredUsersAreFullMembers())
                     $this->getUser()->setFlash('notice', 'Joined subreddit!');
@@ -370,7 +387,7 @@ class subredditActions extends sfActions
         
         $result = Api::getInstance()->setUser($auth_key)->delete('subredditdeadline/' . $deadline->getId(),
                                                                  true);
-        $success = $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result, 'delete', 'subredditdeadline/' . $deadline->getId());
         if ($success)
             $this->getUser()->setFlash('notice',
                                        'Deadline was deleted successfully.');
@@ -527,7 +544,7 @@ class subredditActions extends sfActions
         //$subreddit->delete();
         $result = Api::getInstance()->setUser($auth_key)->delete('subreddit/' . $this->subreddit->getId(),
                                                                  true);
-        $success = $this->checkHttpCode($result);
+        $success = $this->checkHttpCode($result, 'delete', 'subreddit/' . $this->subreddit->getId());
         if ($success)
             $this->getUser()->setFlash('notice',
                                        'Subreddit was deleted successfully.');
@@ -555,7 +572,7 @@ class subredditActions extends sfActions
                 if (count($values)) {
                     $result = Api::getInstance()->setUser($auth_key)->put('subreddit/' . $id,
                                                                           $values);
-                    $success = $this->checkHttpCode($result);
+                    $success = $this->checkHttpCode($result, 'put', 'subreddit/' . $id, json_encode($values));
                     if ($success)
                         $this->getUser()->setFlash('notice',
                                                    'Subreddit was edited successfully.');
@@ -573,7 +590,7 @@ class subredditActions extends sfActions
                 }
                 $result = Api::getInstance()->setUser($auth_key)->post('subreddit',
                                                                        $values);
-                $success = $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result, 'post', 'subreddit', json_encode($values));
                 if ($success)
                     $this->getUser()->setFlash('notice',
                                                'Episode was created successfully.');
@@ -608,7 +625,7 @@ class subredditActions extends sfActions
                 if (count($values)) {
                     $result = Api::getInstance()->setUser($auth_key)->put('subredditdeadline/' . $id,
                                                                           $values);
-                    $success = $this->checkHttpCode($result);
+                    $success = $this->checkHttpCode($result, 'put', 'subredditdeadline/' . $id, json_encode($values));
                     if ($success)
                         $this->getUser()->setFlash('notice',
                                                    'Deadline was edited successfully.');
@@ -625,7 +642,7 @@ class subredditActions extends sfActions
                 $values['subreddit_id'] = $subreddit_id;
                 $result = Api::getInstance()->setUser($auth_key)->post('subredditdeadline',
                                                                        $values);
-                $success = $this->checkHttpCode($result);
+                $success = $this->checkHttpCode($result, 'post', 'subredditdeadline', json_encode($values));
                 if ($success)
                 {
                     $this->getUser()->setFlash('notice',
@@ -664,7 +681,7 @@ class subredditActions extends sfActions
                 if (count($values)) {
                     $result = Api::getInstance()->setUser($auth_key)->put('subredditmembership/' . $id,
                                                                           $values);
-                    $success = $this->checkHttpCode($result);
+                    $success = $this->checkHttpCode($result, 'put', 'subredditmembership/' . $id, json_encode($values));
                     if ($success)
                         $this->getUser()->setFlash('notice',
                                                    'Membership was edited successfully.');
@@ -674,7 +691,8 @@ class subredditActions extends sfActions
         }
     }
 
-    protected function checkHttpCode($result)
+    protected function checkHttpCode($result, $getpost = null, $location = null,
+                                     $request = null)
     {
         $http_code = $result['headers']['http_code'];
         if ($http_code != 200) {
@@ -684,9 +702,20 @@ class subredditActions extends sfActions
                                                                                 $result['body'][0])
                         ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
+
+            $data = array(
+                'getpost' => strtoupper($getpost),
+                'location' => $location,
+                'url' => $result['headers']['url'],
+                'http_code' => $http_code,
+                'response' => json_encode($result['body']),
+            );
+            if ($request)
+                $data['request'] = $request;
+            $this->getUser()->setAttribute('api_log', Api::buildLogString($data));
+            return false;
         } else {
-            $this->getUser()->setFlash('notice',
-                                       'Action was completed successfully.');
+            return true;
         }
     }
 }
