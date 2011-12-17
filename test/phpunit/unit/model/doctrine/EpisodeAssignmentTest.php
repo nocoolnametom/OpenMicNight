@@ -312,6 +312,7 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $understudy_deadline->setSubreddit($subreddit);
         $understudy_deadline->setAuthorType($understudy);
         $understudy_deadline->setSeconds(10);
+        $understudy_deadline->setRestrictedUntilPreviousMissesDeadline(1);
         $understudy_deadline->save();
 
         // Try to save episode assignment.
