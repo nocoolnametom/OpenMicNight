@@ -8,7 +8,7 @@ class AuthFailureTableTest extends sfPHPUnitBaseTestCase
      */
     public function testCreate()
     {
-        $t = ApplicationTable::getInstance();
+        $t = AuthFailureTable::getInstance();
         $this->assertTrue($t instanceof Doctrine_Table);
     }
 }

@@ -22,7 +22,7 @@ class Episode extends BaseEpisode
     {
         return $this->getTitle();
     }
-    
+
     public function setIncremented($id)
     {
         $this->_id = array($id);
@@ -274,12 +274,13 @@ class Episode extends BaseEpisode
                 'moderator',
             );
             $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(), $types);
-
+            $initial_is_submitted = $this->_get('is_submitted');
+            $initial_submitted_at = $this->_get('submitted_at');
             foreach ($memberships as $membership) {
                 $user = $membership->getSfGuardUser();
-                
+
                 ProjectConfiguration::registerZend();
-                
+
                 $mail = new Zend_Mail();
                 $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
                 $parameters = array(
@@ -305,44 +306,49 @@ class Episode extends BaseEpisode
                 if (sfConfig::get('sf_environment') == 'prod') {
                     $mail->send();
                 } else {
-                    throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                    //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                    if (sfConfig::get('sf_logging_enabled')) {
+                        sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                    }
                 }
                 $user->addLoginMessage('You have Episodes awaiting your approval.');
             }
+            // @todo: The previous foreach loop sets the 'is_submitted' and 'submitted_at' columns to null.  I don't know why.
+            $this->_set('is_submitted', $initial_is_submitted);
+            $this->_set('submitted_at', $initial_submitted_at);
         }
-        parent::save($conn);
+
+        return parent::save($conn);
     }
 
     public function getCurrentEpisodeAssignmentByDeadline()
     {
         $assignments = $this->getEpisodeAssignments();
-        
+
         $subreddit_rules = $this->getSubreddit()->getDeadlineRules();
-        
+
         $largest_seconds = 0;
         $longest_deadline = null;
-        
-        foreach($subreddit_rules as $author_type_id => $seconds)
-        {
+
+        foreach ($subreddit_rules as $author_type_id => $seconds) {
             // If the deadline has passed, ignore it
             if ($this->getReleaseDate('U') > (time() + $seconds))
                 unset($subreddit_rules[$author_type_id]);
-            if ($seconds > $largest_seconds)
-            {
+            if ($seconds > $largest_seconds) {
                 $largest_seconds = $seconds;
                 $longest_deadline = $author_type_id;
             }
         }
-        
-       if (is_null($longest_deadline))
-           return null;
-       
-       foreach($assignments as $assignment)
-       {
-           if ($assignment->getAuthorTypeId() == $longest_deadline)
-               return $assignment;
-       }
-       
-       return null;
+
+        if (is_null($longest_deadline))
+            return null;
+
+        foreach ($assignments as $assignment) {
+            if ($assignment->getAuthorTypeId() == $longest_deadline)
+                return $assignment;
+        }
+
+        return null;
     }
+
 }

@@ -23,6 +23,7 @@ class EpisodeTableTest extends sfPHPUnitBaseTestCase
         // Create Test Subreddit
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->save();
 
         // Create Test Episode

@@ -10,11 +10,12 @@ class AuthorTypeTest extends sfPHPUnitBaseTestCase
      */
     public function testCreate()
     {
-        $test_description = 4321;
+        $test_type = "killer_whale";
+        $nice_type = "Killer Whale";
         $t = new AuthorType();
-        $t->setDescription($test_description);
+        $t->setType($test_type);
         $this->assertTrue($t instanceof AuthorType);
-        $this->assertEquals($t->__toString(), $test_description);
+        $this->assertEquals($t->__toString(), $nice_type);
     }
 
 }

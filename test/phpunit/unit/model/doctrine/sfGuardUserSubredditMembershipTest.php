@@ -25,12 +25,14 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
         // Establish fake Subreddit
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->save();
 
         // Establish User
         $user = new sfGuardUser();
         $user->setEmailAddress(rand(0, 100000));
         $user->setUsername(rand(0, 10000));
+        $user->setIsValidated(1);
         $user->save();
         $user_id = $user->getIncremented();
         $this->assertNotEquals(0, $user_id);
@@ -42,7 +44,13 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
         $episode->save();
 
         $author_type = AuthorTypeTable::getInstance()
-                ->findOneBy('type', 'first');
+                ->findOneBy('type', 'squid');
+        
+        $deadline = new Deadline();
+        $deadline->setSubreddit($subreddit);
+        $deadline->setAuthorType($author_type);
+        $deadline->setSeconds(0);
+        $deadline->save();
 
         $episode_assignment = new EpisodeAssignment();
         $episode_assignment->setSfGuardUser($user);
@@ -93,6 +101,9 @@ class sfGuardUserSubredditMembershipTest extends sfPHPUnitBaseTestCase
 
         // Delete Episode
         $episode->delete();
+        
+        // Delete Deadline
+        $deadline->delete();
 
         // Delete Subreddit
         $subreddit->delete();

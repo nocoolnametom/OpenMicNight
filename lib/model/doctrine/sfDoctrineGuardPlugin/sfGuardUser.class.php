@@ -78,7 +78,7 @@ class sfGuardUser extends PluginsfGuardUser
     public function addLoginMessage($message)
     {
         $login_message = new sfGuardLoginMessage();
-        $login_message->setUser($this);
+        $login_message->setUserId($this->getIncremented());
         $login_message->setDisplayed(false);
         $login_message->setMessage($message);
         $login_message->save();

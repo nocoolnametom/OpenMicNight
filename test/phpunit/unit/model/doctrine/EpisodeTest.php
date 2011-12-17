@@ -14,9 +14,6 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
     private $episode_filename;
     private $unapproved_file_location;
     private $aws;
-    private $first_application;
-    private $second_application;
-    private $third_application;
     private $first_deadline;
     private $second_deadline;
     private $third_deadline;
@@ -54,25 +51,12 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
 
         $this->subreddit = new Subreddit();
         $this->subreddit->setName(rand(0, 1000));
+        $this->subreddit->setDomain(rand(0, 1000));
         $this->subreddit->save();
 
-        $first = AuthorTypeTable::getInstance()->findOneByType('first');
-        $understudy = AuthorTypeTable::getInstance()->findOneByType('understudy');
-        $dark_horse = AuthorTypeTable::getInstance()->findOneByType('dark_horse');
-
-        $this->first_application = new Application();
-        $this->first_application->setAuthorType($first);
-        $this->first_application->setSubreddit($this->subreddit);
-        $this->first_application->save();
-        $this->second_application = new Application();
-        $this->second_application->setAuthorType($understudy);
-        $this->second_application->setSubreddit($this->subreddit);
-        $this->second_application->save();
-        $this->third_application = new Application();
-        $this->third_application->setAuthorType($dark_horse);
-        $this->third_application->setSubreddit($this->subreddit);
-        $this->third_application->setRestrictedUntilPreviousMissesDeadline(true);
-        $this->third_application->save();
+        $first = AuthorTypeTable::getInstance()->findOneByType('squid');
+        $understudy = AuthorTypeTable::getInstance()->findOneByType('shark');
+        $dark_horse = AuthorTypeTable::getInstance()->findOneByType('blue_whale');
 
         $this->first_deadline = new Deadline();
         $this->first_deadline->setAuthorType($first);
@@ -93,21 +77,25 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->user = new sfGuardUser();
         $this->user->setEmailAddress(rand(0, 1000));
         $this->user->setUsername(rand(0, 1000));
+        $this->user->setIsValidated(1);
         $this->user->save();
 
         $this->after_deadline_user = new sfGuardUser();
         $this->after_deadline_user->setEmailAddress(rand(0, 1000));
         $this->after_deadline_user->setUsername(rand(0, 1000));
+        $this->after_deadline_user->setIsValidated(1);
         $this->after_deadline_user->save();
 
         $this->dark_horse_user = new sfGuardUser();
         $this->dark_horse_user->setEmailAddress(rand(0, 1000));
         $this->dark_horse_user->setUsername(rand(0, 1000));
+        $this->dark_horse_user->setIsValidated(1);
         $this->dark_horse_user->save();
 
         $this->approver = new sfGuardUser();
         $this->approver->setEmailAddress(rand(0, 1000));
         $this->approver->setUsername(rand(0, 1000));
+        $this->approver->setIsValidated(1);
         $this->approver->save();
 
         $moderator = MembershipTable::getInstance()->findOnebyType('moderator');
@@ -219,7 +207,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->episode->setSfGuardUserId($this->user->getIncremented());
         $this->episode->setAudioFile($this->episode_filename);
         $this->episode->save();
-        $this->episode->setIsSubmitted(true);
+        $this->episode->setIsSubmitted(1);
         $this->episode->save();
         $this->assertTrue($this->episode->getIsSubmitted());
         $this->assertTrue(strlen($this->episode->getSubmittedAt()) > 0);
@@ -330,12 +318,6 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
             $this->second_deadline->delete();
         if ($this->third_deadline)
             $this->third_deadline->delete();
-        if ($this->first_application)
-            $this->first_application->delete();
-        if ($this->second_application)
-            $this->second_application->delete();
-        if ($this->third_application)
-            $this->third_application->delete();
         if ($this->subreddit)
             $this->subreddit->delete();
     }
