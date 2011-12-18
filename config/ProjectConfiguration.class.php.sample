@@ -23,6 +23,7 @@ class ProjectConfiguration extends sfProjectConfiguration
             'sfReCaptchaPlugin',
             'sfHtml5FormPlugin',
             'sfPluploadPlugin',
+            'sfWidgetFormInputSWFUploadPlugin',
         ));
     }
 
