@@ -73,6 +73,18 @@ class episodeActions extends sfActions
         $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
         
+        $this->graphic_hash = sha1(
+                'image_file'
+                . (int)$request->getParameter('id')
+                . (int)$this->getUser()->getApiUserId()
+        );
+        
+        $this->audio_hash = sha1(
+                'audio_file'
+                . (int)$request->getParameter('id')
+                . (int)$this->getUser()->getApiUserId()
+        );
+        
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                                         true);
@@ -104,24 +116,7 @@ class episodeActions extends sfActions
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
-        
-        if ($episode->getGraphicFile()) {
-            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('graphic_file')->setOption('file_src',
-                                                              image_path('/uploads/graphics/' . $episode->getGraphicFile()));
-            $this->form->getWidget('graphic_file')->setLabel("Change Graphic");
-        }
-        $this->form->getValidator('graphic_file')->setOption('path',
-                                                             sfConfig::get('sf_web_dir') . '/uploads/graphics/');
-
-        if ($episode->getAudioFile()) {
-            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('audio_file')->setOption('file_src',
-                                                            image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
-            $this->form->getWidget('audio_file')->setLabel("Change Audio");
-        }
-        $this->form->getValidator('audio_file')->setOption('path',
-                                                           sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
+        unset($this->form['nice_filename']);
     }
 
     public function executeApprove(sfWebRequest $request)

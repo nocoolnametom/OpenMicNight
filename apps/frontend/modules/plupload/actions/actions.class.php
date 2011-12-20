@@ -135,8 +135,8 @@ class pluploadActions extends sfActions
                     $this->getUser()->setAttribute('valid_episode', true);
                     $this->getUser()->setAttribute('valid_episode_id', $id);
                     $this->getUser()->setAttribute('valid_episode_user_id', $episode->getSfGuardUserId());
-                    $this->getUser()->setAttribute('valid_episode_image_file_hash', $this->generateFilenamehashForAudio($filename));
-                    $episode->setGraphicFile($this->generateFilenamehashForAudio($filename));
+                    $this->getUser()->setAttribute('valid_episode_image_file_hash', $this->generateFilenameHashForImage($filename));
+                    $episode->setGraphicFile($this->generateFilenameHashForImage($filename));
                     $episode->save();
                 }
             }
@@ -159,15 +159,9 @@ class pluploadActions extends sfActions
 
         // Make sure the fileName is unique but only if chunking is disabled
         if ($chunks < 2 && file_exists($targetDir . DIRECTORY_SEPARATOR . $fileName)) {
-            $ext = strrpos($fileName, '.');
-            $fileName_a = substr($fileName, 0, $ext);
-            $fileName_b = substr($fileName, $ext);
-
-            $count = 1;
-            while (file_exists($targetDir . DIRECTORY_SEPARATOR . $fileName_a . '_' . $count . $fileName_b))
-                $count++;
-
-            $fileName = $fileName_a . '_' . $count . $fileName_b;
+            // Since the file exists and we haven't started chunking, we'll delete the file before beginning a new upload.
+            while (file_exists($targetDir . DIRECTORY_SEPARATOR . $fileName))
+                unlink($targetDir . DIRECTORY_SEPARATOR . $fileName);
         }
 
         // Create target dir
