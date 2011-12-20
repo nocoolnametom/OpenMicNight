@@ -96,13 +96,7 @@ class episodeActions extends sfActions
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
-
-        // File storage location help
-        $plupload_audio_file = new sfWidgetFormInputPersistentFileEditablePlupload(array(
-            'plupload_upload_path' => sfConfig::get('sf_web_dir') . '/uploads/graphics/',
-            'file_dir' => sfConfig::get('sf_web_dir') . '/uploads/graphics/',
-        ));
-        $this->form->setWidget('plupload_audio_file', $plupload_audio_file);
+        
         if ($episode->getGraphicFile()) {
             sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
             $this->form->getWidget('graphic_file')->setOption('file_src',
@@ -116,7 +110,7 @@ class episodeActions extends sfActions
             sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
             $this->form->getWidget('audio_file')->setOption('file_src',
                                                             image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
-            $this->form->getWidget('audio_file')->setLabel("Change Graphic");
+            $this->form->getWidget('audio_file')->setLabel("Change Audio");
         }
         $this->form->getValidator('audio_file')->setOption('path',
                                                            sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
