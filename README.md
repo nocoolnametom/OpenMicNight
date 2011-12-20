@@ -52,4 +52,42 @@ The application should have full code coverage in its unique model classes (thou
 
 There are a few options that affect all aspects of the application, and they are declared within `config/ProjectConfiguration.class.php`.  You can change the Amazon bucket prefix, the storage location for pre-approved audio files, and the storage location for episode graphic files.  Other options more sepcific to different application services are contained within their respectives app config directories (eg, `apps/api_v1/config/app.yml` and `apps/api_v1/config/settings.yml`).  For more information on these configuration files see the [symfony documentation](http://www.symfony-project.org/gentle-introduction/1_4/en/05-Configuring-Symfony).
 
-Remember to make the data/temp directory writable by the web user so that users cna upload episode files.  Episodes are served via Apache or nginx x-sendfile so the file are not executed.
+Remember to make the data/temp directory writable by the web user so that users can upload episode files.  Episodes are served via Apache [X-Sendfile](https://tn123.org/mod_xsendfile/),  nginx [X-Accel-Redirect](http://wiki.nginx.org/XSendfile), or lighttpd [X-LIGHTTPD-send-file](http://redmine.lighttpd.net/wiki/1/X-LIGHTTPD-send-file) so the files are not executed.
+
+### Configure nginx for X-Accel-Redirect
+
+Audio files are put into the /data/temp directory, so this directory must be explicitly linked in the nginx configuration to an external URI.  Place the following in your nginx configuration:
+
+    location /audio/temp/ {
+      internal;
+      root /[path_to_project_root]data/temp/; # note the trailing slash
+    }
+
+### Configure Apache for X-Sendfile
+
+In your Apache config ensure that XSendfile is loaded, enabled, and can serve files that are not found within the web root:
+
+    # Load xsendfile
+    LoadModule xsendfile_module /path/to/modules/mod_xsendfile.so
+    
+    # Enable xsendfile
+    XSendFile On
+    # enable sending files from parent dirs
+    XSendFileAllowAbove On
+
+Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.
+
+### Configure lighttpd for X-LIGHTTPD-send-file
+
+If your FastCGI setup file, make sure that the `allow-x-send-file' option is enabled:
+
+    fastcgi.server = {
+       ".php" => {
+          "127.0.0.1" => {
+              # ....
+              "allow-x-send-file" => "enable" 
+          }
+       }
+    }
+
+Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.

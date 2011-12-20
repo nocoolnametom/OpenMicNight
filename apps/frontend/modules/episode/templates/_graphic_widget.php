@@ -8,9 +8,9 @@
     $(function() {
         var uploader = new plupload.Uploader({
             runtimes : 'html5, html4',
-            browse_button : 'pickfiles',
+            browse_button : 'graphic_pickfiles',
             container : 'image_uploader',
-            //max_file_size : '10mb',
+            max_file_size : '10mb',
             chunk_size : '2mb',
             unique_names : false,
             url : '<?php echo url_for('plupload/upload_image?id=' . $form->getObject()->getId()); ?>',
@@ -23,11 +23,11 @@
         });
 <?php if (sfConfig::get('sf_environment') != 'prod'): ?>
             uploader.bind('Init', function(up, params) {
-                $('#filelist').html("<div>Current runtime: " + params.runtime + "</div>");
+                $('#graphic_filelist').html("<div>Current runtime: " + params.runtime + "</div>");
             });
 <?php endif; ?>
 
-        $('#uploadfiles').click(function(e) {
+        $('#graphic_uploadfiles').click(function(e) {
             uploader.start();
             e.preventDefault();
         });
@@ -36,13 +36,13 @@
 
         uploader.bind('FilesAdded', function(up, files) {
             $.each(files, function(i, file) {
-                $('#filelist').append(
+                $('#graphic_filelist').append(
                 '<div id="' + file.id + '">' +
                     file.name + ' (' + plupload.formatSize(file.size) + ') <b></b>' +
                     '</div>');
             });
-            $('#uploadfiles').html("[Upload Image]");
-            $('#pickfiles_span').html("");
+            $('#graphic_uploadfiles').html("[Upload Image]");
+            $('#graphic_pickfiles_span').html("");
 
             up.refresh(); // Reposition Flash/Silverlight
         });
@@ -51,13 +51,13 @@
             $('#' + file.id + " b").html(file.percent + "%");
             if (file.percent != 100)
             {    
-                $('#uploadfiles_span').html("<span style=\"text-size: smaller;\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
+                $('#graphic_uploadfiles_span').html("<span style=\"text-size: smaller;\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
             }
             $('#remove_graphic').html("");
         });
 
         uploader.bind('Error', function(up, err) {
-            $('#filelist').append("<div>Error: " + err.code +
+            $('#graphic_filelist').append("<div>Error: " + err.code +
                 ", Message: " + err.message +
                 (err.file ? ", File: " + err.file.name : "") +
                 "</div>"
@@ -68,7 +68,7 @@
 
         uploader.bind('FileUploaded', function(up, file) {
             $('#' + file.id + " b").html("100%");
-            $('#uploadfiles_span').html("");
+            $('#graphic_uploadfiles_span').html("");
             $('#uploader_graphic').attr("src", "<?php echo substr(image_path('/uploads/graphics/' . $graphic_hash . '.png'), 0, -3); ?>" + file.name.split('.').pop());
         });
     });
@@ -84,7 +84,7 @@
             <label for="episode_audio_file_delete">remove the current file</label>
         </div>
     <?php endif; ?>
-    <div id="filelist"><?php if (sfConfig::get('sf_environment') != 'prod'): ?>No runtime found.<?php endif; ?></div>
-    <span id="pickfiles_span"><a id="pickfiles" href="#">[Select Image]</a></span>
-    <span id="uploadfiles_span"><a id="uploadfiles" href="#"></a></span>
+    <div id="graphic_filelist"><?php if (sfConfig::get('sf_environment') != 'prod'): ?>No runtime found.<?php endif; ?></div>
+    <span id="graphic_pickfiles_span"><a id="graphic_pickfiles" href="#">[Select Image]</a></span>
+    <span id="graphic_uploadfiles_span"><a id="graphic_uploadfiles" href="#"></a></span>
 </div>

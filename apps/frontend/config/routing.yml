@@ -25,6 +25,10 @@ episode:
     column:               id
     with_wildcard_routes: true
 
+episode_audio:
+  url:   /episode/:id/audio.:format
+  param: { module: episode, action: audio }
+
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/10-Routing
 

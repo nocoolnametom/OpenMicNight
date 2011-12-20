@@ -10,20 +10,19 @@
  */
 class episodeActions extends sfActions
 {
-    
+
     public function preExecute()
     {
         parent::preExecute();
         $request = $this->getRequest();
-        if ($request->hasAttribute('api_log'))
-        {
+        if ($request->hasAttribute('api_log')) {
             $dispatcher = sfApplicationConfiguration::getActive()
-                ->getEventDispatcher();
+                    ->getEventDispatcher();
             $string = $request->getAttribute('api_log');
             $dispatcher->notify(new sfEvent('Api', 'application.log', array(
-                    'priority' =>  sfLogger::WARNING,
-                    $string
-                )));
+                        'priority' => sfLogger::WARNING,
+                        $string
+                    )));
             $request->getAttributeHolder()->remove('api_log');
         }
     }
@@ -34,8 +33,7 @@ class episodeActions extends sfActions
         $page = $this->page = (int) $request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '?page=' . $page;
-        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released' . $page,
-                                                                     true);
+        $episodes_data = Api::getInstance()->setUser($auth_key)->get('episode/released' . $page, true);
         $this->episodes = ApiDoctrine::createQuickObjectArray($episodes_data['body']);
     }
 
@@ -52,11 +50,8 @@ class episodeActions extends sfActions
             'episode_id' => $episode_id,
             'sf_guard_user_id' => $user_id,
         );
-        $result = Api::getInstance()->setUser($auth_key)->post('episodeassignment',
-                                                               $post_values,
-                                                               false);
-        $success = $this->checkHttpCode($result, 'post', 'episodeassignment',
-                                        json_encode($post_values));
+        $result = Api::getInstance()->setUser($auth_key)->post('episodeassignment', $post_values, false);
+        $success = $this->checkHttpCode($result, 'post', 'episodeassignment', json_encode($post_values));
         if ($success)
             $this->getUser()->setFlash('notice', 'Registered for Episode!');
 
@@ -72,36 +67,33 @@ class episodeActions extends sfActions
         $this->getUser()->getAttributeHolder()->remove('valid_episode_audio_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
-        
+
         $this->graphic_hash = sha1(
                 'image_file'
-                . (int)$request->getParameter('id')
-                . (int)$this->getUser()->getApiUserId()
+                . (int) $request->getParameter('id')
+                . (int) $this->getUser()->getApiUserId()
         );
-        
+
         $this->audio_hash = sha1(
                 'audio_file'
-                . (int)$request->getParameter('id')
-                . (int)$this->getUser()->getApiUserId()
+                . (int) $request->getParameter('id')
+                . (int) $this->getUser()->getApiUserId()
         );
-        
+
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
-                                                                                                        true);
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         // Cheating for this one for now.
         //$episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $episode = EpisodeTable::getInstance()->find($request->getParameter('id'));
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
 
-        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $episode->getIncremented() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0',
-                                                                       true);
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $episode->getIncremented() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
         $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
         $author_type_id = $assignment->getAuthorTypeId();
 
-        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $episode->getSubredditId() . '&author_type_id=' . $author_type_id,
-                                                                     true);
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
         $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
         $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
 
@@ -119,11 +111,70 @@ class episodeActions extends sfActions
         unset($this->form['nice_filename']);
     }
 
+    public function executeAudio(sfWebRequest $request)
+    {
+        $episode = EpisodeTable::getInstance()->find($request->getParameter('id'));
+
+        // If the episode is released, everyone is allowed to download the file from Amazon
+        ;
+
+        // If the episode is not released, only the admins and moderators can view it.
+        ;
+
+        // Unless the owner of the episode is trying to download it.  That's okay.
+        ;
+
+        // Now that we're serving the local file, let's set up the server to serve it.
+        header('Content-Disposition: attachment;filename=' . $episode->getNiceFilename());
+        switch ($request->getParameter('format')) {
+            case "wma":
+                header("Content-Type: audio/x-ms-wma");
+                break;
+            case "m4a":
+                header("Content-Type: audio/mp4a-latm");
+                break;
+            case "ogg":
+                header("Content-Type: application/ogg");
+                break;
+            default:
+            case 'mp3':
+                header("Content-Type: audio/mpeg");
+                break;
+        }
+
+
+        // Check if we're using nginx and if nxginx and XSendfile are installed and use that
+        if (array_key_exists('SERVER_SOFTWARE', $_SERVER) && preg_match('/nginx/i', $_SERVER['SERVER_SOFTWARE'])) {
+            header("X-Accel-Redirect: /audio/temp/" . $episode->getAudioFile());
+            die();
+        }
+
+        // If not, check if Apache has mod_xsendfile and use that
+        if (array_key_exists('SERVER_SOFTWARE', $_SERVER) && preg_match('/apache/i', $_SERVER['SERVER_SOFTWARE']) && in_array('mod_xsendfile', apache_get_modules())) {
+            header('X-Sendfile: ' . sfConfig::get('sf_data_dir') . '/temp/' . $episode->getAudioFile());
+            die();
+        }
+
+        // If not that, then we'll try and see if we have lighttpd
+        if (array_key_exists('SERVER_SOFTWARE', $_SERVER) && preg_match('/lighttpd/i', $_SERVER['SERVER_SOFTWARE'])) {
+            header('X-LIGHTTPD-send-file: ' . sfConfig::get('sf_data_dir') . '/temp/' . $episode->getAudioFile());
+            die();
+        }
+
+        // Otherwise, let's waste time by loading the file into memory and serving it through PHP (horror!  Not a joke!)
+        if (!sfConfig::get('app_enable_slow_audio_download', false))
+            throw new sfException('Slow downloads not enabled.');
+
+        $filename = sfConfig::get('sf_data_dir') . '/temp/' . $episode->getAudioFile();
+        header("Content-Length: " . filesize($filename));
+        $file = fopen($filename, 'r');
+        fpassthru($file);
+    }
+
     public function executeApprove(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
-                                                                                                        true);
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
@@ -138,8 +189,7 @@ class episodeActions extends sfActions
     public function executeSubmit(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
-                                                                                                        true);
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
@@ -147,15 +197,10 @@ class episodeActions extends sfActions
         $submission_change = array(
             'is_submitted' => 1,
         );
-        $result = $episode_data = Api::getInstance()->setUser($auth_key)->put('episode/' . $episode->getIncremented(),
-                                                                              $submission_change,
-                                                                              true);
-        $success = $this->checkHttpCode($result, 'put',
-                                        'episode/' . $episode->getIncremented(),
-                                        json_encode($submission_change));
+        $result = $episode_data = Api::getInstance()->setUser($auth_key)->put('episode/' . $episode->getIncremented(), $submission_change, true);
+        $success = $this->checkHttpCode($result, 'put', 'episode/' . $episode->getIncremented(), json_encode($submission_change));
         if ($success)
-            $this->getUser()->setFlash('notice',
-                                       'Episode was submitted for approval.');
+            $this->getUser()->setFlash('notice', 'Episode was submitted for approval.');
         $this->redirect('episode/edit?id=' . $episode->getId());
     }
 
@@ -168,12 +213,11 @@ class episodeActions extends sfActions
         $this->getUser()->getAttributeHolder()->remove('valid_episode_audio_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
-        
+
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
         $auth_key = $this->getUser()->getApiAuthKey();
-        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
-                                                                                                        true);
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
 
@@ -186,21 +230,17 @@ class episodeActions extends sfActions
         // File storage location help
         if ($episode->getGraphicFile()) {
             sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('graphic_file')->setOption('file_src',
-                                                              image_path('/uploads/graphics/' . $episode->getGraphicFile()));
+            $this->form->getWidget('graphic_file')->setOption('file_src', image_path('/uploads/graphics/' . $episode->getGraphicFile()));
             $this->form->getWidget('graphic_file')->setLabel("Change Graphic");
         }
-        $this->form->getValidator('graphic_file')->setOption('path',
-                                                             sfConfig::get('sf_web_dir') . '/uploads/graphics/');
+        $this->form->getValidator('graphic_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/graphics/');
 
         if ($episode->getAudioFile()) {
             sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('audio_file')->setOption('file_src',
-                                                            image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
+            $this->form->getWidget('audio_file')->setOption('file_src', image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
             $this->form->getWidget('audio_file')->setLabel("Change Graphic");
         }
-        $this->form->getValidator('audio_file')->setOption('path',
-                                                           sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
+        $this->form->getValidator('audio_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
 
         $this->processForm($request, $this->form);
 
@@ -217,20 +257,17 @@ class episodeActions extends sfActions
         $this->forward404Unless($episode && $episode->getId());
 
         //$episode->delete();
-        $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(),
-                                                                 true);
+        $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(), true);
         $success = $this->checkHttpCode($result, 'episode/' . $episode->getId());
         if ($success)
-            $this->getUser()->setFlash('notice',
-                                       'Episode was deleted successfully.');
+            $this->getUser()->setFlash('notice', 'Episode was deleted successfully.');
 
         $this->redirect('episode/index');
     }
 
     protected function processForm(sfWebRequest $request, EpisodeForm $form)
     {
-        $form->bind($request->getParameter($form->getName()),
-                                           $request->getFiles($form->getName()));
+        $form->bind($request->getParameter($form->getName()), $request->getFiles($form->getName()));
         if ($form->isValid()) {
             $form->processValues($form->getValues());
             $auth_key = $this->getUser()->getApiAuthKey();
@@ -250,32 +287,23 @@ class episodeActions extends sfActions
                         $values[$key] = 0;
                 }
                 $id = $episode->getId();
-                $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id,
-                                                                      $values);
-                $success = $this->checkHttpCode($result, 'put',
-                                                'episode/' . $id,
-                                                json_encode($values));
+                $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $id, $values);
+                $success = $this->checkHttpCode($result, 'put', 'episode/' . $id, json_encode($values));
                 if ($success)
-                    $this->getUser()->setFlash('notice',
-                                               'Episode was saved successfully.');
-                $test_episode = ApiDoctrine::createObject('Episode',
-                                                          $result['body']);
+                    $this->getUser()->setFlash('notice', 'Episode was saved successfully.');
+                $test_episode = ApiDoctrine::createObject('Episode', $result['body']);
                 $episode = $test_episode ? $test_episode : $episode;
             }
             $this->redirect('episode/edit?id=' . $episode->getId());
         }
     }
 
-    protected function checkHttpCode($result, $getpost = null, $location = null,
-                                     $request = null)
+    protected function checkHttpCode($result, $getpost = null, $location = null, $request = null)
     {
         $http_code = $result['headers']['http_code'];
         if ($http_code != 200) {
-            $message = array_key_exists('message', $result['body']) ? $result['body']['message']
-                        : 'An error occured.';
-            $message = array_key_exists(0, $result['body']) && array_key_exists('message',
-                                                                                $result['body'][0])
-                        ? $result['body'][0]['message'] : $message;
+            $message = array_key_exists('message', $result['body']) ? $result['body']['message'] : 'An error occured.';
+            $message = array_key_exists(0, $result['body']) && array_key_exists('message', $result['body'][0]) ? $result['body'][0]['message'] : $message;
             $this->getUser()->setFlash('error', "($http_code) $message");
 
             $data = array(
@@ -293,4 +321,5 @@ class episodeActions extends sfActions
             return true;
         }
     }
+
 }

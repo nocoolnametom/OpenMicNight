@@ -23,7 +23,7 @@
                 <td>
                     <?php echo $form['audio_file']->renderError() ?>
                     <?php
-                    include_partial('audio_widget', array(
+                    include_partial('audio_widget_two', array(
                         'form' => $form,
                         'audio_hash' => $audio_hash,
                     ));
