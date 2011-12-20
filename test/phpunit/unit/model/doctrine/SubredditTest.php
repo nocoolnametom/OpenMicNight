@@ -13,6 +13,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
         $test_name = 'test3';
         $t = new Subreddit();
         $t->setName($test_name);
+        $t->setDomain($test_name);
         $this->assertTrue($t instanceof Subreddit);
         $this->assertEquals($test_name, $t->__toString());
         $t->delete();
@@ -26,6 +27,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
         $subreddit->save();
         $episode_schedule = $subreddit->getEpisodeScheduleAsCronExpression();
@@ -42,6 +44,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->save();
         $creation_schedule = $subreddit->getCreationScheduleAsCronExpression();
@@ -57,6 +60,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
         $subreddit->save();
         $episode_interval = $subreddit->getEpisodeItervalAsDateInterval();
@@ -72,6 +76,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->save();
         $creation_internal = $subreddit->getCreationIntervalAsDateInterval();
@@ -90,6 +95,7 @@ class SubredditTest extends sfPHPUnitBaseTestCase
 
         $subreddit = new Subreddit;
         $subreddit->setName(rand(0, 1000));
+        $subreddit->setDomain(rand(0, 1000));
         $subreddit->setEpisodeScheduleCronFormatted('0 0 * * *');
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->save();

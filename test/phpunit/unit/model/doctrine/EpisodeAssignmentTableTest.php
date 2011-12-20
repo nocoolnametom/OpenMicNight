@@ -41,17 +41,25 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         // Create two episode assignments: one for a past Episode, one for a future
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setIsValidated(true);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneBy('type', 'first');
+                ->findOneBy('type', 'squid');
         $this->assertTrue($first instanceof AuthorType);
         $this->assertNotEquals(null, $first->getIncremented());
+        
+        $deadline = new Deadline();
+        $deadline->setSeconds(0);
+        $deadline->setAuthorType($first);
+        $deadline->setSubreddit($subreddit);
+        $deadline->save();
 
         $future_episode = new Episode();
         $future_episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
@@ -81,6 +89,7 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         if ($future_assignment)
             $future_assignment->delete();
         $future_episode->delete();
+        $deadline->delete();
         $user->delete();
         $subreddit->delete();
     }
@@ -99,21 +108,35 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         // Create two episode assignments: one for a past Episode, one for a future
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setisValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneBy('type', 'first');
+                ->findOneBy('type', 'squid');
         $understudy = AuthorTypeTable::getInstance()
-                ->findOneBy('type', 'understudy');
+                ->findOneBy('type', 'shark');
         $this->assertTrue($first instanceof AuthorType);
         $this->assertNotEquals(null, $first->getIncremented());
         $this->assertTrue($understudy instanceof AuthorType);
         $this->assertNotEquals(null, $understudy->getIncremented());
+        
+        $deadline_one = new Deadline();
+        $deadline_one->setSeconds(100);
+        $deadline_one->setAuthorType($first);
+        $deadline_one->setSubreddit($subreddit);
+        $deadline_one->save();
+        
+        $deadline_two = new Deadline();
+        $deadline_two->setSeconds(0);
+        $deadline_two->setAuthorType($understudy);
+        $deadline_two->setSubreddit($subreddit);
+        $deadline_two->save();
 
         $episode_one = new Episode();
         $episode_one->setReleaseDate(date('Y-m-d H:i:s', time() + 200000));
@@ -178,6 +201,8 @@ class EpisodeAssignmentTableTest extends sfPHPUnitBaseTestCase
         $episode_one->delete();
         $episode_two->delete();
         $episode_three->delete();
+        $deadline_one->delete();
+        $deadline_two->delete();
         $user->delete();
         $subreddit->delete();
     }

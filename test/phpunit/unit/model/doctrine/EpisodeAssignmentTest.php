@@ -21,15 +21,23 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setIsValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
+        
+        $deadline = new Deadline();
+        $deadline->setSubreddit($subreddit);
+        $deadline->setAuthorType($first);
+        $deadline->setSeconds(0);
+        $deadline->save();
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
@@ -62,6 +70,7 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         // Remvoe test data.
         $episode->delete();
         $user->delete();
+        $deadline->delete();
         $subreddit->delete();
 
         $this->assertTrue($exception_thrown);
@@ -75,25 +84,34 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setisValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
         $episode->setSubreddit($subreddit);
         $episode->save();
+        
+        $deadline = new Deadline();
+        $deadline->setSubreddit($subreddit);
+        $deadline->setAuthorType($first);
+        $deadline->setSeconds(0);
+        $deadline->save();
 
         // Establish conditions to trip up test.
         $new_user = new sfGuardUser();
         $new_user->setUsername(rand(0, 10000));
         $new_user->setEmailAddress(rand(0, 10000));
+        $new_user->setIsValidated(1);
         $new_user->save();
         $existing_assignment = new EpisodeAssignment();
         $existing_assignment->setEpisode($episode);
@@ -122,6 +140,7 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
             $assignment->delete();
         $episode->delete();
         $user->delete();
+        $deadline->delete();
         $subreddit->delete();
 
         $this->assertTrue($exception_thrown);
@@ -135,20 +154,28 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setisValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
         $episode->setSubreddit($subreddit);
         $episode->save();
+        
+        $deadline = new Deadline();
+        $deadline->setSubreddit($subreddit);
+        $deadline->setAuthorType($first);
+        $deadline->setSeconds(0);
+        $deadline->save();
 
         // Establish conditions to trip up test.
         $existing_episode = new Episode();
@@ -182,6 +209,7 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
             $assignment->delete();
         $episode->delete();
         $user->delete();
+        $deadline->delete();
         $subreddit->delete();
 
         $this->assertTrue($exception_thrown);
@@ -194,15 +222,17 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setIsValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
@@ -251,17 +281,19 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setIsValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
         $understudy = AuthorTypeTable::getInstance()
-                ->findOneByType('understudy');
+                ->findOneByType('shark');
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
@@ -280,18 +312,8 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
         $understudy_deadline->setSubreddit($subreddit);
         $understudy_deadline->setAuthorType($understudy);
         $understudy_deadline->setSeconds(10);
+        $understudy_deadline->setRestrictedUntilPreviousMissesDeadline(1);
         $understudy_deadline->save();
-
-        $application_first = new Application();
-        $application_first->setAuthorType($first);
-        $application_first->setSubreddit($subreddit);
-        $application_first->save();
-        $application_next = new Application();
-        $application_next->setAuthorType($understudy);
-        $application_next->setSubreddit($subreddit);
-        $application_next->setRestrictedUntilPreviousMissesDeadline(true);
-        $application_next->save();
-
 
         // Try to save episode assignment.
         $assignment = new EpisodeAssignment();
@@ -329,21 +351,29 @@ class EpisodeAssignmentTest extends sfPHPUnitBaseTestCase
     {
         $subreddit = new Subreddit();
         $subreddit->setName(rand(0, 10000));
+        $subreddit->setDomain(rand(0, 10000));
         $subreddit->save();
 
         $user = new sfGuardUser();
         $user->setUsername(rand(0, 10000));
         $user->setEmailAddress(rand(0, 10000));
+        $user->setIsValidated(1);
         $user->save();
 
         $first = AuthorTypeTable::getInstance()
-                ->findOneByType('first');
+                ->findOneByType('squid');
 
         $episode = new Episode();
         $episode->setReleaseDate(date('Y-m-d H:i:s', time() + 100000));
         $episode->setSubreddit($subreddit);
         $episode->save();
-
+        
+        $deadline = new Deadline();
+        $deadline->setSubreddit($subreddit);
+        $deadline->setAuthorType($first);
+        $deadline->setSeconds(0);
+        $deadline->save();
+        
         $assignment = new EpisodeAssignment();
         $assignment->setSfGuardUser($user);
         $assignment->setEpisode($episode);

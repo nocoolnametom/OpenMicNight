@@ -42,6 +42,7 @@ class SubredditTableTest extends sfPHPUnitBaseTestCase
         // Create Test Subreddit
         $subreddit = new Subreddit();
         $subreddit->setName('test1');
+        $subreddit->setDomain('test1');
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
         $subreddit->setCreationInterval('0');
@@ -72,6 +73,7 @@ class SubredditTableTest extends sfPHPUnitBaseTestCase
         // Create Test Subreddit
         $subreddit = new Subreddit();
         $subreddit->setName('test2');
+        $subreddit->setDomain('test2');
         $subreddit->setCreateNewEpisodesCronFormatted('0 0 1 * *');
         $subreddit->setEpisodeScheduleCronFormatted('0 0 1 * *');
         $subreddit->setCreationInterval('0');

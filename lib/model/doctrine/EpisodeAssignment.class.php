@@ -169,7 +169,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              */
             $deadline = DeadlineTable::getInstance()->find($this->getEpisode()->getSubreddit()->getFirstDeadlineId());
             if ($deadline) {
-                if ($author_type_id == $deadline->getAuthorTypeId()) {
+                if ($this->getAuthorTypeId() == $deadline->getAuthorTypeId()) {
                     $release_date = $this->getEpisode()->getReleaseDate('U');
                     $seconds = $deadline->getSeconds();
                     $deadline = $release_date - $seconds;

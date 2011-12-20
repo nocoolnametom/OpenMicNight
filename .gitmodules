@@ -7,6 +7,9 @@
 [submodule "plugins/sfDoctrineRestGeneratorPlugin"]
 	path = plugins/sfDoctrineRestGeneratorPlugin
 	url = git://github.com/xavierlacot/sfDoctrineRestGeneratorPlugin.git
-[submodule "plugins/sfPluploadPlugin"]
-	path = plugins/sfPluploadPlugin
-	url = git://github.com/kevindew/sfPluploadPlugin.git
+[submodule "lib/vendor/symfony"]
+	path = lib/vendor/symfony
+	url = git://github.com/vjousse/symfony-1.4.git
+[submodule "lib/vendor/plupload"]
+	path = lib/vendor/plupload
+	url = git://github.com/moxiecode/plupload.git
