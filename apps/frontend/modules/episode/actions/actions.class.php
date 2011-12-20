@@ -65,6 +65,14 @@ class episodeActions extends sfActions
 
     public function executeEdit(sfWebRequest $request)
     {
+        // Clear pluploader session variables.
+        $this->getUser()->getAttributeHolder()->remove('valid_episode');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_id');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_audio_file_hash');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
+        
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                                         true);
@@ -158,6 +166,14 @@ class episodeActions extends sfActions
 
     public function executeUpdate(sfWebRequest $request)
     {
+        // Clear pluploader session variables
+        $this->getUser()->getAttributeHolder()->remove('valid_episode');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_id');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_audio_file_hash');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
+        $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
+        
         $this->forward404Unless($request->isMethod(sfRequest::POST) || $request->isMethod(sfRequest::PUT));
 
         $auth_key = $this->getUser()->getApiAuthKey();

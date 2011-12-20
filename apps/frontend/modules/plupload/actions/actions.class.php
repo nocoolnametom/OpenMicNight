@@ -11,92 +11,56 @@
 class pluploadActions extends sfActions
 {
 
-    /**
-     * Takes the web request and tries to save the uploaded file
-     *
-     * The web request is expected to have a form and a validator field name
-     * passed as arguments. Once an upload is complete this action will initiate
-     * the form class and get the validator with the name and pass an array of
-     * data through the clean method.
-     *
-     * data for validator
-     * array(
-     *   name => $filename
-     *   file => $pathToFile
-     *   type => $mimeType
-     * )
-     *
-     * Expected to return JSON. The 3 successful states it'll return is
-     *
-     * incomplete file:
-     *    status: incomplate
-     *
-     * validation error:
-     *    status: error
-     *    message: $errorMessage
-     *
-     * comlete file:
-     *    status: complete
-     *    filename: $fileName (note not path)
-     *
-     * @see sfActions::execute
-     */
-    public function executeIndex(sfWebRequest $request)
+    public function executeUpload_audio(sfWebRequest $request)
     {
-        $plupload = new sfPluploadUploadedFile(
-                        $request->getParameter('chunk', 0),
-                        $request->getParameter('chunks', 0),
-                        $request->getParameter('name', 'file.tmp')
-        );
+        $id = $request->getParameter('id');
+        $filename = $request->getParameter('name');
 
-        $plupload->processUpload(
-                $request->getFiles($request->getParameter('file-data-name', 'file')), $plupload->getContentType($request)
-        );
+        $this->forward404Unless($id && $filename);
 
-        $this->returnData = array();
+        $valid_episode = $this->validateEpisodeForAudioUpload($id, $filename);
 
-        if (!$plupload->isComplete()) {
-            $this->returnData = array(
-                'status' => 'incomplete'
-            );
+        $this->forward404Unless($valid_episode);
 
-            return;
-        }
+        // Settings
+        $targetDir = rtrim(preg_replace_callback('/~([a-z0-1_\-]+)~/', create_function('$matches', 'return sfConfig::get($matches[1]);'), sfConfig::get('app_plupload_audio_file_location')), '/');
+        //$targetDir = 'uploads/';
+        //$cleanupTargetDir = false; // Remove old files
+        //$maxFileAge = 60 * 60; // Temp file age in seconds
+        // 5 minutes execution time
+        @set_time_limit(5 * 60);
 
-        $formClass = $request->getParameter('form');
-        $validatorName = $request->getParameter('validator');
+        $fileName = $this->getUser()->getAttribute('valid_episode_audio_file_hash', '');
 
-        if (!class_exists($formClass)) {
-            throw new Exception('Form class doesn\'t exist');
-        }
+        return $this->handlePlupload($request, $targetDir, $fileName);
+    }
 
-        $form = new $formClass();
+    public function executeUpload_image(sfWebRequest $request)
+    {
+        $id = $request->getParameter('id');
+        $filename = $request->getParameter('name');
 
-        $validator = $form->getValidator($validatorName);
+        $this->forward404Unless($id && $filename);
 
-        try {
-            $file = $validator->clean(array(
-                'name' => $plupload->getOriginalFilename(),
-                'file' => $plupload->getFilePath(),
-                'type' => $plupload->getMimeType()
-                    ));
-        } catch (sfValidatorError $e) {
-            $this->returnData = array(
-                'status' => 'error',
-                'message' => $e->getMessage()
-            );
-            return;
-        }
+        $valid_episode = $this->validateEpisodeForImageUpload($id, $filename);
 
-        $this->returnData = array(
-            'status' => 'complete',
-            'file' => $file
-        );
+        $this->forward404Unless($valid_episode);
+
+        // Settings
+        $targetDir = rtrim(preg_replace_callback('/~([a-z0-1_\-]+)~/', create_function('$matches', 'return sfConfig::get($matches[1]);'), sfConfig::get('app_plupload_image_file_location')), '/');
+        //$targetDir = 'uploads/';
+        //$cleanupTargetDir = false; // Remove old files
+        //$maxFileAge = 60 * 60; // Temp file age in seconds
+        // 5 minutes execution time
+        @set_time_limit(5 * 60);
+
+        $fileName = $this->getUser()->getAttribute('valid_episode_image_file_hash', '');
+
+        return $this->handlePlupload($request, $targetDir, $fileName);
     }
 
     public function executeTest(sfWebRequest $request)
     {
-        $this->plupload_location = rtrim(preg_replace_callback('/~([a-z0-1_\-]+)~/', create_function('$matches', 'return sfConfig::get($matches[1]);'), sfConfig::get('app_plupload_js_dir')), '/');
         $this->plupload_web_dir = sfConfig::get('app_plupload_web_dir');
         $this->getUser()->getAttributeHolder()->remove('valid_episode');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_id');
@@ -181,41 +145,13 @@ class pluploadActions extends sfActions
         return $this->getUser()->getAttribute('valid_episode', false);
     }
 
-    public function executeUpload_audio(sfWebRequest $request)
+    protected function handlePlupload(sfWebRequest $request, $targetDir, $fileName)
     {
-        $id = $request->getParameter('id');
-        $filename = $request->getParameter('name');
-
-        $this->forward404Unless($id && $filename);
-
-        $valid_episode = $this->validateEpisodeForAudioUpload($id, $filename);
-
-        $this->forward404Unless($valid_episode);
-
-        $response = $this->getResponse();
-
-        // HTTP headers for no cache etc
-        header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-        header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
-        header("Cache-Control: no-store, no-cache, must-revalidate");
-        header("Cache-Control: post-check=0, pre-check=0", false);
-        header("Pragma: no-cache");
-
-
-        // Settings
-        $targetDir = sfConfig::get("sf_upload_dir") . DIRECTORY_SEPARATOR . "plupload";
-        //$targetDir = 'uploads/';
-        //$cleanupTargetDir = false; // Remove old files
-        //$maxFileAge = 60 * 60; // Temp file age in seconds
-        // 5 minutes execution time
-        @set_time_limit(5 * 60);
-
         // Uncomment this one to fake upload time
         //usleep(5000);
         // Get parameters
         $chunk = $request->getParameter('chunk', 0);
         $chunks = $request->getParameter('chunks', 0);
-        $fileName = $this->getUser()->getAttribute('valid_episode_file_hash', '');
 
 
         // Clean the fileName for security reasons

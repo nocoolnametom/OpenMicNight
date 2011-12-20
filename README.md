@@ -51,3 +51,5 @@ The application should have full code coverage in its unique model classes (thou
 ## Configuation
 
 There are a few options that affect all aspects of the application, and they are declared within `config/ProjectConfiguration.class.php`.  You can change the Amazon bucket prefix, the storage location for pre-approved audio files, and the storage location for episode graphic files.  Other options more sepcific to different application services are contained within their respectives app config directories (eg, `apps/api_v1/config/app.yml` and `apps/api_v1/config/settings.yml`).  For more information on these configuration files see the [symfony documentation](http://www.symfony-project.org/gentle-introduction/1_4/en/05-Configuring-Symfony).
+
+Remember to make the data/temp directory writable by the web user so that users cna upload episode files.  Episodes are served via Apache or nginx x-sendfile so the file are not executed.

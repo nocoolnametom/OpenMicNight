@@ -22,8 +22,6 @@ class ProjectConfiguration extends sfProjectConfiguration
             'sfDoctrineRestGeneratorPlugin',
             'sfReCaptchaPlugin',
             'sfHtml5FormPlugin',
-            'sfPluploadPlugin',
-            'sfWidgetFormInputSWFUploadPlugin',
         ));
     }
 

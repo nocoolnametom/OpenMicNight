@@ -21,8 +21,11 @@ all:
     auth_key_remember_me_expiration: 1209600
   recaptcha:
     active:     false
-  plupload_js_dir: ~sf_lib_dir~/vendor/plupload/src/javascript/
-  plupload_web_dir: plupload
+  plupload:
+    js_dir:                ~sf_lib_dir~/vendor/plupload/src/javascript/
+    web_dir:               plupload
+    audio_file_location: ~sf_data_dir~/temp/
+    image_file_location: ~sf_upload_dir~/graphics/
 
 prod:
   recaptcha:
