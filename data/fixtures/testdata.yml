@@ -10,7 +10,7 @@ Subreddit:
 sfGuardUser:
   nocoolnametom:
     email_address:  nocoolnametom@gmail.com
-    username:       admin
+    username:       nocoolnametom
     password:       admin
     is_validated:   true
     is_authorized:  true
