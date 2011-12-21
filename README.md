@@ -72,7 +72,7 @@ In your Apache config ensure that XSendfile is loaded, enabled, and can serve fi
     
     # Enable xsendfile
     XSendFile On
-    # Set the data/tmp/ file to be whitelisted
+    # Set the data/tmp/ directory to be whitelisted
     XSendFilePath /[path_to_project_root]/data/temp/
 
 Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.

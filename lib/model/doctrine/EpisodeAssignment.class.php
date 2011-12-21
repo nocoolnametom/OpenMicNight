@@ -167,13 +167,14 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              * rules, let's set it to be valid if it belongs to the first
              * Deadline and send an email to the user about it.
              */
-            $deadline = DeadlineTable::getInstance()->find($this->getEpisode()->getSubreddit()->getFirstDeadlineId());
+            $subreddit = SubredditTable::getInstance()->find($this->getEpisode()->getSubredditId());
+            $deadline = DeadlineTable::getInstance()->find($subreddit->getFirstDeadlineId());
             if ($deadline) {
                 if ($this->getAuthorTypeId() == $deadline->getAuthorTypeId()) {
                     $release_date = $this->getEpisode()->getReleaseDate('U');
                     $seconds = $deadline->getSeconds();
                     $deadline = $release_date - $seconds;
-                    $this->getEpisode()->getSubreddit()->sendEmail($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
+                    $subreddit->sendEmail($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
                 }
             }
         }
@@ -212,7 +213,8 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         );
         if ($pending_membership)
         {
-            return ($this->getEpisode()->getSubreddit->getPreferredUsersAreFullMembers() ? false : true);
+            $subreddit = SubredditTable::getInstance()->find($this->getEpisode()->getSubredditId());
+            return ($subreddit->getPreferredUsersAreFullMembers() ? false : true);
         }
         return false;
     }
