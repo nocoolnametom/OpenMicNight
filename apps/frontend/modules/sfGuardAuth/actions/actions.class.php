@@ -31,6 +31,12 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         $this->form = new $class();
 
         if ($request->isMethod('post')) {
+            //Clean up email address
+            $signin = $request->getParameter('signin');
+            if (array_key_exists('username', $signin)) {
+                $signin['username'] = str_replace(' ', '', $signin['username']);
+            }
+            $request->setParameter('signin', $signin);
             $this->form->bind($request->getParameter('signin'));
             if ($this->form->isValid()) {
                 $values = $this->form->getValues();
@@ -88,7 +94,7 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
                 $user = $this->form->user;
 
                 $new_password = substr(md5(time() . rand(0, 10000)), 0, 10);
-                
+
                 $user->setPassword($new_password);
                 $user->save();
 
@@ -119,18 +125,18 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
             if ($this->form->isValid()) {
                 $user = $this->form->save();
                 $this->getUser()->setApiUserId($user->getIncremented());
+                $this->getUser()->setFlash('email_link', $user->getEmailAddress());
                 $this->getUser()->sendMail('RegisterInitial');
-                $this->getUser()->setFlash('notice', 'You have registered a user account.  Please check your email for further instructions.');
+                $this->getUser()->setFlash('notice', 'You have registered a user account.  We\'ve sent an email to ' . $user->getEmailAddress() . ' with further instructions.');
                 $this->redirect('@homepage');
             }
         }
     }
-    
+
     public function executeValidate(sfWebRequest $request)
     {
         $url = ValidationPostTable::getInstance()->getMostRecent()->getPostAddress();
-        if (stripos($url, 'http') !== 0)
-        {
+        if (stripos($url, 'http') !== 0) {
             $url = ProjectConfiguration::getDefaultSubredditAddress() . '/' . $url;
         }
         $this->redirect($url);

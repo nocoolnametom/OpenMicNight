@@ -10,6 +10,7 @@
   </head>
   <body>
     <div class="notice"><?php echo $sf_user->getFlash('notice'); ?></div>
+    <?php include_partial('global/email_link'); ?>
     <?php if ($sf_user->hasFlash('login')): ?>
     <?php foreach($sf_user->getFlash('login') as $login_message): ?>
     <div class="notice"><?php echo $login_message; ?></div>

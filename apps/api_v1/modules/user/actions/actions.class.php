@@ -124,7 +124,7 @@ class userActions extends autouserActions
     public function requestToken($content)
     {
         $data = $this->parsePayload($content);
-        $email_address = $data['email_address'];
+        $email_address = str_replace(' ', '', $data['email_address']);
         $password = $data['password'];
         $expires_in = (array_key_exists('expires_in', $data) ? $data['expires_in'] : null);
         return $this->getUser()
