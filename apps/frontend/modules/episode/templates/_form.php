@@ -43,17 +43,17 @@
                 </td>
             </tr>
             <tr>
-                <th><?php echo $form['is_nsfw']->renderLabel() ?></th>
-                <td>
-                    <?php echo $form['is_nsfw']->renderError() ?>
-                    <?php echo $form['is_nsfw'] ?>
-                </td>
-            </tr>
-            <tr>
                 <th><?php echo $form['title']->renderLabel() ?></th>
                 <td>
                     <?php echo $form['title']->renderError() ?>
                     <?php echo $form['title'] ?>
+                </td>
+            </tr>
+            <tr>
+                <th><?php echo $form['is_nsfw']->renderLabel() ?></th>
+                <td>
+                    <?php echo $form['is_nsfw']->renderError() ?>
+                    <?php echo $form['is_nsfw'] ?>
                 </td>
             </tr>
             <tr>

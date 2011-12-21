@@ -60,20 +60,20 @@ Audio files are put into the /data/temp directory, so this directory must be exp
 
     location /audio/temp/ {
       internal;
-      root /[path_to_project_root]data/temp/; # note the trailing slash
+      root /[path_to_project_root]/data/temp/; # note the trailing slash
     }
 
 ### Configure Apache for X-Sendfile
 
-In your Apache config ensure that XSendfile is loaded, enabled, and can serve files that are not found within the web root:
+In your Apache config ensure that XSendfile is loaded, enabled, and can serve files that are found within the `data/temp/` folder:
 
     # Load xsendfile
     LoadModule xsendfile_module /path/to/modules/mod_xsendfile.so
     
     # Enable xsendfile
     XSendFile On
-    # enable sending files from parent dirs
-    XSendFileAllowAbove On
+    # Set the data/tmp/ file to be whitelisted
+    XSendFilePath /[path_to_project_root]/data/temp/
 
 Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.
 

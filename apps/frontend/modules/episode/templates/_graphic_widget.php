@@ -80,8 +80,8 @@
     </div>
     <?php if ($form->getObject()->getGraphicFile()): ?>
         <div id="remove_graphic">
-            <input type="checkbox" name="episode[audio_file_delete]" id="episode_audio_file_delete">
-            <label for="episode_audio_file_delete">remove the current file</label>
+            <input type="checkbox" name="episode[graphic_file_delete]" id="episode_audio_file_delete" />
+            <label for="episode_graphic_file_delete">remove the current file</label>
         </div>
     <?php endif; ?>
     <div id="graphic_filelist"><?php if (sfConfig::get('sf_environment') != 'prod'): ?>No runtime found.<?php endif; ?></div>

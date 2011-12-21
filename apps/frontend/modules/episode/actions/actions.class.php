@@ -68,25 +68,16 @@ class episodeActions extends sfActions
         $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
 
-        $this->graphic_hash = sha1(
-                'image_file'
-                . (int) $request->getParameter('id')
-                . (int) $this->getUser()->getApiUserId()
-        );
-
-        $this->audio_hash = sha1(
-                'audio_file'
-                . (int) $request->getParameter('id')
-                . (int) $this->getUser()->getApiUserId()
-        );
-
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        // Cheating for this one for now.
-        //$episode = ApiDoctrine::createQuickObject($episode_data['body']);
-        $episode = EpisodeTable::getInstance()->find($request->getParameter('id'));
+        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        $this->forward404Unless(strtotime($quick_episode->getReleaseDate()) >= time());
+        // If the episode is not released, only the admins and moderators can view it.
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        // Unless the owner of the episode is trying to download it.  That's okay.
+        $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $episode->getIncremented() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
         $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
@@ -109,20 +100,36 @@ class episodeActions extends sfActions
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
         unset($this->form['nice_filename']);
+        
+        $this->graphic_hash = sha1(
+                'image_file'
+                . (int) $request->getParameter('id')
+                . (int) $this->getUser()->getApiUserId()
+        );
+
+        $this->audio_hash = sha1(
+                'audio_file'
+                . (int) $request->getParameter('id')
+                . (int) $this->getUser()->getApiUserId()
+        );
     }
 
     public function executeAudio(sfWebRequest $request)
     {
-        $episode = EpisodeTable::getInstance()->find($request->getParameter('id'));
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
+        $episode = ApiDoctrine::createQuickObject($episode_data['body']);
 
         // If the episode is released, everyone is allowed to download the file from Amazon
-        ;
+        if ($episode->getReleaseDate('U') > time()) {
+            // @todo Redirect to the Amazon location.
+        }
 
         // If the episode is not released, only the admins and moderators can view it.
-        ;
+        $permission = $this->verifyPermissionsForCurrentUser($episode->getSubredditId());
 
         // Unless the owner of the episode is trying to download it.  That's okay.
-        ;
+        $this->forward404Unless($permission || $episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         // Now that we're serving the local file, let's set up the server to serve it.
         header('Content-Disposition: attachment;filename=' . $episode->getNiceFilename());
@@ -141,7 +148,6 @@ class episodeActions extends sfActions
                 header("Content-Type: audio/mpeg");
                 break;
         }
-
 
         // Check if we're using nginx and if nxginx and XSendfile are installed and use that
         if (array_key_exists('SERVER_SOFTWARE', $_SERVER) && preg_match('/nginx/i', $_SERVER['SERVER_SOFTWARE'])) {
@@ -162,13 +168,14 @@ class episodeActions extends sfActions
         }
 
         // Otherwise, let's waste time by loading the file into memory and serving it through PHP (horror!  Not a joke!)
-        if (!sfConfig::get('app_enable_slow_audio_download', false))
-            throw new sfException('Slow downloads not enabled.');
-
-        $filename = sfConfig::get('sf_data_dir') . '/temp/' . $episode->getAudioFile();
-        header("Content-Length: " . filesize($filename));
-        $file = fopen($filename, 'r');
-        fpassthru($file);
+        if (sfConfig::get('app_enable_slow_audio_download', false)) {
+            $filename = sfConfig::get('sf_data_dir') . '/temp/' . $episode->getAudioFile();
+            header("Content-type: application/octet-stream");
+            header('Content-Disposition: attachment; filename="' . basename($filename) . '"');
+            header("Content-Length: " . filesize($filename));
+            readfile($filename);
+            die();
+        }
     }
 
     public function executeApprove(sfWebRequest $request)
@@ -176,23 +183,29 @@ class episodeActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        $this->forward404Unless(strtotime($quick_episode->getReleaseDate()) >= time());
+        // If the episode is not released, only the admins and moderators can view it.
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        $this->forward404Unless($permission);
 
         $this->form = new EpisodeForm($episode);
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
+        unset($this->form['nice_filename']);
     }
 
     public function executeSubmit(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
+        $this->forward404Unless($episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $submission_change = array(
             'is_submitted' => 1,
@@ -219,28 +232,17 @@ class episodeActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $this->form = new EpisodeForm($episode);
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
-
-        // File storage location help
-        if ($episode->getGraphicFile()) {
-            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('graphic_file')->setOption('file_src', image_path('/uploads/graphics/' . $episode->getGraphicFile()));
-            $this->form->getWidget('graphic_file')->setLabel("Change Graphic");
-        }
-        $this->form->getValidator('graphic_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/graphics/');
-
-        if ($episode->getAudioFile()) {
-            sfContext::getInstance()->getConfiguration()->loadHelpers("Asset");
-            $this->form->getWidget('audio_file')->setOption('file_src', image_path('/uploads/audio/staging/' . $episode->getAudioFile()));
-            $this->form->getWidget('audio_file')->setLabel("Change Graphic");
-        }
-        $this->form->getValidator('audio_file')->setOption('path', sfConfig::get('sf_web_dir') . '/uploads/audio/staging/');
+        unset($this->form['nice_filename']);
 
         $this->processForm($request, $this->form);
 
@@ -265,6 +267,14 @@ class episodeActions extends sfActions
         $this->redirect('episode/index');
     }
 
+    protected function verifyPermissionsForCurrentUser($subreddit_id, $permissions = array())
+    {
+        $membership = sfGuardUserSubredditMembershipTable::getInstance()->getFirstByUserSubredditAndMemberships(
+                $this->getUser()->getApiUserId(), $subreddit_id, $permissions
+        );
+        return ($membership ? true : false);
+    }
+
     protected function processForm(sfWebRequest $request, EpisodeForm $form)
     {
         $form->bind($request->getParameter($form->getName()), $request->getFiles($form->getName()));
@@ -274,8 +284,18 @@ class episodeActions extends sfActions
             if ($form->getValue('id')) {
                 // Update existing item.
                 $values = $form->getTaintedValues();
+                if ($form->getValue('audio_file_delete') == true) {
+                    $values['audio_file'] = null;
+                    $values['nice_filename'] = null;
+                    unlink(sfConfig::get('sf_data_dir') . '/temp/' . $form->getObject()->getAudioFile());
+                }
+                if ($form->getValue('graphic_file_delete') == true) {
+                    // @todo this should also delete the file.
+                    $values['graphic_file'] = null;
+                    unlink(sfConfig::get('sf_web_dir') . '/uploads/graphics/' . $form->getObject()->getGraphicFile());
+                }
                 unset(
-                        $values['_csrf_token'], $values['id']
+                        $values['_csrf_token'], $values['id'], $values['graphic_file_delete'], $values['audio_file_delete']
                 );
                 $episode = $form->getObject();
                 if (!array_key_exists('is_nsfw', $values) && $episode->getIsNsfw())
