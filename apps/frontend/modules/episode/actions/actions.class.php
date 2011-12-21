@@ -75,7 +75,7 @@ class episodeActions extends sfActions
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($quick_episode->getReleaseDate()) >= time());
         // If the episode is not released, only the admins and moderators can view it.
-        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
         // Unless the owner of the episode is trying to download it.  That's okay.
         $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
@@ -89,18 +89,19 @@ class episodeActions extends sfActions
         $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
 
         $this->deadline = strtotime($quick_episode->getReleaseDate()) - $deadline->getSeconds();
-        
+
         $this->is_submitted = (bool) $quick_episode->getIsSubmitted();
         $this->is_approved = (bool) $quick_episode->getIsApproved();
 
 
         $this->form = new EpisodeForm($episode);
+        $this->form->setDefault('is_nsfw', $quick_episode->getIsNsfw());
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
         unset($this->form['nice_filename']);
-        
+
         $this->graphic_hash = sha1(
                 sfConfig::get('app_web_app_image_hash_salt')
                 . (int) $request->getParameter('id')
@@ -127,7 +128,7 @@ class episodeActions extends sfActions
         }
 
         // If the episode is not released, only the admins and moderators can view it.
-        $permission = $this->verifyPermissionsForCurrentUser($episode->getSubredditId());
+        $permission = $this->verifyPermissionsForCurrentUser($episode->getSubredditId(), array('admin', 'moderator'));
 
         // Unless the owner of the episode is trying to download it.  That's okay.
         $this->forward404Unless($permission || $episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
@@ -179,24 +180,37 @@ class episodeActions extends sfActions
         }
     }
 
-    public function executeApprove(sfWebRequest $request)
+    public function executeApproval(sfWebRequest $request)
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
-        $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
-        $this->forward404Unless($episode && $episode->getId());
-        $this->forward404Unless(strtotime($quick_episode->getReleaseDate()) >= time());
+        $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $this->forward404Unless($this->episode && $this->episode->getId());
+        $this->forward404Unless(strtotime($this->episode->getReleaseDate()) >= time());
+        $this->forward404If($this->episode->getIsApproved());
         // If the episode is not released, only the admins and moderators can view it.
-        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
+        // The owner of the Episode *cannot* be an approver for the episode.
+        $this->forward404If($this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+
         $this->forward404Unless($permission);
 
-        $this->form = new EpisodeForm($episode);
-        unset($this->form['sf_guard_user_id']);
-        unset($this->form['file_is_remote']);
-        unset($this->form['remote_url']);
-        unset($this->form['approved_at']);
-        unset($this->form['nice_filename']);
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $this->episode->getId() . '&sf_guard_user_id=' . $this->episode->getSfGuardUserId() . '&missed_deadline=0', true);
+        $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
+        $author_type_id = $assignment->getAuthorTypeId();
+
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $this->episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
+        $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
+        $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
+
+        $this->deadline = strtotime($this->episode->getReleaseDate()) - $deadline->getSeconds();
+
+        $this->is_submitted = (bool) $this->episode->getIsSubmitted();
+        $this->is_approved = (bool) $this->episode->getIsApproved();
     }
 
     public function executeSubmit(sfWebRequest $request)
@@ -218,6 +232,55 @@ class episodeActions extends sfActions
         $this->redirect('episode/edit?id=' . $episode->getId());
     }
 
+    public function executeApprove(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
+        $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $this->forward404Unless($this->episode && $this->episode->getId());
+        $this->forward404Unless(strtotime($this->episode->getReleaseDate()) >= time());
+        $this->forward404If($this->episode->getIsApproved());
+        // If the episode is not released, only the admins and moderators may approve it
+        $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
+        $this->forward404Unless($permission);
+        // The owner of the Episode *cannot* be an approver for the episode.
+        $this->forward404If($this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+
+        $submission_change = array(
+            'is_approved' => 1,
+            'approved_by' => $this->getUser()->getApiUserid(),
+        );
+        $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $this->episode->getIncremented(), $submission_change, true);
+        $success = $this->checkHttpCode($result, 'put', 'episode/' . $this->episode->getIncremented(), json_encode($submission_change));
+        if ($success)
+        {
+            $this->getUser()->setFlash('notice', 'Episode was approved and will appear on its release date.');
+            $this->redirect('profile/episodes');
+        }
+        $this->setTemplate('approval');
+    }
+
+    public function executeShow(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
+        $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $this->forward404Unless($this->episode && $this->episode->getId());
+        if (strtotime($this->episode->getReleaseDate()) >= time()) {
+            // If the episode is not released, only the admins,  moderators, and submitter can view it.
+            $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
+            $this->forward404Unless($permission || $this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        } else {
+            $this->forward404Unless($this->episode->getIsApproved());
+        }
+
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+    }
+
     public function executeUpdate(sfWebRequest $request)
     {
         // Clear pluploader session variables
@@ -235,10 +298,13 @@ class episodeActions extends sfActions
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId());
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
         $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        
+        $episode->setIsNsfw($quick_episode->getIsNsfw());
 
         $this->form = new EpisodeForm($episode);
+        $this->form->setDefault('is_nsfw', $quick_episode->getIsNsfw());
         unset($this->form['sf_guard_user_id']);
         unset($this->form['file_is_remote']);
         unset($this->form['remote_url']);
@@ -258,6 +324,8 @@ class episodeActions extends sfActions
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'));
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
+        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
+        $this->forward404Unless($permission);
 
         //$episode->delete();
         $result = Api::getInstance()->setUser($auth_key)->delete('episode/' . $episode->getId(), true);
@@ -286,23 +354,29 @@ class episodeActions extends sfActions
                 // Update existing item.
                 $values = $form->getTaintedValues();
                 if ($form->getValue('audio_file_delete') == true) {
-                    $values['audio_file'] = null;
-                    $values['nice_filename'] = null;
-                    unlink(sfConfig::get('sf_data_dir') . '/temp/' . $form->getObject()->getAudioFile());
+                    if (!$form->getObject()->getApprovedAt() && !$form->getObject()->getSubmittedAt()) {
+                        $values['audio_file'] = null;
+                        $values['nice_filename'] = null;
+                        unlink(sfConfig::get('sf_data_dir') . '/temp/' . $form->getObject()->getAudioFile());
+                    }
                 }
                 if ($form->getValue('graphic_file_delete') == true) {
-                    // @todo this should also delete the file.
-                    $values['graphic_file'] = null;
-                    unlink(sfConfig::get('sf_web_dir') . '/uploads/graphics/' . $form->getObject()->getGraphicFile());
+                    if (!$form->getObject()->getApprovedAt()) {
+                        $values['graphic_file'] = null;
+                        unlink(sfConfig::get('sf_web_dir') . '/uploads/graphics/' . $form->getObject()->getGraphicFile());
+                    }
                 }
                 unset(
-                        $values['_csrf_token'], $values['id'], $values['graphic_file_delete'], $values['audio_file_delete']
+                        $values['_csrf_token'],
+                        $values['id'],
+                        $values['graphic_file_delete'],
+                        $values['audio_file_delete']
                 );
                 $episode = $form->getObject();
                 if (!array_key_exists('is_nsfw', $values) && $episode->getIsNsfw())
-                    $values['is_nsfw'] = '0';
+                    $values['is_nsfw'] = 0;
                 foreach ($values as $key => $value) {
-                    if ($value == "on")
+                    if ($value == "on" )
                         $values[$key] = 1;
                     if ($value == "off")
                         $values[$key] = 0;

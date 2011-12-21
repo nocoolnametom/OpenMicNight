@@ -92,7 +92,7 @@ class pluploadActions extends sfActions
 
             $episode = EpisodeTable::getInstance()->find($id);
             if ($episode) {
-                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId()) {
+                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId() && !$episode->getIsApproved()) {
                     $valid_episode = true;
                     $this->getUser()->setAttribute('valid_episode', true);
                     $this->getUser()->setAttribute('valid_episode_id', $id);
@@ -130,7 +130,7 @@ class pluploadActions extends sfActions
 
             $episode = EpisodeTable::getInstance()->find($id);
             if ($episode) {
-                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId()) {
+                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId() && !$episode->getIsApproved()) {
                     $valid_episode = true;
                     $this->getUser()->setAttribute('valid_episode', true);
                     $this->getUser()->setAttribute('valid_episode_id', $id);

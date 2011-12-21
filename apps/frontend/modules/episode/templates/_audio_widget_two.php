@@ -81,7 +81,7 @@
         </audio>
         <div style="font-size:xx-small;">To download, right-click and select the option to save...</div>
     </div>
-    <?php if ($form->getObject()->getAudioFile()): ?>
+    <?php if ($form->getObject()->getAudioFile() && !$form->getObject()->getSubmittedAt() && !$form->getObject()->getApprovedAt()): ?>
         <div id="remove_audio">
             <input type="checkbox" name="episode[audio_file_delete]" id="episode_audio_file_delete" />
             <label for="episode_audio_file_delete">remove the current file</label>

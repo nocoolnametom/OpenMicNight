@@ -9,6 +9,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     static protected $cronLoaded = false;
     static protected $awsLoaded = false;
     static protected $zendLoaded = false;
+    static protected $markdownLoaded = false;
 
     public function setup()
     {
@@ -66,6 +67,17 @@ class ProjectConfiguration extends sfProjectConfiguration
         require_once sfConfig::get('sf_lib_dir') . '/vendor/Zend/Loader/Autoloader.php';
         Zend_Loader_Autoloader::getInstance();
         self::$zendLoaded = true;
+    }
+    
+    static public function registerMarkdown()
+    {
+        if (self::$markdownLoaded) {
+            return;
+        }
+
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/php-markdown/markdown.php';
+
+        self::$markdownLoaded = true;
     }
 
     static public function getApplicationName()

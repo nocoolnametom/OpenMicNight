@@ -13,3 +13,6 @@
 [submodule "lib/vendor/plupload"]
 	path = lib/vendor/plupload
 	url = git://github.com/moxiecode/plupload.git
+[submodule "lib/vendor/php-markdown"]
+	path = lib/vendor/php-markdown
+	url = git://github.com/wolfie/php-markdown.git

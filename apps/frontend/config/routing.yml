@@ -62,7 +62,11 @@ homepage:
   param: { module: home, action: index }
 
 subreddit_index:
-  url:   /r/:subreddit_name/:module
+  url:   /r/:domain
+  param: { module: subreddit, action: show }
+
+subreddit:
+  url:   /r/:domain/:module
   param: { action: index }
 
 subreddit_default:

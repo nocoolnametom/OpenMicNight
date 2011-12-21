@@ -22,6 +22,36 @@ class Episode extends BaseEpisode
     {
         return $this->getTitle();
     }
+    
+    public function setTitle($value)
+    {
+        if (!$this->getApprovedAt())
+            $this->_set('title', $value);
+    }
+    
+    public function setDescription($value)
+    {
+        if (!$this->getApprovedAt())
+            $this->_set('description', $value);
+    }
+    
+    public function setAudioFile($value)
+    {
+        if (!$this->getApprovedAt())
+            $this->_set('audio_file', $value);
+    }
+    
+    public function setNiceFilename($value)
+    {
+        if (!$this->getApprovedAt())
+            $this->_set('nice_filename', $value);
+    }
+    
+    public function setGraphicFile($value)
+    {
+        if (!$this->getApprovedAt())
+            $this->_set('graphic_file', $value);
+    }
 
     public function setIncremented($id)
     {

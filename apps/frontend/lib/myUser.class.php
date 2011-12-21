@@ -32,6 +32,12 @@ class myUser extends sfGuardSecurityUser
             $this->setApiAuthkey($response['body']['auth_key']);
         }
     }
+    
+    public function formatMarkdown($input)
+    {
+        ProjectConfiguration::registerMarkdown();
+        return Markdown($input);
+    }
 
     public function setApiAuthkey($auth_key)
     {
@@ -52,9 +58,13 @@ class myUser extends sfGuardSecurityUser
     {
         if (!$this->_user_id) {
             $user_id = Api::getInstance()->setUser($this->getApiAuthKey())->get('user/token_user_id');
-            if (array_key_exists('body', $user_id) &&
-                    array_key_exists('user_id', $user_id['body']))
+            if (array_key_exists('body', $user_id)
+                    && array_key_exists('user_id', $user_id['body'])
+                    && $user_id['body']['user_id']) {
                 $this->setApiUserId($user_id['body']['user_id']);
+            } else {
+                $this->setAuthenticated(false);
+            }
         }
         return $this->_user_id;
     }
@@ -100,11 +110,10 @@ class myUser extends sfGuardSecurityUser
         // save last login
         $user->setLastLogin(date('Y-m-d H:i:s'));
         $user->save($con);
-        
+
         // Set login messages
         $message = array();
-        foreach($user->getUndisplayedLoginMessages() as $message)
-        {
+        foreach ($user->getUndisplayedLoginMessages() as $message) {
             $messages[] = $message->getMessage();
             $message->setDisplayed(true);
             $message->save();
@@ -172,8 +181,7 @@ class myUser extends sfGuardSecurityUser
         $name = ($user->getPreferredName() ?
                         $user->getPreferredName() : $user->getFullName());
         $user_id = $this->getApiUserId();
-        if (!array_key_exists('user_id', $additional_params))
-        {
+        if (!array_key_exists('user_id', $additional_params)) {
             $additional_params['user_id'] = $user_id;
         }
 
@@ -183,10 +191,10 @@ class myUser extends sfGuardSecurityUser
             $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage($body_function);
         if (!$email)
             throw new sfException("Cannot find email '$body_function' in language '$language'.");
-        
+
         $subject = $email->generateSubject($additional_params);
         $body = $email->generateBodyText($additional_params, $prefer_html);
-        
+
         $mail->setBodyText($body);
         $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
         $mail->addTo($address, $name);
