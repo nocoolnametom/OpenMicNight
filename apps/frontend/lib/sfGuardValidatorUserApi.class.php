@@ -43,7 +43,7 @@ class sfGuardValidatorUserApi extends sfGuardValidatorUser
         // don't allow to sign in with an empty username
         if ($email) {
             $package = array(
-                'email_address' => $email,
+                'email_address' => preg_replace('/\s+/', '', $email), //str_replace(" ", '', $email),
                 'password' => $password,
                 'expires_in' => $expires_in,
             );

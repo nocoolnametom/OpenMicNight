@@ -38,7 +38,7 @@ class sfGuardValidatorUser extends sfValidatorBase
 
     protected function doClean($values)
     {
-        $username = isset($values[$this->getOption('username_field')]) ? $values[$this->getOption('username_field')]
+        $username = isset($values[$this->getOption('username_field')]) ? trim(str_replace(" ", '', $values[$this->getOption('username_field')]))
                     : '';
         $password = isset($values[$this->getOption('password_field')]) ? $values[$this->getOption('password_field')]
                     : '';
