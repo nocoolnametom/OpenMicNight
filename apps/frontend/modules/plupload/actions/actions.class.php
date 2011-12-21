@@ -77,7 +77,7 @@ class pluploadActions extends sfActions
         $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
 
         $hash = sha1(
-                'audio_file'
+                sfConfig::get('app_web_app_audio_hash_salt')
                 . $this->getUser()->getAttribute('valid_episode_id')
                 . $this->getUser()->getAttribute('valid_episode_user_id')
         );
@@ -115,7 +115,7 @@ class pluploadActions extends sfActions
         $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
 
         $hash = sha1(
-                'image_file'
+                sfConfig::get('app_web_app_image_hash_salt')
                 . $this->getUser()->getAttribute('valid_episode_id')
                 . $this->getUser()->getAttribute('valid_episode_user_id')
         );

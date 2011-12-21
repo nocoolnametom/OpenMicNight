@@ -79,19 +79,19 @@ class episodeActions extends sfActions
         // Unless the owner of the episode is trying to download it.  That's okay.
         $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
-        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $episode->getIncremented() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
         $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
         $author_type_id = $assignment->getAuthorTypeId();
 
-        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
+        $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $quick_episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
         $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
         $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
 
-        $this->deadline = strtotime($episode->getReleaseDate()) - $deadline->getSeconds();
-
-        $this->is_submitted = (bool) $episode->getIsSubmitted();
-        $this->is_approved = (bool) $episode->getIsApproved();
+        $this->deadline = strtotime($quick_episode->getReleaseDate()) - $deadline->getSeconds();
+        
+        $this->is_submitted = (bool) $quick_episode->getIsSubmitted();
+        $this->is_approved = (bool) $quick_episode->getIsApproved();
 
 
         $this->form = new EpisodeForm($episode);
@@ -102,13 +102,13 @@ class episodeActions extends sfActions
         unset($this->form['nice_filename']);
         
         $this->graphic_hash = sha1(
-                'image_file'
+                sfConfig::get('app_web_app_image_hash_salt')
                 . (int) $request->getParameter('id')
                 . (int) $this->getUser()->getApiUserId()
         );
 
         $this->audio_hash = sha1(
-                'audio_file'
+                sfConfig::get('app_web_app_audio_hash_salt')
                 . (int) $request->getParameter('id')
                 . (int) $this->getUser()->getApiUserId()
         );
@@ -119,6 +119,7 @@ class episodeActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $this->forward404Unless($episode && $episode->getId());
 
         // If the episode is released, everyone is allowed to download the file from Amazon
         if ($episode->getReleaseDate('U') > time()) {
