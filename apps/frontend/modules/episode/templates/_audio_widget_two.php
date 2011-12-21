@@ -10,7 +10,7 @@
             runtimes : 'html5, html4',
             browse_button : 'audio_pickfiles',
             container : 'audio_uploader',
-            //max_file_size : '10mb',
+            max_file_size : '250mb',
             chunk_size : '2mb',
             unique_names : false,
             url : '<?php echo url_for('plupload/upload_audio?id=' . $form->getObject()->getId()); ?>',

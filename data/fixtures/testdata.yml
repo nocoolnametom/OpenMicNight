@@ -16,7 +16,39 @@ sfGuardUser:
     is_authorized:  true
     full_name:      Tom Doggett
     preferred_name: Tom
+    is_super_admin: false
+  tomdoggett:
+    email_address:  tom.doggett@unicity.net
+    username:       tomdoggett
+    password:       admin
+    is_validated:   true
+    is_authorized:  true
+    full_name:      Tom Doggett
+    preferred_name: Tom
     is_super_admin: true
+  admin:
+    email_address:  tomdoggett@uvu.edu
+    username:       admin
+    password:       admin
+    is_validated:   true
+    is_authorized:  true
+    full_name:      Tom Doggett
+    preferred_name: Tom
+    is_super_admin: true
+
+sfGuardUserSubredditMembership:
+  nocoolnametom_programming:
+    sfGuardUser: nocoolnametom
+    Subreddit: programming
+    Membership: user
+  tomdoggett_programming:
+    sfGuardUser: tomdoggett
+    Subreddit: programming
+    Membership: moderator
+  admin_programming:
+    sfGuardUser: admin
+    Subreddit: programming
+    Membership: admin
 
 ValidationPost:
   testpost:
@@ -52,7 +84,4 @@ Deadline:
 Episode:
   episode_one:
     Subreddit:      programming
-    release_date:   '2011-01-01'
-    is_nsfw:        false
-    title:          Epsiode One
-    description:    This is a test
+    release_date:   '2012-12-31'
