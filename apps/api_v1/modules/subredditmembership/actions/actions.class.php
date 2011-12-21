@@ -65,7 +65,7 @@ class subredditmembershipActions extends autosubredditmembershipActions
             $params['membership_id'] = $pending->getIncremented();
         }
 
-        if (!$admin && !$this->getUser()->isSuperAdmin())
+        if (!$admin && !$this->getUser()->isSuperAdmin() && $params['membership_id'] != $pending->getIncremented())
             throw new sfException("Your user does not have permissions to "
                     . "create new user memberships in this Subreddit.", 403);
 
