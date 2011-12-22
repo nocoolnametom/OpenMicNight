@@ -12,6 +12,7 @@ lib/filter/doctrine/sfDoctrineGuardPlugin/base/
 lib/form/doctrine/sfDoctrineGuardPlugin/base/
 lib/model/doctrine/sfDoctrineGuardPlugin/base/
 lib/vendor/symfony/
+lib/vendor/Zend
 log/
 web/sf
 web/sfDoctrinePlugin
