@@ -29,6 +29,10 @@ episode_audio:
   url:   /episode/:id/audio.:format
   param: { module: episode, action: audio }
 
+episode_delete:
+  url:  /episode/:id/delete
+  param: { module: episode, action: delete}
+
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/10-Routing
 
@@ -66,11 +70,11 @@ subreddit_index:
   param: { module: subreddit, action: show }
 
 subreddit:
-  url:   /r/:domain/:module
-  param: { action: index }
+  url:   /r/:domain/:action
+  param: { module: subreddit }
 
 subreddit_default:
-  url:   /r/:subreddit_name/:module/:action/*
+  url:   /r/:domain/:module/:action/*
 
 # generic rules
 # please, remove them by adding more specific rules

@@ -25,6 +25,7 @@ class subredditActions extends autosubredditActions
     {
         $validators = parent::getUpdateValidators();
         $validators['name'] = new sfValidatorString(array('required' => false));
+        $validators['domain'] = new sfValidatorString(array('required' => false));
         $validators['create_new_episodes_cron_formatted'] = new sfValidatorString(array(
                     'max_length' => 32,
                     'required' => false,

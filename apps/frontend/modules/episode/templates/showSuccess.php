@@ -29,7 +29,7 @@
     <tbody>
         <tr>
             <td colspan="2" class="audio">
-                <?php if (strtotime($episode->getReleaseDate()) < time()): ?>
+                <?php if (!$episode->getIsApproved()): ?>
                     <audio id="episode_audio" src="<?php echo ($episode->getAudioFile() ? url_for('@episode_audio?id=' . $episode->getId() . '&format=' . substr($episode->getAudioFile(), -3, 3), true) : '') ?>" controls></audio>
                     <div style="font-size:xx-small;">
                         <a id="episode_audio_link" href="<?php echo ($episode->getAudioFile() ? url_for('@episode_audio?id=' . $episode->getId() . '&format=' . substr($episode->getAudioFile(), -3, 3), true) : '') ?>"><?php echo $episode->getNiceFilename(); ?></a>

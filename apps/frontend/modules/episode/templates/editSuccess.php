@@ -10,6 +10,7 @@ include_partial('form', array(
     'form' => $form,
     'is_submitted' => $is_submitted,
     'is_approved' => $is_approved,
+    'is_admin' => $is_admin,
     'graphic_hash' => $graphic_hash,
     'audio_hash' => $audio_hash,
 ))

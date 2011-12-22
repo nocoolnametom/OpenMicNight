@@ -76,10 +76,14 @@ class episodeActions extends sfActions
         $this->forward404Unless(strtotime($quick_episode->getReleaseDate()) >= time());
         // If the episode is not released, only the admins and moderators can view it.
         $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
-        // Unless the owner of the episode is trying to download it.  That's okay.
+        // Unless the owner of the episode is trying to edit it.  That's okay.
         $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
-        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
+        if (!$permission) {
+            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
+        } else {
+            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $quick_episode->getSfGuardUserId() . '&missed_deadline=0', true);
+        }
         $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
         $author_type_id = $assignment->getAuthorTypeId();
@@ -101,6 +105,10 @@ class episodeActions extends sfActions
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
         unset($this->form['nice_filename']);
+        
+        if (!$this->form->getObject()->getApprovedAt()) {
+            unset($this->form['reddit_post_url']);
+        }
 
         $this->graphic_hash = sha1(
                 sfConfig::get('app_web_app_image_hash_salt')
@@ -113,6 +121,8 @@ class episodeActions extends sfActions
                 . (int) $request->getParameter('id')
                 . (int) $this->getUser()->getApiUserId()
         );
+        
+        $this->is_admin = ($permission ? true : false);
     }
 
     public function executeAudio(sfWebRequest $request)
@@ -187,7 +197,8 @@ class episodeActions extends sfActions
         $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($this->episode && $this->episode->getId());
         $this->forward404Unless(strtotime($this->episode->getReleaseDate()) >= time());
-        $this->forward404If($this->episode->getIsApproved());
+        // Approval should only be an option once the episode is submitted.
+        $this->forward404If($this->episode->getIsApproved() || !$this->episode->getIsSubmitted());
         // If the episode is not released, only the admins and moderators can view it.
         $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
         // The owner of the Episode *cannot* be an approver for the episode.
@@ -245,18 +256,17 @@ class episodeActions extends sfActions
         $this->forward404Unless($permission);
         // The owner of the Episode *cannot* be an approver for the episode.
         $this->forward404If($this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
-        
+
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
 
         $submission_change = array(
             'is_approved' => 1,
-            'approved_by' => $this->getUser()->getApiUserid(),
+            'approved_by' => $this->getUser()->getApiUserId(),
         );
         $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $this->episode->getIncremented(), $submission_change, true);
         $success = $this->checkHttpCode($result, 'put', 'episode/' . $this->episode->getIncremented(), json_encode($submission_change));
-        if ($success)
-        {
+        if ($success) {
             $this->getUser()->setFlash('notice', 'Episode was approved and will appear on its release date.');
             $this->redirect('profile/episodes');
         }
@@ -268,7 +278,7 @@ class episodeActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
-        $this->forward404Unless($this->episode && $this->episode->getId());
+        $this->forward404Unless($this->episode && $this->episode->getId() && $this->episode->getSfGuardUserId());
         if (strtotime($this->episode->getReleaseDate()) >= time()) {
             // If the episode is not released, only the admins,  moderators, and submitter can view it.
             $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
@@ -300,7 +310,7 @@ class episodeActions extends sfActions
         $this->forward404Unless($episode && $episode->getId());
         $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
         $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
-        
+
         $episode->setIsNsfw($quick_episode->getIsNsfw());
 
         $this->form = new EpisodeForm($episode);
@@ -310,6 +320,13 @@ class episodeActions extends sfActions
         unset($this->form['remote_url']);
         unset($this->form['approved_at']);
         unset($this->form['nice_filename']);
+        
+        if (!$permission && $this->form->getObject()->getApprovedAt()) {
+            unset($this->form['title'], $this->form['description']);
+        }
+        if (!$permission && !$this->form->getObject()->getApprovedAt()) {
+            unset($this->form['reddit_post_url']);
+        }
 
         $this->processForm($request, $this->form);
 
@@ -324,7 +341,7 @@ class episodeActions extends sfActions
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'));
         $episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
-        $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
+        $permission = $this->verifyPermissionsForCurrentUser($episode->getSubredditId(), array('admin'));
         $this->forward404Unless($permission);
 
         //$episode->delete();
@@ -333,7 +350,7 @@ class episodeActions extends sfActions
         if ($success)
             $this->getUser()->setFlash('notice', 'Episode was deleted successfully.');
 
-        $this->redirect('episode/index');
+        $this->redirect('profile/episodes');
     }
 
     protected function verifyPermissionsForCurrentUser($subreddit_id, $permissions = array())
@@ -367,16 +384,13 @@ class episodeActions extends sfActions
                     }
                 }
                 unset(
-                        $values['_csrf_token'],
-                        $values['id'],
-                        $values['graphic_file_delete'],
-                        $values['audio_file_delete']
+                        $values['_csrf_token'], $values['id'], $values['graphic_file_delete'], $values['audio_file_delete']
                 );
                 $episode = $form->getObject();
                 if (!array_key_exists('is_nsfw', $values) && $episode->getIsNsfw())
                     $values['is_nsfw'] = 0;
                 foreach ($values as $key => $value) {
-                    if ($value == "on" )
+                    if ($value == "on")
                         $values[$key] = 1;
                     if ($value == "off")
                         $values[$key] = 0;

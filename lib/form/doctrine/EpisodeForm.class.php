@@ -22,12 +22,6 @@ class EpisodeForm extends BaseEpisodeForm
                 ));
         $this->validatorSchema['graphic_file_delete'] = new sfValidatorPass();
         $this->validatorSchema['audio_file_delete'] = new sfValidatorPass();
-
-        if ($this->getObject()->getApprovedAt()) {
-            unset($this['title'], $this['description']);
-        } else {
-            unset($this['reddit_post_url']);
-        }
     }
 
     public function processValues($values)
