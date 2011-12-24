@@ -1,3 +1,4 @@
+<?php $graphic_file_web_location = '/' . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'; ?>
 <h3><?php echo link_to($subreddit->getName(), '@subreddit_index?module=index&domain=' . $subreddit->getDomain()) ?></h3>
 <div id="release_date"><?php echo date('Y-m-d g:ia', strtotime($episode->getReleaseDate())); ?></div>
 <?php if ($sf_user->getApiUserId() == $episode->getSfGuardUserId()): ?>
@@ -14,7 +15,7 @@
     <thead>
         <?php if ($episode->getGraphicFile()): ?>
             <tr>
-                <th colspan="2" class="graphic"><?php echo image_tag('/uploads/graphics/' . $episode->getGraphicFile()); ?></th>
+                <th colspan="2" class="graphic"><?php echo image_tag($graphic_file_web_location . $episode->getGraphicFile()); ?></th>
             </tr>
         <?php endif; ?>
         <tr>

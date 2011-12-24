@@ -1,3 +1,4 @@
+<?php $graphic_file_web_location = '/' . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'; ?>
 <h3><?php echo link_to($subreddit->getName(), '@subreddit_index?module=index&domain=' . $subreddit->getDomain()) ?></h3>
 <?php $submitted_at = date("g:ia, D j M Y", strtotime($episode->getSubmittedAt())); ?>
 <?php $approved_at = date("g:ia, D j M Y", strtotime($episode->getApprovedAt())); ?>

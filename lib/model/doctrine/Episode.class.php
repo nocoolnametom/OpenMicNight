@@ -208,7 +208,8 @@ class Episode extends BaseEpisode
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
             $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
-                'fileUpload' => $file_location . $this->getAudioFile()
+                'fileUpload' => $file_location . $this->getAudioFile(),
+                'acl' => AmazonS3::ACL_PUBLIC,
                     ));
             if ($response->isOK()) {
                 $this->setRemoteUrl($s3->get_object_url($bucket, $this->getNiceFilename()));

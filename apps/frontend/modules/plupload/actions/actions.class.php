@@ -23,7 +23,7 @@ class pluploadActions extends sfActions
         $this->forward404Unless($valid_episode);
 
         // Settings
-        $targetDir = rtrim(preg_replace_callback('/~([a-z0-1_\-]+)~/', create_function('$matches', 'return sfConfig::get($matches[1]);'), sfConfig::get('app_plupload_audio_file_location')), '/');
+        $targetDir = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/');
         //$targetDir = 'uploads/';
         //$cleanupTargetDir = false; // Remove old files
         //$maxFileAge = 60 * 60; // Temp file age in seconds
@@ -47,7 +47,7 @@ class pluploadActions extends sfActions
         $this->forward404Unless($valid_episode);
 
         // Settings
-        $targetDir = rtrim(preg_replace_callback('/~([a-z0-1_\-]+)~/', create_function('$matches', 'return sfConfig::get($matches[1]);'), sfConfig::get('app_plupload_image_file_location')), '/');
+        $targetDir = rtrim(ProjectConfiguration::getEpisodeGraphicFileLocalDirectory(), '/');
         //$targetDir = 'uploads/';
         //$cleanupTargetDir = false; // Remove old files
         //$maxFileAge = 60 * 60; // Temp file age in seconds

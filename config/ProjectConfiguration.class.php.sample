@@ -107,7 +107,7 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static public function getEpisodeGraphicFileLocalDirectory()
     {
-        return sfConfig::get('sf_web_dir') . '/uploads/';
+        return sfConfig::get('sf_web_dir') . '/uploads/graphics/';
     }
 
 }

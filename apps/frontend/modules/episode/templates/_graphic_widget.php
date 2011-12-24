@@ -2,6 +2,7 @@
 <?php use_javascript(sfConfig::get('app_plupload_web_dir') . '/plupload.html4.js'); ?>
 <?php use_javascript(sfConfig::get('app_plupload_web_dir') . '/plupload.html5.js'); ?>
 <?php use_javascript(sfConfig::get('app_plupload_web_dir') . '/plupload.flash.js'); ?>
+<?php $graphic_file_web_location = '/' . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'; ?>
 
 <script type="text/javascript">
     // Custom example logic
@@ -69,14 +70,14 @@
         uploader.bind('FileUploaded', function(up, file) {
             $('#' + file.id + " b").html("100%");
             $('#graphic_uploadfiles_span').html("");
-            $('#uploader_graphic').attr("src", "<?php echo substr(image_path('/uploads/graphics/' . $graphic_hash . '.png'), 0, -3); ?>" + file.name.split('.').pop());
+            $('#uploader_graphic').attr("src", "<?php echo substr(image_path($graphic_file_web_location . $graphic_hash . '.png'), 0, -3); ?>" + file.name.split('.').pop());
         });
     });
 </script>
 
 <div id="image_uploader">
     <div id="uploader_graphic_div">
-        <img id="uploader_graphic" src="<?php echo ($form->getObject()->getGraphicFile() ? image_path('/uploads/graphics/' . $form->getObject()->getGraphicFile()) : '') ?>" />
+        <img id="uploader_graphic" src="<?php echo ($form->getObject()->getGraphicFile() ? image_path($graphic_file_web_location . $form->getObject()->getGraphicFile()) : '') ?>" />
     </div>
     <?php if ($form->getObject()->getGraphicFile()): ?>
         <div id="remove_graphic">

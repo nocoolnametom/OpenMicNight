@@ -48,7 +48,7 @@ class Subreddit extends BaseSubreddit
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
             $s3->create_bucket($name, AmazonS3::REGION_US_E1,
-                               AmazonS3::ACL_PUBLIC);
+                               AmazonS3::ACL_AUTH_READ);
             $exists = $s3->if_bucket_exists($name);
             $attempts = 0;
             while (!$exists && $attempts < 10) {
