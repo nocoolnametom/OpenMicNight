@@ -105,6 +105,38 @@ class profileActions extends sfActions
                 $subreddit_ids[] = $episode->getSubredditId();
         }
         
+        $memberships = array();
+        $moderator_data = Api::getInstance()->get('membershiptype?type=moderator', true);
+        $membership_objects = ApiDoctrine::createQuickObjectArray($moderator_data['body']);
+        foreach($membership_objects as $membershiptype)
+        {
+            $memberships[] = $membershiptype->getIncremented();
+        }
+        $admin_data = Api::getInstance()->get('membershiptype?type=admin', true);
+        $membership_objects = ApiDoctrine::createQuickObjectArray($admin_data['body']);
+        foreach($membership_objects as $membershiptype)
+        {
+            $memberships[] = $membershiptype->getIncremented();
+        }
+        
+        $approval_data = Api::getInstance()->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&membership_id=' . implode(',', $memberships) , true);
+        $approval_memberships = ApiDoctrine::createQuickObjectArray($approval_data['body']);
+        
+        $this->approvals = array();
+        if (count($approval_memberships))
+        {
+        
+            $approval_subreddits = array();
+            foreach($approval_memberships as $membership)
+            {
+                $approval_subreddits[] = $membership->getSubredditId();
+                if (!in_array($membership->getSubredditId(), $subreddit_ids))
+                    $subreddit_ids[] = $membership->getSubredditId();
+            }
+            $approval_episode_data = Api::getInstance()->get('episode/future?is_submitted=1&is_approved=0&subreddit_id=' . implode(',', $approval_subreddits) );
+            $this->approvals = ApiDoctrine::createQuickObjectArray($approval_episode_data['body']);            
+        }
+        
         $subreddit_data = Api::getInstance()->get('subreddit?id=' . implode(',', $subreddit_ids), true);
         
         $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
@@ -113,6 +145,7 @@ class profileActions extends sfActions
         {
             $this->subreddits[$subreddit->getId()] = $subreddit;
         }
+        
     }
 
     public function executeAuth_revoke(sfWebRequest $request)

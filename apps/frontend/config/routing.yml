@@ -7,6 +7,10 @@ message:
     column:               id
     with_wildcard_routes: true
 
+message_send_previous:
+  url:  /message/:id/send/:previous
+  param: { module: message, action: send}
+
 profile:
   class: sfDoctrineRouteCollection
   options:

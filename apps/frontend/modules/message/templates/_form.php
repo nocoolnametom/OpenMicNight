@@ -10,7 +10,7 @@
       <tr>
         <td colspan="2">
           <?php echo $form->renderHiddenFields(false) ?>
-          &nbsp;<a href="<?php echo url_for('message/index') ?>">Back to list</a>
+          &nbsp;<a href="<?php echo url_for('message/index') ?>">Back to messages</a>
           <?php if (!is_null($form->getObject()->getId())): ?>
             &nbsp;<?php echo link_to('Delete', 'message/delete?id='.$form->getObject()->getId(), array('method' => 'delete', 'confirm' => 'Are you sure?')) ?>
           <?php endif; ?>

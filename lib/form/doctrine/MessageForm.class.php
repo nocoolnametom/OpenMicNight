@@ -12,5 +12,8 @@ class MessageForm extends BaseMessageForm
 {
   public function configure()
   {
+      $this->widgetSchema['previous_message_id'] = new sfWidgetFormInputHidden();
+      $this->widgetSchema['recipient_id'] = new sfWidgetFormInputHidden();
+      unset($this['sender_id']);
   }
 }

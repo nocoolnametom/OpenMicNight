@@ -261,8 +261,8 @@ class episodeActions extends sfActions
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
 
         $submission_change = array(
-            'is_approved' => 1,
             'approved_by' => $this->getUser()->getApiUserId(),
+            'is_approved' => 1,
         );
         $result = Api::getInstance()->setUser($auth_key)->put('episode/' . $this->episode->getIncremented(), $submission_change, true);
         $success = $this->checkHttpCode($result, 'put', 'episode/' . $this->episode->getIncremented(), json_encode($submission_change));

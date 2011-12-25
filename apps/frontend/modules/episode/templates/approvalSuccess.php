@@ -21,7 +21,7 @@
                 &nbsp;<?php echo button_to('Approve Episode', 'episode/approve?id=' . $episode->getId(), array('confirm' => 'Are you sure?  There is no going back!')) ?>
             </td>
             <td style="text-align: right;">
-                <?php echo link_to('Contact Submitter', 'message/to?id=' . $episode->getSfGuardUserId()) ?>
+                <?php echo link_to('Contact Submitter', 'message/send?id=' . $episode->getSfGuardUserId()) ?>
             </td>
         </tr>
     </tfoot>

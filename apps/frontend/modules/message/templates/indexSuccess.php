@@ -1,30 +1,44 @@
-<h1>Messages List</h1>
-
+<?php if (count($received_messages)): ?>
+<h2>Received</h2>
 <table>
   <thead>
     <tr>
-      <th>Id</th>
-      <th>Recipient</th>
       <th>Sender</th>
-      <th>Previous message</th>
       <th>Text</th>
-      <th>Created at</th>
-      <th>Updated at</th>
+      <th colspan="2">Sent</th>
     </tr>
   </thead>
   <tbody>
-    <?php foreach ($messages as $message): ?>
+    <?php foreach ($received_messages as $message): ?>
     <tr>
-      <td><a href="<?php echo url_for('message/edit?id='.$message->getId()) ?>"><?php echo $message->getId() ?></a></td>
-      <td><?php echo $message->getRecipientId() ?></td>
-      <td><?php echo $message->getSenderId() ?></td>
-      <td><?php echo $message->getPreviousMessageId() ?></td>
+      <td><?php echo $users[$message->getSenderId()]->getUsername() ?></td>
       <td><?php echo $message->getText() ?></td>
       <td><?php echo $message->getCreatedAt() ?></td>
-      <td><?php echo $message->getUpdatedAt() ?></td>
+      <td><?php echo link_to('Reply', '@message_send_previous?id=' . $message->getSenderId() . '&previous=' . $message->getIncremented()) ?></td>
     </tr>
     <?php endforeach; ?>
   </tbody>
 </table>
+<?php endif; ?>
 
-  <a href="<?php echo url_for('message/new') ?>">New</a>
+<?php if (count($sent_messages)): ?>
+<h2>Sent</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Recipient</th>
+      <th>Text</th>
+      <th>Sent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($sent_messages as $message): ?>
+    <tr>
+      <td><?php echo $users[$message->getRecipientId()]->getUsername() ?></td>
+      <td><?php echo $message->getText() ?></td>
+      <td><?php echo $message->getCreatedAt() ?></td>
+    </tr>
+    <?php endforeach; ?>
+  </tbody>
+</table>
+<?php endif; ?>

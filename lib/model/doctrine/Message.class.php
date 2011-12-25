@@ -85,7 +85,10 @@ class Message extends BaseMessage
             if (sfConfig::get('sf_environment') == 'prod') {
                 $mail->send();
             } else {
-                throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                if (sfConfig::get('sf_logging_enabled')) {
+                    sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                }
             }
         }
     }

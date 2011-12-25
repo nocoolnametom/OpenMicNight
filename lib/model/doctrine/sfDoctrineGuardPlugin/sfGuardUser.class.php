@@ -58,7 +58,10 @@ class sfGuardUser extends PluginsfGuardUser
             if (sfConfig::get('sf_environment') == 'prod') {
                 $mail->send();
             } else {
-                throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                if (sfConfig::get('sf_logging_enabled')) {
+                    sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
+                }
             }
             $this->addLoginMessage('You have changed information relating to your Reddit user and will need to validate your Reddit username again.  Please see your email for more information.');
         }

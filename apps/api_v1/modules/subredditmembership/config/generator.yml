@@ -9,7 +9,7 @@ generator:
 #          created_at:                  { date_format: 'Y-m-d\TH:i:s', tag_name: 'created' }      # for instance
 #        formats_enabled:               [ json, xml, yaml ]    # enabled formats
 #        formats_strict:                true
-#        separator:                     ','     # separator used for multiple filters
+        separator:                     ','
       get:
         # list here additionnal params names, which are not object properties
         additional_params:             [ api_key, time, signature, auth_key ]
@@ -28,5 +28,5 @@ generator:
 #        pagination_page_size:          100     # the default number of items in a page
 #        sort_custom:                   false   # set to true to allow the client to pass a sort_by and a sort_order parameter
 #        sort_default:                  []      # set to [column, asc|desc] in order to sort on a column
-#        filters:                               # list here the filters
-#          created_at:                  { date_format: 'd-m-Y', multiple: true }  # for instance
+        filters:
+          membership_id:               { multiple: true }
