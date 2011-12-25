@@ -77,6 +77,7 @@
 <div id="audio_uploader">
     <?php include_partial('episode/html5_audio_player', array(
         'episode' => $form->getObject(),
+        'width' => 0,
     )); ?>
     <?php if ($form->getObject()->getAudioFile() && !$form->getObject()->getSubmittedAt() && !$form->getObject()->getApprovedAt()): ?>
         <div id="remove_audio">

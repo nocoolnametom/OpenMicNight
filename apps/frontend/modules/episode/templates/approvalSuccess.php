@@ -45,6 +45,7 @@
             <td colspan="2" class="audio">
                 <?php include_partial('episode/html5_audio_player', array(
                     'episode' => $episode,
+                    'width' => 0,
                 )); ?>
             </td>
         </tr>

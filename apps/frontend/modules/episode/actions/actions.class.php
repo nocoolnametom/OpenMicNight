@@ -289,6 +289,8 @@ class episodeActions extends sfActions
 
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        $user_data = Api::getInstance()->setUser($auth_key)->get('user/' . $this->episode->getSfGuardUserId(), true);
+        $this->user = ApiDoctrine::createQuickObject($user_data['body']);
     }
 
     public function executeUpdate(sfWebRequest $request)

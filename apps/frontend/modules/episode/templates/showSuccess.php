@@ -1,42 +1,65 @@
-<?php $graphic_file_web_location = '/' . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'; ?>
-<h3><?php echo link_to($subreddit->getName(), '@subreddit_index?module=index&domain=' . $subreddit->getDomain()) ?></h3>
-<div id="release_date"><?php echo date('Y-m-d g:ia', strtotime($episode->getReleaseDate())); ?></div>
-<?php if ($sf_user->getApiUserId() == $episode->getSfGuardUserId()): ?>
-    <?php echo link_to('Edit Episode', 'episode/edit?id=' . $episode->getId()); ?>
-<?php endif; ?>
-<table>
-    <?php if ($episode->getRedditPostUrl()): ?>
-        <tfoot>
-            <tr>
-                <th colspan="2"><?php echo link_to("View on Reddit", $episode->getRedditPostUrl()); ?></th>
-            </tr>
-        </tfoot>
+<?php
+$graphic_file_web_location = '/'
+        . trim(str_replace(sfConfig::get('sf_web_dir'), '',
+                                         ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()),
+                                         '/') . '/';
+
+?>
+<h4 id="subreddit_name"><?php
+echo link_to($subreddit->getName(),
+             '@subreddit_index?module=index&domain=' . $subreddit->getDomain())
+
+?></h4>
+
+<div id="episode_content" style="width: 100%; max-width: 960px;">
+    <?php if ($sf_user->getApiUserId() == $episode->getSfGuardUserId()): ?>
+        <div id="edit_link" style="float: right;">
+            <?php
+            echo link_to('Edit Episode', 'episode/edit?id=' . $episode->getId());
+
+            ?>
+        </div>
     <?php endif; ?>
-    <thead>
-        <?php if ($episode->getGraphicFile()): ?>
-            <tr>
-                <th colspan="2" class="graphic"><?php echo image_tag($graphic_file_web_location . $episode->getGraphicFile()); ?></th>
-            </tr>
-        <?php endif; ?>
-        <tr>
-            <th colspan="2">
-                <?php echo $episode->getTitle() ?>
-                <?php if ($episode->getIsNsfw()): ?>
-                    <span class="nsfw">nsfw</span>
+    <div id="release_date">
+        <?php
+        echo date('Y-m-d g:ia', strtotime($episode->getReleaseDate()));
+        ?>, by <?php echo $user->getUsername(); ?>
+    </div>
+    <div id="episode_title" style="width: 100%; min-height: 2em; vertical-align: middle; max-width: 960px; background-color: orangered; color: white;">
+        <h2 style="font-weight: bolder; padding: 10px; margin: 0;">
+            <?php echo $episode->getTitle(); ?>
+            <?php if ($episode->getIsNsfw()): ?>
+                <span class="nsfw" style="font-weight: lighter; font-size: smaller;"> (nsfw)</span>
+            <?php endif; ?>
+        </h2>
+    </div>
+    <div id="content_columns" style="margin-top: -0.25em;">
+        <div id="media_column" style="max-width: 575px; float: left; margin-left: -3px; margin-right: 10px;">
+            <table>
+                <?php if ($episode->getGraphicFile()): ?>
+                <tr>
+                    <td>
+                        <?php echo image_tag($graphic_file_web_location . $episode->getGraphicFile()); ?>
+                    </td>
+                </tr>
                 <?php endif; ?>
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td colspan="2" class="audio">
-                <?php include_partial('episode/html5_audio_player', array(
-                    'episode' => $episode,
-                )); ?>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="2"><?php echo html_entity_decode($sf_user->formatMarkdown($episode->getDescription())); ?></td>
-        </tr>
-    </tbody>
-</table>
+                <tr>
+                    <td style="min-width: 290px;">
+                        <?php
+                        include_partial('episode/html5_audio_player',
+                                        array(
+                            'episode' => $episode,
+                            'width' => '100%',
+                        ));
+
+                        ?>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="episode_description" style="padding-top: 0.25em;">
+            <?php echo html_entity_decode($sf_user->formatMarkdown($episode->getDescription())); ?>
+        </div>
+    </div>
+    <div id="reddit_post" style="clear: both;"><?php echo '';//link_to('View this on Reddit', 'http://www.reddit.com/'); ?></div>
+</div>
