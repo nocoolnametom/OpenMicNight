@@ -67,5 +67,5 @@ if ($sf_user->hasFlash('email_link'))
     }
 }
 if ($website): ?>
-<div id="email_link"><?php echo link_to('Go check your inbox now!', $website); ?></div>
+<div class="notification email_link" style="background-color: palegoldenrod;"><?php echo link_to('Go check your inbox now!', $website); ?></div>
 <?php endif; ?>

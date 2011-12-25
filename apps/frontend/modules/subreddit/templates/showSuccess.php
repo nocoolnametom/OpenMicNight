@@ -19,6 +19,7 @@
             <?php echo link_to('Deadlines', 'subreddit/deadlines?domain=' . $subreddit->getDomain()); ?>
         </div>
 
+<?php if (count($episodes)): ?>
 <h2>Released Episodes</h2>
 <ul>
     <?php foreach ($episodes as $episode): ?>
@@ -35,4 +36,5 @@
             <a href="<?php echo url_for('subreddit/show?domain=' . $subreddit->getDomain() . '&page=' . ($page + 1)) ?>">next</a>
         <?php endif; ?>
     </div>
+<?php endif; ?>
 <?php endif; ?>

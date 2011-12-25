@@ -67,20 +67,17 @@
         uploader.bind('FileUploaded', function(up, file) {
             $('#' + file.id + " b").html("100%");
             $('#audio_uploadfiles_span').html("");
-            $('#uploader_audio').attr("src", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
-            $('#uploader_audio_link').attr("href", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
-            $('#uploader_audio_link').http(file.name);
+            $('#episode_audio').attr("src", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
+            $('#episode_audio_link').attr("href", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
+            $('#episode_audio_link').http(file.name);
         });
     });
 </script>
 
 <div id="audio_uploader">
-    <div id="uploader_audio_div">
-        <audio id="uploader_audio" src="<?php echo ($form->getObject()->getAudioFile() ? url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=' . substr($form->getObject()->getAudioFile(), -3, 3), true) : '') ?>" controls>
-            <a id="uploader_audio_link" href="<?php echo ($form->getObject()->getAudioFile() ? url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=' . substr($form->getObject()->getAudioFile(), -3, 3), true) : '') ?>"><?php echo $form->getObject()->getNiceFilename(); ?></a>
-        </audio>
-        <div style="font-size:xx-small;">To download, right-click and select the option to save...</div>
-    </div>
+    <?php include_partial('episode/html5_audio_player', array(
+        'episode' => $form->getObject(),
+    )); ?>
     <?php if ($form->getObject()->getAudioFile() && !$form->getObject()->getSubmittedAt() && !$form->getObject()->getApprovedAt()): ?>
         <div id="remove_audio">
             <input type="checkbox" name="episode[audio_file_delete]" id="episode_audio_file_delete" />
