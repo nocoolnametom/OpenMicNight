@@ -7,6 +7,9 @@
         <link rel="shortcut icon" href="/favicon.ico" />
         <?php include_stylesheets() ?>
         <?php include_javascripts() ?>
+        <?php if (has_slot('atom_feed')): ?>
+            <?php include_slot('atom_feed') ?>
+        <?php endif; ?>
         <script type="text/javascript">  
             AudioPlayer.setup("<?php echo image_path('player.swf'); ?>", {  
                 width: 290  
