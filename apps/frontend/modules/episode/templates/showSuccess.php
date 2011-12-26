@@ -1,4 +1,6 @@
-<?php
+<?php slot('atom_feed') ?>
+<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php $subreddit->getName() ?>" />
+<?php end_slot() ?><?php
 $graphic_file_web_location = '/'
         . trim(str_replace(sfConfig::get('sf_web_dir'), '',
                                          ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()),

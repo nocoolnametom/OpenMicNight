@@ -57,6 +57,10 @@ class messageActions extends sfActions
         foreach ($users as $user) {
             $this->users[$user->getIncremented()] = $user;
         }
+        
+        $user_data = Api::getInstance()->setUser($auth_key)->get('user/' . $this->getUser()->getApiUserId(),
+                                                                                      true);
+        $this->user = ApiDoctrine::createQuickObject($user_data['body']);
     }
 
     public function executeCreate(sfWebRequest $request)

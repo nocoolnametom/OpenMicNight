@@ -43,8 +43,8 @@ class profileActions extends sfActions
         $user_id = $this->getUser()->getApiUserId();
         $this->forward404Unless($user_id);
         $user_data = Api::getInstance()->get('user/' . $user_id);
-        $user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
-        $this->form = new sfGuardUserAdminForm($user);
+        $this->user = ApiDoctrine::createObject('sfGuardUser', $user_data['body']);
+        $this->form = new sfGuardUserAdminForm($this->user);
         unset(
                 $this->form['is_active'],
                 $this->form['groups_list'],
@@ -76,6 +76,8 @@ class profileActions extends sfActions
     {
         $user_id = $this->getUser()->getApiUserId();
         $this->forward404Unless($user_id);
+        $user_data = Api::getInstance()->get('user/' . $user_id);
+        $this->user = ApiDoctrine::createQuickObject($user_data['body']);
         $page = $this->page = (int)$request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;

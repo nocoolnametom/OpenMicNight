@@ -1,4 +1,8 @@
-<h1><?php echo $subreddit ?></h1>
+<?php slot('atom_feed') ?>
+<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?>" />
+<?php end_slot() ?>
+<div id="feed_link" style="float: right;"><?php echo link_to(image_tag('rss.svg', array('style' => 'height: 32px; width: auto;')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?></div>
+<h2><?php echo $subreddit ?></h2>
 <?php if ($sf_user->isAuthenticated()): ?>
     <?php if ($membership && in_array($membership->getMembership()->getType(), array('admin'))): ?>
         <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?domain=' . $subreddit->getDomain()); ?></div>
@@ -20,7 +24,7 @@
         </div>
 
 <?php if (count($episodes)): ?>
-<h2>Released Episodes</h2>
+<h3>Released Episodes</h3>
 <ul>
     <?php foreach ($episodes as $episode): ?>
         <li><?php echo $episode->getReleaseDate(); ?></li>
