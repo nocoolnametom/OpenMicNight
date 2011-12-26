@@ -1,5 +1,5 @@
 <div id="header" style="border-bottom: 1px solid black; height: 3.5em;">
-    <span id="logo" style="padding: 0 0.5em 0 0.5em; font-size: larger; font-weight: bold; font-family: 'Arizonia', cursive;">
+    <span id="logo" style="padding: 0 0.5em 0 0.5em; font-size: larger; font-family: 'Arizonia', cursive;">
         <a href="<?php echo url_for('@homepage'); ?>" class="app_name" style=" font-size: 3em; text-decoration: none; color: orangered;"><?php echo ProjectConfiguration::getApplicationName(); ?></a>
     </span>
     <div id="non_logo-header" style="float:right; padding-top: 1em;">

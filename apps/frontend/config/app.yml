@@ -24,6 +24,8 @@ all:
     # The following hashes help prevent others from guessing future file hashes.  Change them before deploying.
   web_app_image_hash_salt:    b00ee53725416c87d7a84df7cfc28dac853b4283
   web_app_audio_hash_salt:    3afb1b9abd1a8638e0dc0b376b63a394832cdaeb
+  web_app_feed_default:
+    subreddits:               [ programming ]
   recaptcha:
     active:                   false
   plupload:

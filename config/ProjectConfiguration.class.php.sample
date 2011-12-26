@@ -84,6 +84,11 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return 'Herddit';
     }
+    
+    static public function getApplicationEmailAddress()
+    {
+        return 'webmaster@herddit.com';
+    }
 
     static public function getDefaultSubredditAddress()
     {
