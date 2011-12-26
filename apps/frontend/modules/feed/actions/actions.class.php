@@ -11,6 +11,9 @@
 class feedActions extends sfActions
 {
     protected $_users = array();
+    
+    //protected $_episode_location = 'episode/future';
+    protected $_episode_location = 'episode';
 
     /**
      * Executes index action
@@ -122,7 +125,7 @@ class feedActions extends sfActions
 
         $episodes = array();
         if (count($subreddit_ids)) {
-            $episode_data = Api::getInstance()->get('episode?subreddit_id='
+            $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
             $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
@@ -146,7 +149,7 @@ class feedActions extends sfActions
 
     protected function getSubredditEpisodes($subreddit_id)
     {
-        $episode_data = Api::getInstance()->get('episode?subreddit_id='
+        $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                 . $subreddit_id, true);
         $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
 
@@ -184,7 +187,7 @@ class feedActions extends sfActions
 
         $episodes = array();
         if (count($subreddit_ids)) {
-            $episode_data = Api::getInstance()->get('episode?subreddit_id='
+            $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
             $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
