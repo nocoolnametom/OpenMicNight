@@ -26,7 +26,7 @@ sfGuardUser:
     email_address:  nocoolnametom@gmail.com
     username:       nocoolnametom
     password:       admin
-    is_validated:   false
+    is_validated:   true
     is_authorized:  true
     full_name:      Tom Doggett
     preferred_name: Tom
