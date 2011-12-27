@@ -1,0 +1,129 @@
+Subreddit:
+  lds:
+    name:            LDS
+    domain:          lds
+    create_new_episodes_cron_formatted: "0 0 1 * *"
+    episode_schedule_cron_formatted:    "0 22 * * 1,3,5"
+    creation_interval: 0
+    bucket_name:    herddit-lds
+  mormon:
+    name:            Mormon
+    domain:          mormon
+    create_new_episodes_cron_formatted: "0 0 1 * *"
+    episode_schedule_cron_formatted:    "0 22 * * 1,3,5"
+    creation_interval: 0
+    bucket_name:    herddit-mormon
+  exmormon:
+    name:            Exmormon
+    domain:          exmormon
+    create_new_episodes_cron_formatted: "0 0 1 * *"
+    episode_schedule_cron_formatted:    "0 22 * * 1,3,5"
+    creation_interval: 0
+    bucket_name:    herddit-exmormon
+
+sfGuardUser:
+  nocoolnametom:
+    email_address:  nocoolnametom@gmail.com
+    username:       nocoolnametom
+    password:       admin
+    is_validated:   false
+    is_authorized:  true
+    full_name:      Tom Doggett
+    preferred_name: Tom
+    is_super_admin: false
+
+sfGuardUserSubredditMembership:
+  nocoolnametom_lds:
+    sfGuardUser: nocoolnametom
+    Subreddit: lds
+    Membership: admin
+  nocoolnametom_mormon:
+    sfGuardUser: nocoolnametom
+    Subreddit: mormon
+    Membership: admin
+  nocoolnametom_exmormon:
+    sfGuardUser: nocoolnametom
+    Subreddit: exmormon
+    Membership: admin
+
+ValidationPost:
+  testpost:
+    post_address:   comments/kdxhb/post_your_codes_in_here
+    is_active:       true
+
+Deadline:
+  # LDS Deadlines
+  lds_seahorse:
+    AuthorType: seahorse
+    Subreddit:  lds
+    # Three Days before release date
+    seconds:    259200
+    restricted_until_previous_misses_deadline: false
+  lds_shark:
+    AuthorType: shark
+    Subreddit:  lds
+    # Two Days before release date
+    seconds:    172800
+    restricted_until_previous_misses_deadline: false
+  lds_squid:
+    AuthorType: squid
+    Subreddit:  lds
+    # One Day before release date
+    seconds:    86400
+    restricted_until_previous_misses_deadline: false
+  lds_blue_whale:
+    AuthorType: blue_whale
+    Subreddit:  lds
+    # Zero Seconds (valid up until release date)
+    seconds:    0
+    restricted_until_previous_misses_deadline: true
+  # Mormon Deadlines
+  mormon_seahorse:
+    AuthorType: seahorse
+    Subreddit:  mormon
+    # Three Days before release date
+    seconds:    259200
+    restricted_until_previous_misses_deadline: false
+  mormon_shark:
+    AuthorType: shark
+    Subreddit:  mormon
+    # Two Days before release date
+    seconds:    172800
+    restricted_until_previous_misses_deadline: false
+  mormon_squid:
+    AuthorType: squid
+    Subreddit:  mormon
+    # One Day before release date
+    seconds:    86400
+    restricted_until_previous_misses_deadline: false
+  mormon_blue_whale:
+    AuthorType: blue_whale
+    Subreddit:  mormon
+    # Zero Seconds (valid up until release date)
+    seconds:    0
+    restricted_until_previous_misses_deadline: true
+  # Exmormon Deadlines
+  exmormon_seahorse:
+    AuthorType: seahorse
+    Subreddit:  exmormon
+    # Three Days before release date
+    seconds:    259200
+    restricted_until_previous_misses_deadline: false
+  exmormon_shark:
+    AuthorType: shark
+    Subreddit:  exmormon
+    # Two Days before release date
+    seconds:    172800
+    restricted_until_previous_misses_deadline: false
+  exmormon_squid:
+    AuthorType: squid
+    Subreddit:  exmormon
+    # One Day before release date
+    seconds:    86400
+    restricted_until_previous_misses_deadline: false
+  exmormon_blue_whale:
+    AuthorType: blue_whale
+    Subreddit:  exmormon
+    # Zero Seconds (valid up until release date)
+    seconds:    0
+    restricted_until_previous_misses_deadline: true
