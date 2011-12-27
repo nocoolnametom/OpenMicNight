@@ -35,6 +35,11 @@ class homeActions extends sfActions
         }
     }
     
+    public function executeFeedback(sfWebRequest $request)
+    {
+        
+    }
+    
     protected function getIndexEpisodes()
     {
         $subreddit_ids = array();

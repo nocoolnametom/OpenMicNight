@@ -85,7 +85,7 @@ class profileActions extends sfActions
         $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id . $page);
         $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
         $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
-        $this->future = ApiDoctrine::createQuickObjectArray($future_data['body']);
+        $this->future = ApiDoctrine::createObjectArray('EpisodeAssignment', $future_data['body']);
         foreach($this->future as $assignment)
         {
             if (!in_array($assignment->getEpisode()->getSubredditId(), $subreddit_ids))
