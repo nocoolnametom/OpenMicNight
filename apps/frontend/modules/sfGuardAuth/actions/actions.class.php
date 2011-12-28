@@ -80,7 +80,8 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         $user->save();
         $this->getUser()->setApiUserId($user->getIncremented());
         $this->getUser()->sendMail('RegisterRedditPost');
-        $this->getUser()->setFlash('notice', 'Your email address has been validated!  Please log in!');
+        $this->getUser()->setFlash('notice', 'Your email address has been validated!  Please log in!  You should have one final email waiting for you with your final instructions to get you started.');
+        $this->getUser()->setFlash('email_link', $user->getEmailAddress());
         $this->redirect('@sf_guard_signin');
     }
 
@@ -104,6 +105,7 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
                 ));
 
                 $this->getUser()->setFlash('notice', 'Check your e-mail! You should receive something shortly!');
+                $this->getUser()->setFlash('email_link', $user->getEmailAddress());
                 $this->redirect('@sf_guard_signin');
             } else {
                 $this->getUser()->setFlash('error', 'Invalid e-mail address!');

@@ -29,7 +29,7 @@ class sfGuardUserTable extends PluginsfGuardUserTable
         return (count($query) ? true : false);
     }
     
-    public function getNewlyValidatedUsers()
+    public function getUsersToBeValidated()
     {
         $sql = "SELECT `sf_guard_user`.`id`
 FROM `sf_guard_user`
@@ -40,10 +40,15 @@ WHERE `sf_guard_user`.`is_validated` = '0' OR `sf_guard_user`.`is_validated` IS 
         $q = Doctrine_Manager::getInstance()->getCurrentConnection();
         $results = $q->fetchColumn($sql);
         
+        return $results;
+    }
+    
+    public function validateUsers($ids)
+    {   
         $rows = $this->createQuery()
                 ->update()
                 ->set('sfGuardUser.is_validated', true)
-                ->whereIn('sfGuardUser.id', $results)
+                ->whereIn('sfGuardUser.id', $ids)
                 ->execute();
         return $rows;
     }

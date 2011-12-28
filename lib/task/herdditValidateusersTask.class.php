@@ -34,6 +34,8 @@ EOF;
         // initialize the database connection
         $databaseManager = new sfDatabaseManager($this->configuration);
         $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
+        $applicationConfig = sfProjectConfiguration::getApplicationConfiguration('frontend', 'prod', true);
+        $context = sfContext::createInstance($applicationConfig);
 
         // Go to the Subreddit and obtain the past few keys.
         $reddit_location = $options['subreddit'];
@@ -52,10 +54,21 @@ EOF;
         ValidationTable::getInstance()->storeNewKeys($reddit->getComments());
 
         // Now that new keys are stored in the database we need to update all applicable users
-        $updated = sfGuardUserTable::getInstance()->getNewlyValidatedUsers();
+        $users = sfGuardUserTable::getInstance()->getUsersToBeValidated();
+        
+        $updated = sfGuardUserTable::getInstance()->validateUsers($users);
+        
+        if (!$quiet)
+            echo "\nSending emails...";
+        
+        foreach ($users as $user_id) {
+            $sf_user = $context->getUser();
+            $sf_user->setApiUserId($user_id);
+            $sf_user->sendMail('RedditValidationSucceeded');
+        }
 
         if (!$quiet)
-            echo "\n$updated users validated.\n";
+            echo "\n$updated users validated and email sent.\n";
     }
 
 }

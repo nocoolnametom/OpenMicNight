@@ -3,7 +3,7 @@ EmailType:
   apiauthrequest:
     type: ApiAuthRequest
     description: Sent when an API requests an authorization token.
-  # This email is sent when an existing user has their 'iv_validated' column set false.
+  # This email is sent when an existing user has their 'is_validated' column set false.
   changeredditkey:
     type: ChangeRedditKey
     description: Sent for revalidation when a change to the Reddit key is made.
@@ -38,6 +38,10 @@ EmailType:
   # The validation email is sent by the email authorization landing page
   registerredditpost:
     type: RegisterRedditPost
+    description: Sent when a user has authorized their email and needs to validate their username.
+  # The success email is sent when a user's validation key is found by the app on Reddit
+  redditvalidationsucceeded:
+    type: RedditValidationSucceeded
     description: Sent when a user has authorized their email and needs to validate their username.
 
 Email:
@@ -194,7 +198,7 @@ Email:
       thing standing in your way is to verify your Reddit username by responding
       with your Reddit activation key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the following Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your key, verification shouldn't take more than an hour
@@ -216,7 +220,7 @@ Email:
       still need to verify your Reddit username, however.  You can do this by
       posting your Reddit activation key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the following Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your key, verification shouldn't take more than an hour or
@@ -245,12 +249,35 @@ Email:
       <p>You're almost ready to participate (we promise!).  Your final step is to
       paste in the following key:</p>
       <blockquote>~valid_key~</blockquote>
-      <p> as a reply to a post in the ~app_name~ Subreddit:</p>
+      <p> as a reply to a post in the following Subreddit:</p>
       <blockquote>~reddit_post~</blockquote>
       
       <p>Once you've posted your reply, verification shouldn't take more than an hour
       or two.  We'll do our best to let you know if there are any problems that
       might take longer.</p>
+      
+      <p>We hope you enjoy using ~app_name~!  Have fun!</p>
+      
+      <p>Sincerely,<br/>
+      The ~app_name~ Team</p>
+  redditvalidationsucceded:
+    EmailType: RedditValidationSucceeded
+    language: en
+    subject: "~app_name~: We've Found Your Key on Reddit!"
+    body_text_html: |
+      <p>Dear ~name~,</p>
+      
+      <p>Welcome to ~app_name~!  For reals!  We promise!</p>
+      
+      <p>You've fought through the obstalces in your path and have earned the
+      right to participate.  Go ahead and signup for a Subreddit, sign up for an
+      episode, and get ready to release it to the world!</p>
+      
+      <p>Record a radio drama, do some improve comedy, perform your own music,
+      deliver a scholarly paper, participate in a panel discussion with your
+      friends, do an audio review of something you like, or just let the world
+      know how your day was today.  Do whatever you want, ~app_name~ is
+      <em>your</em> app!</p>
       
       <p>We hope you enjoy using ~app_name~!  Have fun!</p>
       

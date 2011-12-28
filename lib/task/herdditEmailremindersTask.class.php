@@ -33,7 +33,7 @@ EOF;
         // initialize the database connection
         $databaseManager = new sfDatabaseManager($this->configuration);
         $connection = $databaseManager->getDatabase($options['connection'])->getConnection();
-        $applicationConfig = sfProjectConfiguration::getApplicationConfiguration('frontend', 'dev', true);
+        $applicationConfig = sfProjectConfiguration::getApplicationConfiguration('frontend', 'prod', true);
         $context = sfContext::createInstance($applicationConfig);
 
         $one_day_users = sfGuardUserTable::getInstance()->getOneDayEmailReminders();
