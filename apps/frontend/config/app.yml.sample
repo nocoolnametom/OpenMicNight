@@ -1,0 +1,44 @@
+# You can find more information about this file on the symfony website:
+# http://www.symfony-project.org/reference/1_4/en/11-App
+
+# default values
+all:
+  # If you're using nginx, please make sure you have XSendfile installed. See
+  # the README for more info.
+  enable_slow_audio_download: false
+  sf_guard_plugin:
+    only_login_with_email:    true
+    signin_form:              sfGuardFormSigninApi
+  reddit_validation:
+    post_location:            http://www.reddit.com/comments/kdxhb.json
+# Remember to change the api key and shared secret before using the app in
+# production! Keep it secret, keep it safe!
+  web_app_api_key:            75d32b53a0ccf8b92d7513c548351261d8d5cafe
+  web_app_api_shared_secret:  dbc39c8cecb3dda2146ae9ba0f0bdb0879755180
+  web_app_api_location:       http://api.openmicnight/v1/api_v1_dev.php/
+  web_app_api_format:         json
+      # 2 hours before regular login is revoked
+  web_app_api_auth_key_login_expiration: 7200 
+      # 2 weeks before a "Remember Me" login is revoked
+  web_app_api_auth_key_remember_me_expiration: 1209600
+    # The following hashes help prevent others from guessing future file hashes.  Change them before deploying.
+  web_app_image_hash_salt:    b00ee53725416c87d7a84df7cfc28dac853b4283
+  web_app_audio_hash_salt:    3afb1b9abd1a8638e0dc0b376b63a394832cdaeb
+  web_app_feed_default:
+    subreddits:               [ programming ]
+  recaptcha:
+    active:                   false
+  plupload:
+    js_dir:                   ~sf_lib_dir~/vendor/plupload/src/javascript/
+    web_dir:                  plupload
+
+prod:
+  recaptcha:
+    active:                   true
+    publickey:                "foo"
+    privatekey:               "bar"
+  mailhide:
+    publickey:                "foo"
+    privatekey:               "bar"
+  web_app_api:
+    location:                 http://api.openmicnight/v1/

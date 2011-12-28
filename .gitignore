@@ -1,7 +1,9 @@
+apps/frontend/config/app.yml
 build/
 cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
+data/fixtures/testdata.yml
 data/sql/
 data/temp/
 docs/output/
@@ -20,6 +22,9 @@ web/sfFormExtraPlugin
 web/sfAdminThemejRollerPlugin
 web/sfWidgetFormInputSWFUploadPlugin
 web/uploads/
+web/frontend_dev.php
+web/api_v1_dev.php
+web/backend_dev.php
 plugins/.filemap
 plugins/.registry/
 plugins/.channels/
