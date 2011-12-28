@@ -261,7 +261,7 @@ Email:
       <p>Sincerely,<br/>
       The ~app_name~ Team</p>
   redditvalidationsucceded:
-    EmailType: RedditValidationSucceeded
+    EmailType: redditvalidationsucceeded
     language: en
     subject: "~app_name~: We've Found Your Key on Reddit!"
     body_text_html: |
