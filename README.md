@@ -22,6 +22,7 @@ It’s open mic night!
 
 ## Installation
 
+Make sure that you grab whatever submodules you require for the application when you clone the codebase.
 
 ### ProjectConfiguration.class.php
 
@@ -37,6 +38,9 @@ Copy `config/databases.yml.sample` to `config/databases.yml`.  Edit the file and
 
 `./symfony doctrine:build --all --and-load;`
 
+### app.yml
+
+Copy `apps/frontend/config/app.yml.sample` to `apps/frontend/config/app.yml`.  See the Configuration section below for more info on further instructions regarding this file.
 
 ### Amazon Web Services
 
@@ -91,3 +95,49 @@ If your FastCGI setup file, make sure that the `allow-x-send-file' option is ena
     }
 
 Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.
+
+### Configure the really slow file delviery using PHP
+
+If you don't have the ability to tell the server to deliver files for you, you can still deliver them using PHP, but this is NOT recommended as it is much more resource intensive.  To actviate this option, you'll need to explicitly change the `enable_slow_audio_download` key in `apps/frontend/config/app.yml` from false to true.  And may God have mercy on your soul (and server).
+
+### Replace Hashes in Configuration files
+
+Replace the existing hashes in the following files for security reasons.
+
+ * `data/fixtures/fixtures.yml` - Replace the `api_key` and `shared_secret` hashes.  Make a note of what you change them to: you'll need them for the following file.  Feel free to change the `api_app_name`, `developer_name`, and `developer_email` to whatever you'd like.
+ 
+ * `apps/frontend/config/app.yml` - Replace the `web_app_api_key` and `web_app_api_shared_secret` with whatever you changed the corresponding values in the `data/fixtures/fixtures.yml` file.  Also replace the `web_app_image_hash_salt` and `web_app_audio_hash_salt` with whatever you'd like.  Near the bottom of the file, enter in your ReCAPTCHA keys to enable the correct functioning of ReCAPTCHA.
+
+### Set the location of the API part of the app
+
+It's expected that you'll serve the API using the API frontend controller.  Set the location you'll use to provide access to the API by changing the `location` key underneath `web_app_api` at the bottom of `apps/frontend/config/app.yml`.  You can change the similar value that is more in the middle of the file, but this governs which API the web application will use if you are accessing the web app in any other environment than production.
+
+### Set Default Values
+
+#### Set the Default Feed Subreddits
+
+To set which Subreddits will automatically appear in the main site feed (and on the slideshow rotator on the home page), list the subreddits by their domains in `apps/frontend/config/app.yml` in the key called `subreddits` underneath `web_app_feed_default`.
+
+#### Set the Reddit Post for Validation
+
+Users who register for the app are sent an email that contains a URL in the app that will redirect them to a post on Reddit.  They're expected to reply to this post with their Reddit validation key, which a task in the application will routinely scan.  To set the web address for this post, replace the existing address in `apps/frontend/config/app.yml` defined by the key `post_location` underneath `reddit_validation`.
+
+#### Set the Subreddit for Validation
+
+Technically, users do not need to actually reply to the specific post defined above, *but* they do need to reply within a specific Subreddit.  Rather than have that subreddit defined by the `app.yml` value, the subreddit itself is defined within the `getDefaultSubredditAddress()` function of `config/ProjectConfiguration.class.php`.
+
+#### Set the Frontend Location
+
+To give the ability for cron jobs and api calls to reference the web frontend correctly, define the web location of the homepage of the application in the `getFrontendAppLocation()` function of `config/ProjectConfiguration.class.php`.
+
+#### Set the Application Name
+
+You can change the name of the app by changing it in the `getApplicationName()` function of `config/ProjectConfiguration.class.php`.
+
+#### Set the Application Email Address
+
+Set what address the application should use to send feedback emails to by changing the `getApplicationEmailAddress() function of `config/ProjectConfiguration.class.php`.
+
+#### Set the Amazon Bucket Prefix
+
+You can change the Amazon bucket prefix by changing the `getAmazonBucketPrefix()` function of `config/ProjectConfiguration.class.php`.
