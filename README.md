@@ -141,3 +141,13 @@ Set what address the application should use to send feedback emails to by changi
 #### Set the Amazon Bucket Prefix
 
 You can change the Amazon bucket prefix by changing the `getAmazonBucketPrefix()` function of `config/ProjectConfiguration.class.php`.
+
+## Cron Jobs
+
+**This needs to be filled in**
+
+There are four cron jobs that the system expects for its functioning.  These handle such things as creating new episodes according to Subreddit schedules, validating users, sending nag emails, and moving user assignments on Episodes when deadlines pass.  Executing a call against the symfony executable in the project root should display all of the command-line tasks that can be run using the executable.  These four tasks are defined by the namespace of the app (which may be different if you changed the name of the app.  For help, just run the following command:
+
+    php symfony help [app_name]:[task_name]
+
+This should gvie you more information about the task in question.
