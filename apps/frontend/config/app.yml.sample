@@ -31,6 +31,8 @@ all:
   plupload:
     js_dir:                   ~sf_lib_dir~/vendor/plupload/src/javascript/
     web_dir:                  plupload
+  feedback:
+    subjects:                 [ Report Bugs, Suggestion, Question, Praise, Help Needed, Other ]
 
 prod:
   recaptcha:

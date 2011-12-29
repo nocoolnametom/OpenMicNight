@@ -2,7 +2,7 @@
 
 <h2><?php echo __('Send Feedback', null, 'home') ?></h2>
 
-<form action="<?php echo url_for('home/send') ?>" method="POST">
+<?php echo form_tag('@feedback_send'); ?>
     <table>
         <?php echo $form ?>
         <tr>
@@ -20,4 +20,4 @@
             </td>
         </tr>
     </table>
-</form>
+<?php echo '</form>' ?>

@@ -16,3 +16,6 @@
 [submodule "lib/vendor/php-markdown"]
 	path = lib/vendor/php-markdown
 	url = git://github.com/wolfie/php-markdown.git
+[submodule "lib/vendor/fancybox"]
+	path = lib/vendor/fancybox
+	url = git://github.com/fancyapps/fancyBox.git

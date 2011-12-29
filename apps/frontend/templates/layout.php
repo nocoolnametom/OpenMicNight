@@ -14,9 +14,15 @@
             AudioPlayer.setup("<?php echo image_path('player.swf'); ?>", {  
                 width: 290  
             });  
-        </script> 
+        </script>
+        <script>
+            $(document).ready(function() {
+                $('.fancybox').fancybox();
+            });
+        </script>
     </head>
     <body style="background-color: #eee; font-family: Arial, Helvetica, Verdana, sans-serif; font-size: smaller;">
+        <?php include_partial('global/feedback_link'); ?>
         <div id="central_box" style="width:95%; max-width: 960px; background-color: white; padding: 0 15px 15px 15px; -moz-border-radius: 0px 0px 5px 5px; border-radius: 0px 0px 5px 5px; text-align: center; margin: 0 auto; border-top: 20px black solid; margin-top: -0.75em;">
             <div id="everything" style="text-align: left;">
                 <?php include_partial('global/header'); ?>

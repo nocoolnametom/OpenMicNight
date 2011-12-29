@@ -68,7 +68,19 @@ episode_audio:
 
 episode_delete:
   url:  /episode/:id/delete
-  param: { module: episode, action: delete}
+  param: { module: episode, action: delete }
+
+feedback:
+  url:  /feedback
+  param: { module: home, action: feedback }
+
+feedback_send:
+  url:  /send
+  param: { module: home, action: send }
+
+feedback_thankyou:
+  url:  /thankyou
+  param: { module: home, action: thankyou }
 
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/10-Routing

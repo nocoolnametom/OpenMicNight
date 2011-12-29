@@ -38,7 +38,7 @@ class FeedbackForm extends BaseForm
             'name'    => 'Your Name',
             'email'   => 'Your Email Address',
             'subject' => 'Subject',
-            'message' => 'Your mMssage',
+            'message' => 'Your Message',
         ));
         
         if (sfConfig::get('app_recaptcha_active', false)) {

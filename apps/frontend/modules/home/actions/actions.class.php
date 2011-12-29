@@ -48,6 +48,8 @@ class homeActions extends sfActions
             unset($this->form['email']);
             sfConfig::set('app_recaptcha_active', false);
         }
+        
+        $this->getUser()->setReferer($this->getContext()->getActionStack()->getSize() > 1 ? $request->getUri() : $request->getReferer());
     }
 
     public function executeSend(sfWebRequest $request)
@@ -87,15 +89,19 @@ class homeActions extends sfActions
             $name = $this->getUser()->getApiUserId() ? ($user->getPreferredName() ? $user->getPreferredName() : $user->getFullName()) : $this->form->getValue('name');
             $email = $this->getUser()->getApiUserId() ? $user->getEmailAddress() : $this->form->getValue('email');
 
+            $signinUrl = $this->getUser()->getReferer($request->getReferer());
+            
             $mail = new Zend_Mail();
-            $mail->setBodyText($values['message']);
+            $mail->setBodyText($values['message'] . "\nReferer:" . $signinUrl);
             $mail->setFrom($email, $name);
             $mail->addTo(ProjectConfiguration::getApplicationEmailAddress());
             $mail->setSubject($values['subject']);
             $mail->send();
 
-            $this->redirect('home/thankyou');
+            $this->getUser()->setFlash('notice', 'Your message has been sent to ' . ProjectConfiguration::getApplicationName() . '.');
+            return $this->redirect('' != $signinUrl ? $signinUrl : '@homepage');
         }
+        $this->getUser()->setReferer($this->getContext()->getActionStack()->getSize() > 1 ? $request->getUri() : $request->getReferer());
         $this->setTemplate('feedback');
     }
 

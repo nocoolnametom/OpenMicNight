@@ -16,6 +16,7 @@ default:
     - main.css
     - http://fonts.googleapis.com/css?family=Arizonia
     - coin-slider-styles.css
+    - fancybox/jquery.fancybox.css
 
   javascripts:
     - https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
@@ -26,6 +27,7 @@ default:
     - http://bp.yahooapis.com/2.4.21/browserplus-min.js
     - audio-player.js
     - coin-slider.min.js
+    - fancybox/jquery.fancybox.pack.js
 
   has_layout:     true
   layout:         layout
