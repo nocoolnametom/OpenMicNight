@@ -275,8 +275,8 @@ class feedActions extends sfActions
                 'modified' => strtotime($episode->getUpdatedAt()),
                 'released' => strtotime($episode->getReleaseDate()),
                 'author' => array(
-                    'name' => $this->users[$episode->getSfGuardUserId()]->getUsername(),
-                    'email' => $this->users[$episode->getSfGuardUserId()]->getEmailAddress(),
+                    'name' => array_key_exists($episode->getSfGuardUserId(), $this->users) ? $this->users[$episode->getSfGuardUserId()]->getUsername() : '',
+                    'email' => array_key_exists($episode->getSfGuardUserId(), $this->users) ? $this->users[$episode->getSfGuardUserId()]->getEmailAddress() : '',
                     'uri' => $this->getController()->genUrl('@homepage', true),
                 ),
                 'audio_location' => ($episode->getApprovedAt() ? $episode->getRemoteUrl()
