@@ -11,7 +11,7 @@
 class feedActions extends sfActions
 {
     protected $_users = array();
-    protected $_episode_location = 'episode/future';
+    protected $_episode_location = 'episode/released';
     //protected $_episode_location = 'episode';
     protected $_time_to_cache = 120;
 
