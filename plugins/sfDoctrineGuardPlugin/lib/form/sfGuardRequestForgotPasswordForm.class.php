@@ -16,7 +16,9 @@ class sfGuardRequestForgotPasswordForm extends sfForm
      */
     public function configure()
     {
-        $this->widgetSchema['email_address'] = new sfWidgetFormInputEmail();
+        $this->widgetSchema['email_address'] = new sfWidgetFormInputEmail(array(), array(
+            'placeholder' => 'example@domain.com',
+        ));
         $this->validatorSchema['email_address'] = new sfValidatorPass();
 
         $this->widgetSchema->setNameFormat('forgot_password[%s]');

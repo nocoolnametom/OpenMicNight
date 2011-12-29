@@ -29,3 +29,9 @@ plugins/.filemap
 plugins/.registry/
 plugins/.channels/
 /.build/
+*.swp
+.DS_Store
+._*
+.Trash
+.Trashes
+.hidden

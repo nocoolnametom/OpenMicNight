@@ -108,6 +108,30 @@ send_to_reddit_post:
 sf_guard_verify:
   url:   /verify/:key
   param: { module: sfGuardAuth, action: verify }
+  
+about_us:
+  url:   /about_us
+  param: { module: home, action: aboutus }
+
+api:
+  url:   /api
+  param: { module: home, action: api }
+
+how_to_help:
+  url:   /how_to_help
+  param: { module: home, action: howtohelp }
+
+how_to_use:
+  url:   /how_to_use
+  param: { module: home, action: howtouse }
+
+roadmap:
+  url:   /roadmap
+  param: { module: home, action: roadmap }
+
+blog:
+  url:   /blog
+  param: { module: home, action: blog }
 
 # default rules
 homepage:
