@@ -92,7 +92,7 @@ class homeActions extends sfActions
             $signinUrl = $this->getUser()->getReferer($request->getReferer());
             
             $mail = new Zend_Mail();
-            $mail->setBodyText($values['message'] . "\nReferer:" . $signinUrl);
+            $mail->setBodyText($name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl);
             $mail->setFrom($email, $name);
             $mail->addTo(ProjectConfiguration::getApplicationEmailAddress());
             $mail->setSubject($values['subject']);
