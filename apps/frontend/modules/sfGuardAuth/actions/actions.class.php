@@ -90,7 +90,12 @@ class sfGuardAuthActions extends BasesfGuardAuthActions
         $this->form = new sfGuardRequestForgotPasswordForm();
 
         if ($request->isMethod('post')) {
-            $this->form->bind($request->getParameter($this->form->getName()));
+            $requestData = $request->getParameter($this->form->getName());
+            if (sfConfig::get('app_recaptcha_active', false)) {
+                $requestData['challenge'] = $this->getRequestParameter('recaptcha_challenge_field');
+                $requestData['response'] = $this->getRequestParameter('recaptcha_response_field');
+            }
+            $this->form->bind($requestData);
             if ($this->form->isValid()) {
                 $user = $this->form->user;
 
