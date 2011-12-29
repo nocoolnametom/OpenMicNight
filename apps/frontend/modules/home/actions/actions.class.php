@@ -37,36 +37,59 @@ class homeActions extends sfActions
 
     public function executeFeedback(sfWebRequest $request)
     {
+        if ($this->getUser()->getApiUserId()) {
+            sfConfig::set('app_recaptcha_active', false);
+        }
+
         $this->form = new FeedbackForm();
+
+        if ($this->getUser()->getApiUserId()) {
+            unset($this->form['name']);
+            unset($this->form['email']);
+            sfConfig::set('app_recaptcha_active', false);
+        }
     }
 
     public function executeSend(sfWebRequest $request)
     {
-        if (!$this->getApiUserId()) {
-            $this->getUser()->setFlash('error',
-                                       'You need to be signed in to offer feedback.');
-            $this->redirect('@homepage');
-        }
-
         $this->forward404Unless($request->isMethod('post'));
+
+        if ($this->getUser()->getApiUserId()) {
+            sfConfig::set('app_recaptcha_active', false);
+        }
 
         $this->form = new FeedbackForm();
 
-        $this->form->bind($request->getParameter('feedback'));
+        if ($this->getUser()->getApiUserId()) {
+            unset($this->form['name']);
+            unset($this->form['email']);
+        }
+
+        $requestData = $request->getParameter($this->form->getName());
+        if (sfConfig::get('app_recaptcha_active', false)) {
+            $requestData['challenge'] = $this->getRequestParameter('recaptcha_challenge_field');
+            $requestData['response'] = $this->getRequestParameter('recaptcha_response_field');
+        }
+        $this->form->bind($requestData);
         if ($this->form->isValid()) {
-            $user_data = Api::getInstance()->get('user/'
-                    . $this->getApiUserId(), true);
-            $user = ApiDoctrine::createQuickObject($user_data['body']);
+            if ($this->getUser()->getApiUserId()) {
+                $user_data = Api::getInstance()->get('user/'
+                        . $this->getUser()->getApiUserId(), true);
+                $user = ApiDoctrine::createQuickObject($user_data['body']);
+            } else {
+                $user = null;
+            }
 
             $values = $this->form->getValues();
 
             ProjectConfiguration::registerZend();
 
+            $name = $this->getUser()->getApiUserId() ? ($user->getPreferredName() ? $user->getPreferredName() : $user->getFullName()) : $this->form->getValue('name');
+            $email = $this->getUser()->getApiUserId() ? $user->getEmailAddress() : $this->form->getValue('email');
+
             $mail = new Zend_Mail();
             $mail->setBodyText($values['message']);
-            $mail->setFrom($user->getEmailAddress(),
-                           $user->getPreferredName() ? $user->getPreferredName()
-                                : $user->getFullName());
+            $mail->setFrom($email, $name);
             $mail->addTo(ProjectConfiguration::getApplicationEmailAddress());
             $mail->setSubject($values['subject']);
             $mail->send();
@@ -105,4 +128,5 @@ class homeActions extends sfActions
 
         return $episodes;
     }
+
 }

@@ -16,7 +16,6 @@ class sfGuardRequestForgotPasswordForm extends sfForm
      */
     public function configure()
     {
-        //$this->disableCSRFProtection();
         $this->widgetSchema['email_address'] = new sfWidgetFormInputEmail();
         $this->validatorSchema['email_address'] = new sfValidatorPass();
 
