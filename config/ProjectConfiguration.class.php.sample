@@ -16,14 +16,11 @@ class ProjectConfiguration extends sfProjectConfiguration
         $this->enablePlugins(array(
             'sfDoctrinePlugin',
             'sfDoctrineGuardPlugin',
-            'sfAdminThemejRollerPlugin',
-            'sfWidgetFormInputSWFUploadPlugin',
-            'sfJqueryFormValidationPlugin',
-            'sfPHPUnit2Plugin',
             'sfDoctrineRestGeneratorPlugin',
-            'sfReCaptchaPlugin',
-            'sfHtml5FormPlugin',
             'sfFormExtraPlugin',
+            'sfHtml5FormPlugin',
+            'sfPHPUnit2Plugin',
+            'sfReCaptchaPlugin',
         ));
     }
 
