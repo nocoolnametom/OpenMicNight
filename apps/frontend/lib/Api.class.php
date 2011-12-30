@@ -167,8 +167,8 @@ class Api
         // Ignore self-signed certifictes?  Only if set to do so!
         if (sfConfig::get('app_web_app_api_ignore_self_signed_cert', false))
         {
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+            curl_setopt($curlHandle, CURLOPT_SSL_VERIFYHOST, FALSE);
+            curl_setopt($curlHandle, CURLOPT_SSL_VERIFYPEER, FALSE);
         }
     }
 
