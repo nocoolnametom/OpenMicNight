@@ -175,20 +175,27 @@ class Subreddit extends BaseSubreddit
     public function collectGeneratedEpisodes()
     {
         ProjectConfiguration::registerCron();
+        
+        $this->calculateCreationInterval();
 
         $episode_schedule = $this->getEpisodeScheduleAsCronExpression();
 
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
+        
+        $seconds = $this->getCreationInterval();
 
-        $last_episode = new DateTime($this->getDateOfLastEpisode()); // Jan 31 2011
+        $last_episode = new DateTime(date('R', $this->getDateOfLastEpisode())); // Jan 31 2011
 
-        if ($last_episode->getTimestamp() < time())
+        if ($last_episode->getTimestamp() <= time())
             $last_episode = new DateTime();
 
         $stop_creating = $creation_schedule->getNextRunDate($last_episode); // 01 Feb 2011
+        while((time() + $seconds) > $stop_creating->format('U') ) {
+            $stop_creating = $creation_schedule->getNextRunDate($stop_creating);  // Push it out one segment further
+        }
 
         $episode_date = $last_episode;
-
+        
         $new_episodes = array();
         while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
         <= $stop_creating->getTimestamp()) {
@@ -200,8 +207,6 @@ class Subreddit extends BaseSubreddit
             $new_episodes[] = $episode;
         }
 
-
-        $this->calculateCreationInterval();
         $this->save();
 
         return $new_episodes;

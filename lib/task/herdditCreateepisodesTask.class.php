@@ -43,16 +43,30 @@ EOF;
         ProjectConfiguration::registerCron();
 
         $quiet = (bool) $options['quiet'];
+        
+        if (!$quiet)
+            echo "Checking to see which subreddits need new episodes...";
 
         $subreddits = Doctrine::getTable('Subreddit')
                 ->getSubredditsNeedingEpisodeGeneration($arguments['subreddit']);
 
+        if (!$quiet)
+            echo "\n" . count($subreddits) . ' subreddits found that need episodes generated...';
+        
+        $iteration = 0;
+        
         foreach ($subreddits as $subreddit) {
+            if (!$quiet)
+                echo (++$iteration != 1 ? ', ' : "\n") . $iteration;
             $episodes = $subreddit->collectGeneratedEpisodes();
+            if (!$quiet)
+                echo ' (' . count($episodes) . ')';
             foreach ($episodes as $episode) {
                 $episode->save();
             }
         }
+        if (!$quiet)
+            echo "\nFinished.\n";
     }
 
 }

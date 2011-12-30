@@ -87,7 +87,7 @@ class SubredditTable extends Doctrine_Table
                 ->orderBy('Episode.release_date DESC')
                 ->limit(1)
                 ->fetchArray();
-        return (count($results) ? $results[0]['release_date'] : date('Y-m-d H:i:s'));
+        return (count($results) ? strtotime($results[0]['release_date']) : time());
     }
 
 }
