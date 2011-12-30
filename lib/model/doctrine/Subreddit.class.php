@@ -244,7 +244,7 @@ class Subreddit extends BaseSubreddit
     {
         $deadline_rules = $this->getDeadlineRules();
 
-        /* Before beginning the process of movign Episodes to new Assignments, 
+        /* Before beginning the process of moving Episodes to new Assignments, 
          * we need to assign Episodes to the first Deadline assignment if they
          * haven't yet been so assigned.
          */
@@ -292,7 +292,7 @@ AND episode_assignment.author_type_id = $longest_id;
         /* We now have an array that shows how many seconds a givn AuthorType is
          * allowed before their Deadline passes for the Subreddit.  Now we need
          * to find all of the EpisodeAssignments attached to future unapproved
-         * Episodes that havge passed their deadlines and are not so marked.
+         * Episodes that have passed their deadlines and are not so marked.
          */
         $sql = "
 SELECT episode_assignment.*

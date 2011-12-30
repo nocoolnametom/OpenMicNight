@@ -16,6 +16,7 @@ all:
   web_app_api_key:            75d32b53a0ccf8b92d7513c548351261d8d5cafe
   web_app_api_shared_secret:  dbc39c8cecb3dda2146ae9ba0f0bdb0879755180
   web_app_api_location:       http://api.openmicnight/v1/api_v1_dev.php/
+  web_app_api_ignore_self_signed_cert: false
   web_app_api_format:         json
       # 2 hours before regular login is revoked
   web_app_api_auth_key_login_expiration: 7200 

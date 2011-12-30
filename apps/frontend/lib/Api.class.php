@@ -163,6 +163,13 @@ class Api
         // Set the accept type to JSON
         curl_setopt($curlHandle, CURLOPT_HTTPHEADER,
                     array('Accept: application/json'));
+        
+        // Ignore self-signed certifictes?  Only if set to do so!
+        if (sfConfig::get('app_web_app_api_ignore_self_signed_cert', false))
+        {
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        }
     }
 
     protected function doExecute(&$curlHandle, $iterator = 0)
