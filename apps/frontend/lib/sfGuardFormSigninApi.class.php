@@ -17,8 +17,11 @@ class sfGuardFormSigninApi extends sfGuardFormSignin
     public function configure()
     {
         parent::configure();
-        $this->widgetSchema['username'] = new sfWidgetFormInputEmail(array(), array(
-                    'onblur' => "this.value=this.value.replace(/\s+/g, '');"
+        $this->widgetSchema['username'] = new sfWidgetFormInputEmail(array(
+            'label' => 'Email Address',
+        ), array(
+                    'onblur' => "this.value=this.value.replace(/\s+/g, '');",
+                    'placeholder' => 'example@domain.com',
                 ));
         $this->validatorSchema->setPostValidator(new sfGuardValidatorUserApi());
     }

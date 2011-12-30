@@ -20,10 +20,10 @@ class FeedbackForm extends BaseForm
         $this->widgetSchema->setNameFormat('feedback[%s]');
         
         $this->setWidgets(array(
-            'name'    => new sfWidgetFormInput(),
-            'email'   => new sfWidgetFormInputEmail(),
+            'name'    => new sfWidgetFormInput(array(), array('placeholder' => 'First and last name')),
+            'email'   => new sfWidgetFormInputEmail(array(), array('placeholder' => 'example@domain.com')),
             'subject' => new sfWidgetFormSelect(array('choices' => self::$subjects)),
-            'message' => new sfWidgetFormTextarea(),
+            'message' => new sfWidgetFormTextarea(array(), array('placeholder' => 'Tell us what you want to say...')),
         ));
         $this->widgetSchema->setNameFormat('feedback[%s]');
 

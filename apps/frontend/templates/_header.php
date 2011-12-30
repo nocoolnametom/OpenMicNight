@@ -1,6 +1,9 @@
 <div id="header" style="border-bottom: 1px solid black; height: 3.5em;">
-    <span id="logo" style="padding: 0 0.5em 0 0.5em; font-size: larger; font-family: 'Arizonia', cursive;">
-        <a href="<?php echo url_for('@homepage'); ?>" class="app_name" style=" font-size: 3em; text-decoration: none; color: orangered;"><?php echo ProjectConfiguration::getApplicationName(); ?></a>
+    <span id="logo" style="padding: 0 0.5em 0 0.5em; font-size: larger;">
+        <a href="<?php echo url_for('@homepage'); ?>" class="app_name" style=" font-size: 3em; text-decoration: none; color: orangered; font-family: 'Arizonia', cursive;"><?php echo ProjectConfiguration::getApplicationName(); ?></a>
+        <?php if (ProjectConfiguration::getApplicationSubname()): ?>
+            <div style="display: inline; font-size:xx-small; vertical-align: text-top; padding-left: 0.5em; text-transform: uppercase; font-weight: bolder; color: darkgray;"><?php echo ProjectConfiguration::getApplicationSubname(); ?></div>
+        <?php endif; ?>
     </span>
     <div id="non_logo-header" style="float:right; padding-top: 1em;">
         <div id="header_user">&nbsp;
@@ -12,8 +15,8 @@
             <?php endif; ?>
         </div>
         <div class="top_links">
-            <ul style="list-style: none; display: inline; margin: 0; padding: 0;">
-                <li style="display: inline;;">
+            <ul style="display: inline; margin: 0; padding: 0;">
+                <li style="display: inline;">
                     <?php
                     echo link_to('Subreddits', 'subreddit/index');
                     ?>

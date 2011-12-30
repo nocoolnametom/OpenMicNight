@@ -105,7 +105,32 @@ class homeActions extends sfActions
         $this->setTemplate('feedback');
     }
 
-    public function executeThankyou(sfWebRequest $request)
+    public function executeAboutus(sfWebRequest $request)
+    {
+        ;
+    }
+    
+    public function executeApi(sfWebRequest $request)
+    {
+        ;
+    }
+    
+    public function executeHowtohelp(sfWebRequest $request)
+    {
+        ;
+    }
+    
+    public function executeHowtouse(sfWebRequest $request)
+    {
+        ;
+    }
+    
+    public function executeRoadmap(sfWebRequest $request)
+    {
+        ;
+    }
+    
+    public function executeBlog(sfWebRequest $request)
     {
         ;
     }
@@ -134,5 +159,6 @@ class homeActions extends sfActions
 
         return $episodes;
     }
+    
 
 }
