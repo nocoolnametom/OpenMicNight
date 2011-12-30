@@ -7,7 +7,5 @@ remember_me:
 security:  ~
 
 # insert your own filters here
-jquery_form_validation:
-  class: sfJqueryFormValidationFilter
 cache:     ~
 execution: ~
