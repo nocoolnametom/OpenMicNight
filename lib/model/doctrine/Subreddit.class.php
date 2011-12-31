@@ -297,7 +297,7 @@ AND episode_assignment.author_type_id = $longest_id;
             $deadline = $release_date - $seconds;
 
             // Send an email to that user telling them their EpisodeAssignment is now valid
-            $this->sendEmail($assignment->getSfGuardUserId(),
+            $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
                              $episode->getIncremented(), $deadline);
         }
     }

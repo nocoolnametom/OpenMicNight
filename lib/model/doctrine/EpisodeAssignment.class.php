@@ -174,7 +174,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                     $release_date = $this->getEpisode()->getReleaseDate('U');
                     $seconds = $deadline->getSeconds();
                     $deadline = $release_date - $seconds;
-                    $subreddit->sendEmail($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
+                    $subreddit->sendEmailAboutNewAssignment($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
                 }
             }
         }
