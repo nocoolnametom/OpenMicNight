@@ -28,6 +28,14 @@ class EpisodeAssignmentTable extends Doctrine_Table
     {
         return (is_array($value) ? $value['id'] : null);
     }
+    
+    public static function findAllInArray($id_array = array())
+    {
+        $episode_assignments = $this->createQuery()
+                ->whereIn('EpisodeAssignment.id', $id_array)
+                ->execute();
+        return $episode_assignments;
+    }
 
     /**
      * Deletes all future EpisodeAssignments in a given Subreddit for a

@@ -43,6 +43,9 @@ EmailType:
   redditvalidationsucceeded:
     type: RedditValidationSucceeded
     description: Sent when a user has authorized their email and needs to validate their username.
+  passeddeadlineonepisode:
+    type: PassedDeadlineOnEpisode
+    description: Sent when a user's episode has passed deadline and been re-assigned.
 
 Email:
   apiauthrequestemail:
@@ -280,6 +283,20 @@ Email:
       <em>your</em> app!</p>
       
       <p>We hope you enjoy using ~app_name~!  Have fun!</p>
+      
+      <p>Sincerely,<br/>
+      The ~app_name~ Team</p>
+  passeddeadlineonepisode:
+    EmailType: passeddeadlineonepisode
+    language: en
+    subject: "~app_name~: Your Episode Was Not Approved Before Your Deadline"
+    body_text_html: |
+      <p>Dear ~name~,</p>
+      
+      <p>We're sorry to say that your episode, set to be released on
+      ~release_date~, was not approved before the deadline rules set by the
+      subreddit and has been reassigned.  We're sorry, but we hope you'll try
+      again and sign up for a new episode in the future.</p>
       
       <p>Sincerely,<br/>
       The ~app_name~ Team</p>

@@ -44,6 +44,10 @@ EOF;
         ProjectConfiguration::registerCron();
 
         $quiet = (bool) $options['quiet'];
+        
+        $passed = array();
+        
+        $assigned = array();
 
         if ($arguments['subreddit'] == '%') {
             // Cycle through all subreddits.
@@ -57,7 +61,7 @@ EOF;
                 $iterator++;
                 if (!$quiet)
                     echo ($first ? "\n Subreddit: " : " ") . $iterator;
-                $subreddit->advanceEpisodeAssignments();
+                $subreddit->advanceEpisodeAssignmentsNew();
                 $first = false;
             }
         } else {
@@ -65,11 +69,12 @@ EOF;
             if ($subreddit) {
                 if (!$quiet)
                     echo "Advancing EpisodeAssignments for $subreddit Subreddit...";
-                $subreddit->advanceEpisodeAssignments();
+                $subreddit->advanceEpisodeAssignmentsNew();
             } else {
                 throw new sfException('Cannot find Subreddit: ' . $arguments['subreddit']);
             }
         }
+        
         if (!$quiet)
             echo "\n";
     }

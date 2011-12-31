@@ -196,7 +196,7 @@ class myUser extends sfGuardSecurityUser
         $body = $email->generateBodyText($additional_params, $prefer_html);
 
         $mail->setBodyText($body);
-        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->setFrom(sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmail()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
         $mail->addTo($address, $name);
         $mail->setSubject($subject);
         if (sfConfig::get('sf_environment') == 'prod') {

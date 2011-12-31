@@ -14,14 +14,14 @@ default:
 
   stylesheets:
     - main.css
-    - http://fonts.googleapis.com/css?family=Arizonia
+    - //fonts.googleapis.com/css?family=Arizonia
     - coin-slider-styles.css
     - fancybox/jquery.fancybox.css
 
   javascripts:
-    - https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
-    - https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js
-    - https://ajax.googleapis.com/ajax/libs/webfont/1.0.23/webfont.js
+    - //ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
+    - //ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js
+    - //ajax.googleapis.com/ajax/libs/webfont/1.0.23/webfont.js
     - audio-player.js
     - coin-slider.min.js
     - fancybox/jquery.fancybox.pack.js
