@@ -558,7 +558,7 @@ AND (
         $mail->setBodyText($body);
 
         $mail->setFrom(sfConfig::get('app_email_address',
-                                     'donotreply@' . ProjectConfiguration::getApplicationName()),
+                                     ProjectConfiguration::getApplicationEmailAddress()),
                                      sfconfig::get('app_email_name',
                                                    ProjectConfiguration::getApplicationName() . 'Team'));
         $mail->addTo($address, $name);
