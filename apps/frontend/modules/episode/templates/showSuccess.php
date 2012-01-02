@@ -14,7 +14,7 @@ echo link_to($subreddit->getName(),
 ?></h4>
 
 <div id="episode_content" style="width: 100%; max-width: 960px;">
-    <?php if ($sf_user->getApiUserId() == $episode->getSfGuardUserId()): ?>
+    <?php if ($sf_user->getApiUserId() == $assignment->getSfGuardUserId()): ?>
         <div id="edit_link" style="float: right;">
             <?php
             echo link_to('Edit Episode', 'episode/edit?id=' . $episode->getId());

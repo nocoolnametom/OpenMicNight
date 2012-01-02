@@ -22,31 +22,31 @@ class Episode extends BaseEpisode
     {
         return $this->getTitle();
     }
-    
+
     public function setTitle($value)
     {
         if (!$this->getApprovedAt())
             $this->_set('title', $value);
     }
-    
+
     public function setDescription($value)
     {
         if (!$this->getApprovedAt())
             $this->_set('description', $value);
     }
-    
+
     public function setAudioFile($value)
     {
         if (!$this->getApprovedAt())
             $this->_set('audio_file', $value);
     }
-    
+
     public function setNiceFilename($value)
     {
         if (!$this->getApprovedAt())
             $this->_set('nice_filename', $value);
     }
-    
+
     public function setGraphicFile($value)
     {
         if (!$this->getApprovedAt())
@@ -58,6 +58,23 @@ class Episode extends BaseEpisode
         $this->_id = array($id);
         $this->set('id', $id, false);
         $this->_lastModified = array();
+    }
+
+    public function setEpisodeAssignmentId($episode_assignment_id)
+    {
+        $episode_assignment = EpisodeAssignmentTable::getInstance()->find($episode_assignment_id);
+
+        if (is_null($episode_assignment_id) || is_null($episode_assignment))
+            return;
+        
+        /* If they're not within their Deadline we cannot save them to the
+         * Episode.
+         */
+        if (!$episode_assignment->isBeforeDeadlineForAuthorType()) {
+            return;
+        }
+
+        $this->_set('episode_assignment_id', $episode_assignment_id);
     }
 
     public function setSfGuardUserId($user_id)
@@ -107,7 +124,8 @@ class Episode extends BaseEpisode
         // The User who is submitting must be within their Deadline.
         $assignment = EpisodeAssignmentTable::getInstance()
                 ->getFirstByUserEpisodeAndSubreddit(
-                $this->getSfGuardUserId(), $this->getIncremented(), $this->getSubredditId());
+                $this->getSfGuardUserId(), $this->getIncremented(),
+                $this->getSubredditId());
         if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
             return;
         }
@@ -125,16 +143,18 @@ class Episode extends BaseEpisode
     public function setApprovedBy($approver_id)
     {
         // Episode must already have a User
-        if (!$this->getSfGuardUserId() || !$this->getIsSubmitted())
+        if (!$this->getEpisodeAssignmentId() || !$this->getIsSubmitted())
             return;
 
-        if ($this->getSfGuardUserId() == $approver_id)
+        // A user cannot approve their own Episode
+        if ($this->getEpisodeAssignment()->getSfGuardUserId() == $approver_id)
             return;
 
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $approver_id, $this->getSubredditId(), array('moderator', 'admin')
+                $approver_id, $this->getSubredditId(),
+                array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -151,7 +171,8 @@ class Episode extends BaseEpisode
     {
         $nice_filename = $this->_get('nice_filename');
         $nice_filename = ($nice_filename ? $nice_filename : $this->getAudioFile());
-        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_", $nice_filename);
+        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_",
+                                      $nice_filename);
         return $nice_filename;
     }
 
@@ -172,7 +193,8 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getApprovedBy(), $this->getSubredditId(), array('moderator', 'admin')
+                $this->getApprovedBy(), $this->getSubredditId(),
+                array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -207,12 +229,14 @@ class Episode extends BaseEpisode
         $s3 = new AmazonS3;
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
-            $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
+            $response = $s3->create_object($bucket, $this->getNiceFilename(),
+                                           array(
                 'fileUpload' => $file_location . $this->getAudioFile(),
                 'acl' => AmazonS3::ACL_PUBLIC,
                     ));
             if ($response->isOK()) {
-                $this->setRemoteUrl($s3->get_object_url($bucket, $this->getNiceFilename()));
+                $this->setRemoteUrl($s3->get_object_url($bucket,
+                                                        $this->getNiceFilename()));
                 $this->deleteLocalFile($this->getAudioFile());
             }
         } else {
@@ -230,7 +254,8 @@ class Episode extends BaseEpisode
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
-        $response = $s3->get_object($bucket, $this->getNiceFilename(), array(
+        $response = $s3->get_object($bucket, $this->getNiceFilename(),
+                                    array(
             'fileDownload' => $file_location . $this->getAudioFile()
                 ));
         if (!$response->isOK())
@@ -277,7 +302,8 @@ class Episode extends BaseEpisode
         if (!$is_remote && $audio_filename)
             $this->deleteLocalFile($audio_filename);
         if ($graphic_filename)
-            $this->deleteLocalFile($graphic_filename, ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
+            $this->deleteLocalFile($graphic_filename,
+                                   ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
     }
 
     public function getEpisodeAssignments()
@@ -304,7 +330,8 @@ class Episode extends BaseEpisode
             $types = array(
                 'moderator',
             );
-            $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(), $types);
+            $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(),
+                                                                                                               $types);
             $initial_is_submitted = $this->_get('is_submitted');
             $initial_submitted_at = $this->_get('submitted_at');
             foreach ($memberships as $membership) {
@@ -313,7 +340,8 @@ class Episode extends BaseEpisode
                 ProjectConfiguration::registerZend();
 
                 $mail = new Zend_Mail();
-                $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
+                $mail->addHeader('X-MailGenerator',
+                                 ProjectConfiguration::getApplicationName());
                 $parameters = array(
                     'user_id' => $membership->getSfGuardUserId(),
                     'episode_id' => $this->getIncremented(),
@@ -324,14 +352,18 @@ class Episode extends BaseEpisode
                 $name = ($user->getPreferredName() ?
                                 $user->getPreferredName() : $user->getFullName());
 
-                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('EpisodeApprovalPending', $user->getPreferredLanguage());
+                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('EpisodeApprovalPending',
+                                                                                   $user->getPreferredLanguage());
 
                 $subject = $email->generateSubject($parameters);
                 $body = $email->generateBodyText($parameters, $prefer_html);
 
                 $mail->setBodyText($body);
 
-                $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
+                $mail->setFrom(sfConfig::get('app_email_address',
+                                             'donotreply@' . ProjectConfiguration::getApplicationName()),
+                                             sfconfig::get('app_email_name',
+                                                           ProjectConfiguration::getApplicationName() . 'Team'));
                 $mail->addTo($address, $name);
                 $mail->setSubject($subject);
                 if (sfConfig::get('sf_environment') == 'prod') {
@@ -381,5 +413,4 @@ class Episode extends BaseEpisode
 
         return null;
     }
-
 }

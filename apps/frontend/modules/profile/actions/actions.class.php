@@ -82,29 +82,26 @@ class profileActions extends sfActions
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '&page=' . $page;
         $subreddit_ids = array();
-        $released_data = Api::getInstance()->get('episode/released?sf_guard_user_id=' . $user_id . $page);
-        $this->released = ApiDoctrine::createQuickObjectArray($released_data['body']);
+        $released_data = Api::getInstance()->get('episodeassignment/released?sf_guard_user_id=' . $user_id . $page);
+        $this->released = ApiDoctrine::createObjectArray('EpisodeAssignment', $released_data['body']);
         $future_data = Api::getInstance()->get('episodeassignment/future?sf_guard_user_id=' . $user_id);
         $this->future = ApiDoctrine::createObjectArray('EpisodeAssignment', $future_data['body']);
+        $current_data = Api::getInstance()->get('episodeassignment/current?sf_guard_user_id=' . $user_id);
+        $this->current = ApiDoctrine::createObjectArray('EpisodeAssignment', $current_data['body']);
         foreach($this->future as $assignment)
         {
             if (!in_array($assignment->getEpisode()->getSubredditId(), $subreddit_ids))
                 $subreddit_ids[] = $assignment->getEpisode()->getSubredditId();
         }
-        $this->current = array();
-        foreach($this->future as $key => $assignment)
+        foreach($this->current as $assignment)
         {
-            if ($assignment->getEpisode()->getSfGuardUserId() == $assignment->getSfGuardUserId())
-            {
-                $this->current[] = $assignment;
-                unset($this->future[$key]);
-            }
+            if (!in_array($assignment->getEpisode()->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $assignment->getEpisode()->getSubredditId();
         }
-        
-        foreach($this->released as $episode)
+        foreach($this->released as $assignment)
         {
-            if (!in_array($episode->getSubredditId(), $subreddit_ids))
-                $subreddit_ids[] = $episode->getSubredditId();
+            if (!in_array($assignment->getEpisode()->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $assignment->getEpisode()->getSubredditId();
         }
         
         $memberships = array();

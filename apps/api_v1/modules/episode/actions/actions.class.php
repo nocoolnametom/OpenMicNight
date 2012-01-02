@@ -70,9 +70,12 @@ class episodeActions extends autoepisodeActions
             $moderator = sfGuardUserSubredditMembershipTable::getInstance()
                     ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $episode->getSubredditId(), array('moderator'));
             if (!$admin) {
-                if (array_key_exists('sf_guard_user_id', $params)
-                        && $params['sf_guard_user_id'] != $user->getIncremented())
-                    throw new sfException('You are not allowed to change the User of the Episode!', 403);
+                if (array_key_exists('episode_assignment_id', $params))
+                {
+                    $assignment = EpisodeAssignmentTable::getInstance()->find($params['episode_assignment_id']);
+                    if ($assignment->getSfGuardUserId() != $user->getIncremented())
+                        throw new sfException('You are not allowed to change the EpisodeAssignment of the Episode!', 403);
+                }
                 if (array_key_exists('approved_by', $params)
                         && !$moderator
                         && $params['approved_by'] != $user->getIncremented())

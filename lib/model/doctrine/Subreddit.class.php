@@ -289,7 +289,7 @@ AND episode_assignment.author_type_id = $longest_id;
             /** @var $assignment EpisodeAssignment */
             $episode = $assignment->getEpisode();
             $episode->setSfGuardUserId($assignment->getSfGuardUserId());
-            $episode->save();
+            //$episode->save();
 
             $release_date = $episode->getReleaseDate('U');
             $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($longest_id,
@@ -362,7 +362,7 @@ AND episode.release_date <= [time()+deadlinesecond+time_limit]
                 if ($next_deadline && $episode->getSfGuardUserId()) {
                     /* @var $assignment EpisodeAssignment */
                     $assignment = EpisodeAssignmentTable::getInstance()->getFirstByUserEpisodeAndSubreddit($episode->getSfGuardUserId(),
-                                                                                                           $episode->getId(),
+                                                                                                           $episode->getIncremented(),
                                                                                                            $episode->getSubredditId());
                     if ($assignment->getAuthorTypeId() != $next_deadline->getAuthorTypeId()) {
                         /* we're now dealing with an episode that is in need of
@@ -372,7 +372,7 @@ AND episode.release_date <= [time()+deadlinesecond+time_limit]
                          * notification of passed deadline.
                          */
                         $assignment->setMissedDeadline(true);
-                        $assignment->save();
+                        //$assignment->save();
                         $passed_deadline_assignments[] = $assignment;
                         // Clean up the Episode for any new user.
                         $episode->setSfGuardUserId(null);
@@ -390,7 +390,7 @@ AND episode.release_date <= [time()+deadlinesecond+time_limit]
                         $episode->setFileIsRemote(null);
                         $episode->setRemoteUrl(null);
                         $episode->setRedditPostUrl(null);
-                        $episode->save();
+                        //$episode->save();
                     }
 
                     /* Now the episode belongs to nobody and needs a new assignment.
@@ -399,11 +399,11 @@ AND episode.release_date <= [time()+deadlinesecond+time_limit]
                      * Episode and this AuthorType and assign them to the Episode
                      * and add them to the email notification pool. */
                     $new_assignment = EpisodeAssignmentTable::getInstance()->getFirstByEpisodeAuthorTypeAndSubreddit($next_deadline->getAuthorTypeId(),
-                                                                                                                     $episode->getId,
+                                                                                                                     $episode->getIncremented(),
                                                                                                                      $episode->getSubredditId());
                     if ($new_assignment) {
                         $episode->setSfGuardUserId($new_assignment->getSfGuardUserId());
-                        $episode->save();
+                        //$episode->save();
                         $newly_assigned_assignments[] = $new_assignment;
                     }
                 }
@@ -511,8 +511,8 @@ AND (
                 $episode->setSfGuardUserId($next_assignment->getSfGuardUserId());
             }
             // Save everything
-            $episode->save();
-            $assignment->save();
+            //$episode->save();
+            //$assignment->save();
 
             if (!is_null($next_assignment) && $next_assignment instanceof EpisodeAssignment) {
                 // We assemble the deadline date for the EpisodeAssignment.
@@ -570,6 +570,7 @@ AND (
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
+            echo 'Mail sent to ' . $address . ' about new assignment: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('You have an episode that you can work with!');
     }
@@ -614,6 +615,7 @@ AND (
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
+            echo 'Mail sent to ' . $address . ' about passed deadline: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
     }

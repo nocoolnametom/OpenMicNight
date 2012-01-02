@@ -54,7 +54,7 @@ class EpisodeTable extends Doctrine_Table
                 ->where('Episode.id = ?', $episode_id)
                 ->limit(1)
                 ->fetchArray();
-        return (count($release_date) ? $release_date[0]['release_date'] : date());
+        return (count($release_date) ? $release_date[0]['release_date'] : date('Y-m-d H:i:s'));
     }
 
 }

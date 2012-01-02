@@ -22,9 +22,12 @@ generator:
 #        hide:                          [id]    # list here the fields you don't want to expose
 #        max_items:                     0       # uncomment to fix an absolute limit to the number of items in the response
 #        object_additional_fields:      []      # list here additionnal calculated fields
-#        pagination_enabled:            false   # set to true to activate the pagination
-#        pagination_custom_page_size:   false   # set to true to allow the client to pass a page_size parameter
-#        pagination_page_size:          100     # the default number of items in a page
+# set to true to activate the pagination
+        pagination_enabled:            true
+# set to true to allow the client to pass a page_size parameter
+        pagination_custom_page_size:   true
+# the default number of items in a page
+        pagination_page_size:          100
 #        sort_custom:                   false   # set to true to allow the client to pass a sort_by and a sort_order parameter
 #        sort_default:                  []      # set to [column, asc|desc] in order to sort on a column
 # list here the filters

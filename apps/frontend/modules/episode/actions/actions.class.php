@@ -77,12 +77,14 @@ class episodeActions extends sfActions
         // If the episode is not released, only the admins and moderators can view it.
         $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
         // Unless the owner of the episode is trying to edit it.  That's okay.
-        $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $quick_episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404Unless($permission || ($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId()));
 
         if (!$permission) {
             $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
         } else {
-            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $quick_episode->getSfGuardUserId() . '&missed_deadline=0', true);
+            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $episode->getEpisodeAssignment()->getSfGuardUserId() . '&missed_deadline=0', true);
         }
         $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
@@ -141,7 +143,9 @@ class episodeActions extends sfActions
         $permission = $this->verifyPermissionsForCurrentUser($episode->getSubredditId(), array('admin', 'moderator'));
 
         // Unless the owner of the episode is trying to download it.  That's okay.
-        $this->forward404Unless($permission || $episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404Unless($permission || $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         // Now that we're serving the local file, let's set up the server to serve it.
         header('Content-Disposition: attachment;filename=' . $episode->getNiceFilename());
@@ -202,18 +206,16 @@ class episodeActions extends sfActions
         // If the episode is not released, only the admins and moderators can view it.
         $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
         // The owner of the Episode *cannot* be an approver for the episode.
-        $this->forward404If($this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $this->episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404If(!$assignment || $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $this->forward404Unless($permission);
 
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
 
-        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $this->episode->getId() . '&sf_guard_user_id=' . $this->episode->getSfGuardUserId() . '&missed_deadline=0', true);
-        $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
-        $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
         $author_type_id = $assignment->getAuthorTypeId();
-
         $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $this->episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
         $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
         $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
@@ -231,7 +233,9 @@ class episodeActions extends sfActions
         $episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $this->forward404Unless(strtotime($episode->getReleaseDate()) >= time());
-        $this->forward404Unless($episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404Unless($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $submission_change = array(
             'is_submitted' => 1,
@@ -255,7 +259,9 @@ class episodeActions extends sfActions
         $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
         $this->forward404Unless($permission);
         // The owner of the Episode *cannot* be an approver for the episode.
-        $this->forward404If($this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $this->episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404If($assignment->getSfGuardUserId() == $this->getUser()->getApiUserId());
 
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
@@ -278,18 +284,21 @@ class episodeActions extends sfActions
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
         $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
-        $this->forward404Unless($this->episode && $this->episode->getId() && $this->episode->getSfGuardUserId());
+        $this->forward404Unless($this->episode && $this->episode->getId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $this->episode->getEpisodeAssignmentId(), true);
+        $this->assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404Unless($this->assignment && $this->assignment->getSfGuardUserId());
         if (strtotime($this->episode->getReleaseDate()) >= time()) {
             // If the episode is not released, only the admins,  moderators, and submitter can view it.
             $permission = $this->verifyPermissionsForCurrentUser($this->episode->getSubredditId(), array('admin', 'moderator'));
-            $this->forward404Unless($permission || $this->episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+            $this->forward404Unless($permission || $this->assignment->getSfGuardUserId() == $this->getUser()->getApiUserId());
         } else {
             $this->forward404Unless($this->episode->getIsApproved());
         }
 
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $this->episode->getSubredditId(), true);
         $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
-        $user_data = Api::getInstance()->setUser($auth_key)->get('user/' . $this->episode->getSfGuardUserId(), true);
+        $user_data = Api::getInstance()->setUser($auth_key)->get('user/' . $this->assignment->getSfGuardUserId(), true);
         $this->user = ApiDoctrine::createQuickObject($user_data['body']);
     }
 
@@ -311,7 +320,9 @@ class episodeActions extends sfActions
         $quick_episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
         $permission = $this->verifyPermissionsForCurrentUser($quick_episode->getSubredditId(), array('admin'));
-        $this->forward404Unless($permission || $quick_episode->getSfGuardUserId() == $this->getUser()->getApiUserId());
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $quick_episode->getEpisodeAssignmentId(), true);
+        $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
+        $this->forward404Unless($permission || ($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId()));
 
         $episode->setIsNsfw($quick_episode->getIsNsfw());
 

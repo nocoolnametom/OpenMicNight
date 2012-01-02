@@ -201,8 +201,7 @@ class episodeassignmentActions extends autoepisodeassignmentActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
-                            $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -218,9 +217,154 @@ class episodeassignmentActions extends autoepisodeassignmentActions
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
-                ->where('Episode.id = EpisodeAssignment.episode_id')
+                ->where('Episode.id = EpisodeAssignment.episode_id');
+        if (array_key_exists('sf_guard_user_id', $params))
+           $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
+        $q =  $q->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
+                ->andWhere('EpisodeAssignment.id <> Episode.episode_assignment_id')
+                ->orWhere('Episode.episode_assignment_id IS NULL');
+        
+        die($q->getSqlQuery());
+
+        $this->customQueryExecute($q, $params);
+        $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
+        if ($isset_pk && count($this->objects) == 0) {
+            $request->setRequestFormat($format);
+            $this->forward404();
+        }
+
+
+        // configure the fields of the returned objects and eventually hide some
+        $this->setFieldVisibilityIndex();
+        $this->configureFields();
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $this->output = $serializer->serialize($this->objects, $this->model);
+        unset($this->objects);
+    }
+    
+    /**
+     * Retrieves a  collection of Episode objects
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeCurrent(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+
+        try {
+            $format = $this->getFormat();
+            //$this->validateApiAuth($request->getParameterHolder()->getAll());
+            $this->validateIndex($params, $request);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $q = Doctrine_Query::create()
+                ->from('EpisodeAssignment EpisodeAssignment')
+                ->leftJoin('EpisodeAssignment.Episode Episode')
+                ->where('Episode.id = EpisodeAssignment.episode_id');
+        if (array_key_exists('sf_guard_user_id', $params))
+           $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
+        $q =  $q->andWhere('Episode.episode_assignment_id = EpisodeAssignment.id')
                 ->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'));
 
+        $this->customQueryExecute($q, $params);
+        $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
+        if ($isset_pk && count($this->objects) == 0) {
+            $request->setRequestFormat($format);
+            $this->forward404();
+        }
+
+
+        // configure the fields of the returned objects and eventually hide some
+        $this->setFieldVisibilityIndex();
+        $this->configureFields();
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $this->output = $serializer->serialize($this->objects, $this->model);
+        unset($this->objects);
+    }
+    
+    /**
+     * Retrieves a  collection of Episode objects
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeReleased(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+
+        try {
+            $format = $this->getFormat();
+            //$this->validateApiAuth($request->getParameterHolder()->getAll());
+            $this->validateIndex($params, $request);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $q = Doctrine_Query::create()
+                ->from('EpisodeAssignment EpisodeAssignment')
+                ->leftJoin('EpisodeAssignment.Episode Episode')
+                ->where('Episode.id = EpisodeAssignment.episode_id');
+        if (array_key_exists('sf_guard_user_id', $params))
+           $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
+        $q =  $q->andWhere('Episode.episode_assignment_id IS NOT NULL')
+                ->andWhere('Episode.is_approved = ?', true)
+                ->andWhere('Episode.release_date <= ?', date('Y-m-d H:i:s'));
+        
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
         if ($isset_pk && count($this->objects) == 0) {
