@@ -155,8 +155,7 @@ class Email extends BaseEmail
     protected function deriveDeadlineDate($parameters)
     {
         $deadline = $parameters['deadline'];
-        $deadline = strtotime($deadline);
-        $deadline_date = date('l, F n, Y \a\t g:ia', $deadline);
+        return date('l, F n, Y \a\t g:ia', strtotime($deadline));
     }
 
     protected function deriveFrontendRoute($parameters)

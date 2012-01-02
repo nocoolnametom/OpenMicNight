@@ -390,9 +390,8 @@ ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
 
         foreach ($newly_assigned_assignments as $assignment) {
             $episode = $assignment->getEpisode();
-            $release_date = $episode->getReleaseDate('U');
-            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($assignment->getAuthorTypeId(),
-                                                                                    $episode->getSubredditId());
+            $release_date = strtotime($episode->getReleaseDate());
+            $seconds = $deadline_rules[$assignment->getAuthorTypeId()];
             $deadline = $release_date - $seconds;
             $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
                                                $episode->getIncremented(),
@@ -411,7 +410,7 @@ ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
         $parameters = array(
             'user_id' => $user_id,
             'episode_id' => $episode_id,
-            'deadline' => $deadline,
+            'deadline' => date('Y-m-d H:i:s', $deadline),
         );
         $user = sfGuardUserTable::getInstance()->find($user_id);
 
