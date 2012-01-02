@@ -1,4 +1,9 @@
 <h2>How to Use <?php echo ProjectConfiguration::getApplicationName() ?></h2>
 
-
 <div>This section needs work, obviously.</div>
+
+<div>The basic process is thus: Subreddit define episode slots according to a pre-determined schedule.  When new slots are generated, users can sign up for these slots.  There are a number of "roles", defined by the subreddit, that can sign up for episode slots and these roles each have their own deadlines for submitting an episode for approval.  If an episode is not approved before the role's deadline come sup, the episode is reassigned to the next role until it is either approved and released or simply is not released.</div>
+
+<div>Once you have an Episode assigned to you, you can upload an audio file, a graphic file, and can give the Episode a title and a description (also remember to mar it as NSFW if the audio would be inappropriate in public places).  Once your Episode is looking good to your satisfaction you can submit it for approval.  At this point, a moderator for the subreddit in question will listen to what you have posted and, if it adheres to the rules defined by the subreddit and doesn't have any copyright issues, will approve it for release.  While waiting for approval you may continue to make changes to the episode (a moderator, for instance, might tell you to remove a portion of your episode before they will approve it).  One your episode is approved you just need to sit back and wait until it reaches its release date, at which point it will join the various podcast feeds defined by the application.</div>
+
+<div>While you can listen to episodes on the website itself, the whole point is to define specialized podcast feeds that can be imported into your favorite Podcast manager, like Banshee, iTunes, Windows Media Player, and many more.  Podcast feed locations are marked by the RSS feed icon <?php echo image_tag('rss.svg', array('height: 1em; width: auto;')) ?>.</div>

@@ -9,15 +9,23 @@ It’s open mic night!
 
 ## Requirements
 
- * [symfony 1.4 framework](http://svn.symfony-project.com/branches/1.4/).  You can place it wherever you want, but standard ssytem-wide installation options are in the `/usr/share` or `/opt` directories.  Make sure that wherever you install it that it is readable and executable by PHP and your webserver.  For local, applciation-specific installation you should probably place it within the `lib/vendor` directory, alongside other third-party libraries the application uses.
+ * [symfony 1.4 framework](http://svn.symfony-project.com/branches/1.4/).  You can place it wherever you want, but standard system-wide installation options are in the `/usr/share` or `/opt` directories.  Make sure that wherever you install it that it is readable and executable by PHP and your webserver.  For local, application-specific installation you should probably place it within the `lib/vendor` directory, alongside other third-party libraries the application uses.  This can be pulled into the application from the command `git submodule update --init lib/vendor/symfony;`.
 
- * [Zend Framework](http://framework.zend.com/download/latest).  The application assumes the existence of ZF classes within the PHP include_path, which is part of a standard ZF installation.
+ * [Zend Framework](http://framework.zend.com/download/latest).  The application assumes the existence of ZF classes within the PHP include_path, which is part of a standard ZF installation.  Make sure you reference it in `config/ProjectConfiguration.class.php` all the same.
 
  * [AWS SDK for PHP](https://github.com/amazonwebservices/aws-sdk-for-php).  This can be pulled into the application from the command `git submodule update --init lib/vendor/AWS-SDK;`.
 
  * [PHP Cron Expression Parser](https://github.com/mtdowling/cron-expression).  This can be pulled into the application from the command `git submodule update --init lib/vendor/CronExpression;`.
 
+ * [JQuery Fancybox Plugin](https://github.com/fancyapps/fancyBox).  This can be pulled into the application from the command `git submodule update --init lib/vendor/fancybox;`.
+
+ * [PHP Markdown](https://github.com/wolfie/php-markdown).  This can be pulled into the application from the command `git submodule update --init lib/vendor/php-markdown;`.
+
+ * [Plupload Uploader](https://github.com/moxiecode/plupload).  This can be pulled into the application from the command `git submodule update --init lib/vendor/plupload;`.
+
  * PHPUnit is required to run the unit tests.
+
+ * MySQL (or one of its derivatives, like MariaDB) due to some MySQL-specific raw queries at use in the application.
 
 
 ## Installation
@@ -46,17 +54,15 @@ Copy `apps/frontend/config/app.yml.sample` to `apps/frontend/config/app.yml`.  S
 
 The application calls AWS without explicitly making authentication calls; it assumes that authentication will be handled by the use external to the application.  The easiest way to ensure that AWS behaves as expected is to copy `lib/vendor/AWS-SDK/config-sample.inc.php` to `lib/vendor/AWS-SDK/config.inc.php` and edit it.  Place your authentication keys within the config file and save the file.  Amazon Web Services should be good to go now.
 
-
 ## Testing
 
-The application should have full code coverage in its unique model classes (though this does not mean that every use case is actually covered).  Simply run `phpunit` from the applciation root and PHPUnit should use the `phpunit.xml.dist` file to execute those tests.
+The application should have full code coverage in its unique model classes (though this does not mean that every use case is actually covered).  Simply run `phpunit` from the application root and PHPUnit should use the `phpunit.xml.dist` file to execute those tests.
 
+## Configuration
 
-## Configuation
+There are a few options that affect all aspects of the application, and they are declared within `config/ProjectConfiguration.class.php`.  You can change the Amazon bucket prefix, the storage location for pre-approved audio files, and the storage location for episode graphic files.  Other options more specific to different application services are contained within their respective app config directories (eg, `apps/api_v1/config/app.yml` and `apps/api_v1/config/settings.yml`).  For more information on these configuration files see the [symfony documentation](http://www.symfony-project.org/gentle-introduction/1_4/en/05-Configuring-Symfony).
 
-There are a few options that affect all aspects of the application, and they are declared within `config/ProjectConfiguration.class.php`.  You can change the Amazon bucket prefix, the storage location for pre-approved audio files, and the storage location for episode graphic files.  Other options more sepcific to different application services are contained within their respectives app config directories (eg, `apps/api_v1/config/app.yml` and `apps/api_v1/config/settings.yml`).  For more information on these configuration files see the [symfony documentation](http://www.symfony-project.org/gentle-introduction/1_4/en/05-Configuring-Symfony).
-
-Remember to make the data/temp directory writable by the web user so that users can upload episode files.  Episodes are served via Apache [X-Sendfile](https://tn123.org/mod_xsendfile/),  nginx [X-Accel-Redirect](http://wiki.nginx.org/XSendfile), or lighttpd [X-LIGHTTPD-send-file](http://redmine.lighttpd.net/wiki/1/X-LIGHTTPD-send-file) so the files are not executed.
+Remember to make the data/temp directory writable by the web user so that users can upload episode files.  Episodes are served via Apache [X-Sendfile](https://tn123.org/mod_xsendfile/),  nginx [X-Accel-Redirect](http://wiki.nginx.org/XSendfile), or lighttpd [X-LIGHTTPD-send-file](http://redmine.lighttpd.net/wiki/1/X-LIGHTTPD-send-file) so the files are not executed when delivered.
 
 ### Configure nginx for X-Accel-Redirect
 
@@ -96,9 +102,9 @@ If your FastCGI setup file, make sure that the `allow-x-send-file' option is ena
 
 Ensure that the `data/temp/' directory is readable by the web server (it should be because the server's going to be trying to put stuff into it!), and the rest is handled by the app.
 
-### Configure the really slow file delviery using PHP
+### Configure the really slow file delivery using PHP
 
-If you don't have the ability to tell the server to deliver files for you, you can still deliver them using PHP, but this is NOT recommended as it is much more resource intensive.  To actviate this option, you'll need to explicitly change the `enable_slow_audio_download` key in `apps/frontend/config/app.yml` from false to true.  And may God have mercy on your soul (and server).
+If you don't have the ability to tell the server to deliver files for you, you can still deliver them using PHP, but this is NOT recommended as it is much more resource intensive.  To activate this option, you'll need to explicitly change the `enable_slow_audio_download` key in `apps/frontend/config/app.yml` from false to true.  And may God have mercy on your soul (and server).
 
 ### Replace Hashes in Configuration files
 
@@ -150,4 +156,4 @@ There are four cron jobs that the system expects for its functioning.  These han
 
     php symfony help [app_name]:[task_name]
 
-This should gvie you more information about the task in question.
+This should give you more information about the task in question.
