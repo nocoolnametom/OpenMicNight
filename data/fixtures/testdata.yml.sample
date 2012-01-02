@@ -60,19 +60,19 @@ Deadline:
     AuthorType: seahorse
     Subreddit:  programming
     # Three Days before release date
-    seconds:    259200
+    seconds:    900
     restricted_until_previous_misses_deadline: false
   programming_shark:
     AuthorType: shark
     Subreddit:  programming
     # Two Days before release date
-    seconds:    172800
+    seconds:    600
     restricted_until_previous_misses_deadline: false
   programming_squid:
     AuthorType: squid
     Subreddit:  programming
     # One Day before release date
-    seconds:    86400
+    seconds:    300
     restricted_until_previous_misses_deadline: false
   programming_blue_whale:
     AuthorType: blue_whale
@@ -83,5 +83,14 @@ Deadline:
 
 Episode:
   episode_one:
+    title:          Episode One
     Subreddit:      programming
-    release_date:   '2012-12-31'
+    release_date:   <?php echo "'".date('Y-m-d H:i:s', time()+1200)."'\n" ?>
+  episode_two:
+    title:          Episode Two
+    Subreddit:      programming
+    release_date:   <?php echo "'".date('Y-m-d H:i:s', time()+1500)."'\n" ?>
+  episode_three:
+    title:          Episode Three
+    Subreddit:      programming
+    release_date:   <?php echo "'".date('Y-m-d H:i:s', time()+1800)."'\n" ?>
