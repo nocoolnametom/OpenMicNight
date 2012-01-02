@@ -35,3 +35,6 @@ plugins/.channels/
 .Trash
 .Trashes
 .hidden
+plugins/sfProjectAnalyserPlugin/
+web/analysis.html
+web/sfProjectAnalyserPlugin
