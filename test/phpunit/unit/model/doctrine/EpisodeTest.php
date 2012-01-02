@@ -183,20 +183,20 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
          * can't unsubmit]) work.
          */
         
-        // Try to submit without a user (and fail).
+        // Try to submit without an assignment (and fail).
         $this->episode->setIsSubmitted(true);
         $this->episode->save();
         $this->assertFalse($this->episode->getIsSubmitted());
         
         // Set up a user beyond Deadline and try to submit (and fail).
-        $this->episode->setSfGuardUserId($this->after_deadline_user->getIncremented());
+        $this->episode->setEpisodeAssignmentId($this->first_ep_assignment->getIncremented());
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
         $this->episode->save();
         $this->assertFalse($this->episode->getIsSubmitted());
         
         // Set up a user within Deadline without a filename and try to submit (and fail).
-        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setEpisodeAssignmentId($this->second_ep_assignment->getIncremented());
         $this->episode->setAudioFile('');
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
@@ -204,7 +204,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->assertFalse($this->episode->getIsSubmitted());
         
         // Set up a user within Deadline with a filename and try to submit (and succeed).
-        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setEpisodeAssignmentId($this->second_ep_assignment->getIncremented());
         $this->episode->setAudioFile($this->episode_filename);
         $this->episode->save();
         $this->episode->setIsSubmitted(1);
@@ -242,7 +242,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->assertEquals(null, $this->episode->getApprovedBy());
         
         // Cannot save an Approver who is the same as the Submitter.
-        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setEpisodeAssignmentId($this->second_ep_assignment->getIncremented());
         $this->episode->setAudioFile($this->episode_filename);
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
@@ -255,7 +255,7 @@ class EpisodeTest extends sfPHPUnitBaseTestCase
         $this->assertEquals(null, $this->episode->getApprovedBy());
         
         // Cannot save an Approver who is not an admin or moderator.
-        $this->episode->setSfGuardUserId($this->user->getIncremented());
+        $this->episode->setEpisodeAssignmentId($this->second_ep_assignment->getIncremented());
         $this->episode->save();
         $this->episode->setIsSubmitted(true);
         $this->episode->save();

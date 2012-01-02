@@ -80,8 +80,11 @@ class Episode extends BaseEpisode
     public function setIsSubmitted($is_submitted)
     {
         // Episode Must already have a User within their Deadline.
-        $assignment = $this->getEpisodeAssignment();
-        if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
+        $assignment = $this->getEpisodeAssignmentId();
+        if (!$assignment) {
+            return;
+        }
+        if (!$this->getEpisodeAssignment()->isBeforeDeadlineForAuthorType()) {
             return;
         }
 
@@ -139,8 +142,11 @@ class Episode extends BaseEpisode
     public function setIsApproved($is_approved)
     {
         // Episode Must already have a User within their Deadline.
-        $assignment = $this->getEpisodeAssignment();
-        if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
+        $assignment = $this->getEpisodeAssignmentId();
+        if (!$assignment) {
+            return;
+        }
+        if (!$this->getEpisodeAssignment()->isBeforeDeadlineForAuthorType()) {
             return;
         }
 
@@ -323,9 +329,9 @@ class Episode extends BaseEpisode
                 $mail->setBodyText($body);
 
                 $mail->setFrom(sfConfig::get('app_email_address',
-                                             'donotreply@' . ProjectConfiguration::getApplicationName()),
+                                             ProjectConfiguration::getApplicationEmailAddress()),
                                              sfconfig::get('app_email_name',
-                                                           ProjectConfiguration::getApplicationName() . 'Team'));
+                                                           ProjectConfiguration::getApplicationName() . ' Team'));
                 $mail->addTo($address, $name);
                 $mail->setSubject($subject);
                 if (sfConfig::get('sf_environment') == 'prod') {
