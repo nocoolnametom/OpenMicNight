@@ -298,234 +298,105 @@ AND episode_assignment.author_type_id = $longest_id;
 
             // Send an email to that user telling them their EpisodeAssignment is now valid
             $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
-                             $episode->getIncremented(), $deadline);
-        }
-    }
-
-    public function advanceEpisodeAssignmentsNew($time_limit = 3600)
-    {
-        // We grab the Deadlines in descending order for the Subreddit;
-        $deadline_rules = $this->getDeadlineRules();
-
-        // Now we make sure that the first deadline assignment are already asigned
-        $this->assignUnassignedInLongestDeadline();
-
-        foreach ($deadline_rules as $author_type_id => $deadline_seconds) {
-            // We establish the pool of emails we'll be sending.
-            // First to those who pass their deadline
-            $passed_deadline_assignments = array();
-
-            // And to the new episode assignments that are reassigned
-            $newly_assigned_assignments = array();
-
-            /* We grab all episodes that will be released between now + the
-             * deadline seconds and now + the deadline seconds + $time_lmit.  In
-             * other words, we grab all episodes that have just barely moved
-             * past the current deadline and probably need reassignment.  This
-             * is usually just one episode, but we need to acknowledge that it
-             * might be more.
-             */
-            $sql = "
-SELECT episode.*
-FROM episode
-WHERE episode.is_approved <> 1
-AND episode.subreddit_id = 1
-AND episode.release_date >= [time()+deadlineseconds]
-AND episode.release_date <= [time()+deadlinesecond+time_limit]
-";
-            $query = Doctrine_Query::create()
-                    ->from('Episode e')
-                    ->where('e.is_approved <> 1')
-                    ->andWhere('e.subreddit_id = ?', $this->getIncremented())
-                    ->andWhere('e.release_date >= ?',
-                               date('Y-m-d H:i:s', time() + $deadline_seconds))
-                    ->andWhere('e.release_date <= ?',
-                               date('Y-m-d H:i:s',
-                                    time() + $deadline_seconds + $time_limit));
-            $episodes = $query->execute();
-
-            foreach ($episodes as $episode) {
-                /* @var $episode Episode */
-                /* Now that we have these episodes that probably need
-                 * reassignment, we need to check them to see if they're already
-                 * correctly assigned and can be skipped.  We need to determine
-                 * what the correct deadline author_type actually should be for
-                 * the episode in question.  This helps us ensure that their
-                 * current assignment, if they have one, is part of the newly
-                 * correct $deadline_rule.  If so, we skip dealing with them and
-                 * move on.
-                 */
-                $next_deadline_id = $this->getNextDeadlineFrom($deadline_seconds);
-                /* @var $next_deadline Deadline */
-                $next_deadline = DeadlineTable::getInstance()->find($next_deadline_id);
-
-                if ($next_deadline && $episode->getSfGuardUserId()) {
-                    /* @var $assignment EpisodeAssignment */
-                    $assignment = EpisodeAssignmentTable::getInstance()->getFirstByUserEpisodeAndSubreddit($episode->getSfGuardUserId(),
-                                                                                                           $episode->getIncremented(),
-                                                                                                           $episode->getSubredditId());
-                    if ($assignment->getAuthorTypeId() != $next_deadline->getAuthorTypeId()) {
-                        /* we're now dealing with an episode that is in need of
-                         * reassignment, so first we'll remove their current assignment
-                         * if they have one and make them assigned to nobody and add the
-                         * old assignment (if it existed) to the email pool for
-                         * notification of passed deadline.
-                         */
-                        $assignment->setMissedDeadline(true);
-                        //$assignment->save();
-                        $passed_deadline_assignments[] = $assignment;
-                        // Clean up the Episode for any new user.
-                        $episode->setSfGuardUserId(null);
-                        $audio_file = $episode->getAudioFile();
-                        $nice_filename = $episode->getNiceFilename();
-                        $graphic_file = $episode->getGraphicFile();
-                        $episode->setAudioFile(null);
-                        $episode->setNiceFilename(null);
-                        $episode->setGraphicFile(null);
-                        $episode->setIsNsfw(false);
-                        $episode->setTitle(null);
-                        $episode->setDescription(null);
-                        $episode->setIsSubmitted(false);
-                        $episode->setSubmittedAt(null);
-                        $episode->setFileIsRemote(null);
-                        $episode->setRemoteUrl(null);
-                        $episode->setRedditPostUrl(null);
-                        //$episode->save();
-                    }
-
-                    /* Now the episode belongs to nobody and needs a new assignment.
-                     * Since we grabbed what the AuthorType *should* be right now,
-                     * we simply grab any existing EpisodeAssignment for this
-                     * Episode and this AuthorType and assign them to the Episode
-                     * and add them to the email notification pool. */
-                    $new_assignment = EpisodeAssignmentTable::getInstance()->getFirstByEpisodeAuthorTypeAndSubreddit($next_deadline->getAuthorTypeId(),
-                                                                                                                     $episode->getIncremented(),
-                                                                                                                     $episode->getSubredditId());
-                    if ($new_assignment) {
-                        $episode->setSfGuardUserId($new_assignment->getSfGuardUserId());
-                        //$episode->save();
-                        $newly_assigned_assignments[] = $new_assignment;
-                    }
-                }
-
-                // We send the emails for the current deadline we're checking.
-                foreach ($passed_deadline_assignments as $assignment) {
-                    $this->sendEmailAboutPassedDeadline($assignment->getSfGuardUserId(),
-                                                        $assignment->getEpisodeId());
-                }
-
-                foreach ($newly_assigned_assignments as $assignment) {
-                    $episode = $assignment->getEpisode();
-                    $release_date = $episode->getReleaseDate('U');
-                    $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($assignment->getAuthorTypeId(),
-                                                                                            $episode->getSubredditId());
-                    $deadline = $release_date - $seconds;
-                    $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
-                                                       $episode->getIncremented(),
-                                                       $deadline);
-                }
-
-
-                /* And that's it!  On to the next deadline for the Subreddit. */
-            }
+                                               $episode->getIncremented(),
+                                               $deadline);
         }
     }
 
     public function advanceEpisodeAssignments()
     {
+        // We grab the Deadlines in descending order for the Subreddit;
         $deadline_rules = $this->getDeadlineRules();
 
         // Now we make sure that the first deadline assignment are already asigned
-        $this->assignUnassignedInLongestDeadline();
+        //$this->assignUnassignedInLongestDeadline();
+        // We establish the pool of emails we'll be sending.
+        // First to those who pass their deadline
+        $passed_deadline_assignments = array();
 
-        /* We now have an array that shows how many seconds a givn AuthorType is
-         * allowed before their Deadline passes for the Subreddit.  Now we need
-         * to find all of the EpisodeAssignments attached to future unapproved
-         * Episodes that have passed their deadlines and are not so marked.
-         */
-        $sql = "
-SELECT episode_assignment.*
-FROM episode_assignment
-JOIN episode ON episode.id = episode_assignment.episode_id
-WHERE episode.release_date >= NOW()
-AND episode.is_approved <> 1
-AND episode.subreddit_id = 1
-AND episode_assignment.missed_deadline <> 1
-AND (
-  (episode_assignment.author_type_id = 1 AND NOW() >= (episode.release_date - 86400))
-  OR (episode_assignment.author_type_id = 2 AND NOW() >= (episode.release_date - 172800))
-  OR (episode_assignment.author_type_id = 3 AND NOW() >= (episode.release_date - 259200))
-  OR (episode_assignment.author_type_id = 4 AND NOW() >= (episode.release_date - 0))
-)";
-        $rules_query = '';
-        $first = true;
-        foreach ($deadline_rules as $id => $seconds) {
-            $rules_query .= ($first ? '' : ' OR ') . "(ea.author_type_id = $id AND ('" . date('Y-m-d H:i:s',
-                                                                                              time() + $seconds) . "' >= e.release_date))";
-            $first = false;
-        }
-        $query = Doctrine_Query::create()
-                ->from('EpisodeAssignment ea')
-                ->leftJoin('ea.Episode e')
-                ->where('e.release_date >= ?', date('Y-m-d H:i:s'))
-                ->andWhere('e.is_approved <> 1')
-                ->andWhere('e.subreddit_id = ?', $this->getIncremented())
-                ->andWhere('ea.missed_deadline <> 1')
-                ->andWhere("($rules_query)");
-        $assignments = $query->execute();
+        // And to the new episode assignments that are reassigned
+        $newly_assigned_assignments = array();
 
-        // We now have all assignments that are beyond their deadlines
+        // Now we can start on the assignments that are misassigned
+        $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND `episode`.`episode_assignment_id` = ea.`id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = `episode`.`subreddit_id`)
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE ea.`missed_deadline` <> 1
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+        $assignments = $q->execute();
         foreach ($assignments as $assignment) {
-            /* @var $assignment EpisodeAssignment */
-
-            // Set the EpisodeAssignment that it missed its deadline.
+            $passed_deadline_assignments[] = $assignment;
             $assignment->setMissedDeadline(true);
+            $assignment->save();
             $episode = $assignment->getEpisode();
+            // Clean up the Episode for any new user.
+            $episode->setSfGuardUserId(null);
+            $audio_file = $episode->getAudioFile();
+            $nice_filename = $episode->getNiceFilename();
+            $graphic_file = $episode->getGraphicFile();
+            $episode->setAudioFile(null);
+            $episode->setNiceFilename(null);
+            $episode->setGraphicFile(null);
+            $episode->setIsNsfw(false);
+            $episode->setTitle(null);
+            $episode->setDescription(null);
+            $episode->setIsSubmitted(false);
+            $episode->setSubmittedAt(null);
+            $episode->setFileIsRemote(null);
+            $episode->setRemoteUrl(null);
+            $episode->setRedditPostUrl(null);
+            $episode->save();
+        }
 
-            $next_assignment = null;
-
-            if ($episode->getSfGuardUserId() == $assignment->getSfGuardUserId()) {
-                // Remove the current user from the Episode.           
-                $episode->setSfGuardUserId(null);
-
-                // Clean up the Episode for the new user.
-                $audio_file = $episode->getAudioFile();
-                $nice_filename = $episode->getNiceFilename();
-                $graphic_file = $episode->getGraphicFile();
-                $episode->setAudioFile(null);
-                $episode->setNiceFilename(null);
-                $episode->setGraphicFile(null);
-                $episode->setIsNsfw(false);
-                $episode->setTitle(null);
-                $episode->setDescription(null);
-                $episode->setIsSubmitted(false);
-                $episode->setSubmittedAt(null);
-                $episode->setFileIsRemote(null);
-                $episode->setRemoteUrl(null);
-                $episode->setRedditPostUrl(null);
-
-                // Find the next EpisodeAssignment in line for the Episode
-                $next_assignment = $episode->getCurrentEpisodeAssignmentByDeadline();
-
-                // Set the user for the Episode to the new user
-                $episode->setSfGuardUserId($next_assignment->getSfGuardUserId());
+        // Now all episodes are cleared and we need to see if they need to be reassigned to an existing asignment.
+        $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND (`episode`.`episode_assignment_id` IS NULL) AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = `episode`.`subreddit_id`)
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE ea.`missed_deadline` <> 1
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) > (UNIX_TIMESTAMP() + `deadline`.`seconds`)
+ORDER BY `deadline`.`seconds` DESC";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+        $assignments = $q->execute();
+        $episodes_affected = array();
+        foreach ($assignments as $assignment) {
+            $episode = $assignment->getEpisode();
+            $author_type_id = $this->getNextDeadlineFrom(strtotime($episode->getReleaseDate()));
+            if ($assignment->getAuthorTypeId() == $author_type_id && !in_array($assignment->getEpisodeId(), $episodes_affected)) {
+                $episodes_affected[] = $assignment->getEpisodeId();
+                $newly_assigned_assignments[] = $assignment;
+                $episode->setEpisodeAssignmentId($assignment->getIncremented());
+                $episode->save();
             }
-            // Save everything
-            //$episode->save();
-            //$assignment->save();
+        }
 
-            if (!is_null($next_assignment) && $next_assignment instanceof EpisodeAssignment) {
-                // We assemble the deadline date for the EpisodeAssignment.
-                $release_date = $episode->getReleaseDate('U');
-                $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($next_assignment->getAuthorTypeId(),
-                                                                                        $episode->getSubredditId());
-                $deadline = $release_date - $seconds;
+        // We send the emails for the current deadline we're checking.
+        foreach ($passed_deadline_assignments as $assignment) {
+            $this->sendEmailAboutPassedDeadline($assignment->getSfGuardUserId(),
+                                                $assignment->getEpisodeId());
+        }
 
-                // Send an email to that user telling them their EpisodeAssignment is now valid
-                $this->sendEmailAboutNewAssignment($next_assignment->getSfGuardUserId(),
-                                                   $episode->getIncremented(),
-                                                   $deadline);
-            }
+        foreach ($newly_assigned_assignments as $assignment) {
+            $episode = $assignment->getEpisode();
+            $release_date = $episode->getReleaseDate('U');
+            $seconds = DeadlineTable::getInstance()->getSecondsByAuthorAndSubreddit($assignment->getAuthorTypeId(),
+                                                                                    $episode->getSubredditId());
+            $deadline = $release_date - $seconds;
+            $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
+                                               $episode->getIncremented(),
+                                               $deadline);
         }
     }
 
@@ -570,7 +441,6 @@ AND (
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
-            echo 'Mail sent to ' . $address . ' about new assignment: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('You have an episode that you can work with!');
     }
@@ -615,7 +485,6 @@ AND (
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
-            echo 'Mail sent to ' . $address . ' about passed deadline: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
     }

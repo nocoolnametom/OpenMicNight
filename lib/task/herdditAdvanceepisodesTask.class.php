@@ -11,7 +11,7 @@ class herdditAdvanceepisodesTask extends sfBaseTask
 
         $this->addOptions(array(
             new sfCommandOption('application', null, sfCommandOption::PARAMETER_REQUIRED, 'The application name'),
-            new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'prod'),
+            new sfCommandOption('env', null, sfCommandOption::PARAMETER_REQUIRED, 'The environment', 'dev'),
             new sfCommandOption('connection', null, sfCommandOption::PARAMETER_REQUIRED, 'The connection name', 'doctrine'),
                 // add your own options here
         ));
@@ -61,7 +61,7 @@ EOF;
                 $iterator++;
                 if (!$quiet)
                     echo ($first ? "\n Subreddit: " : " ") . $iterator;
-                $subreddit->advanceEpisodeAssignmentsNew();
+                $subreddit->advanceEpisodeAssignments();
                 $first = false;
             }
         } else {
@@ -69,7 +69,7 @@ EOF;
             if ($subreddit) {
                 if (!$quiet)
                     echo "Advancing EpisodeAssignments for $subreddit Subreddit...";
-                $subreddit->advanceEpisodeAssignmentsNew();
+                $subreddit->advanceEpisodeAssignments();
             } else {
                 throw new sfException('Cannot find Subreddit: ' . $arguments['subreddit']);
             }
