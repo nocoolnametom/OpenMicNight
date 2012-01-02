@@ -472,24 +472,6 @@ class subredditActions extends sfActions
 
         $this->setTemplate('edit_deadline');
     }
-    
-    public function executeNew(sfWebRequest $request)
-    {
-        $this->forward404Unless($this->getUser()->isAuthenticated());
-        $this->form = new SubredditForm();
-    }
-
-    public function executeCreate(sfWebRequest $request)
-    {
-        $this->forward404Unless($this->getUser()->isAuthenticated());
-        $this->forward404Unless($request->isMethod(sfRequest::POST));
-
-        $this->form = new SubredditForm();
-
-        $this->processForm($request, $this->form);
-
-        $this->setTemplate('new');
-    }
 
     public function executeEdit(sfWebRequest $request)
     {

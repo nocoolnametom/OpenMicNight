@@ -9,7 +9,7 @@ Subreddit:
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
     creation_interval: { type: integer, notnull: true, default: 0 }
     bucket_name: { type: string(64) }
-    preferred_users_are_full_members: { type: boolean, default: 1 }
+    pending_users_are_full_members: { type: boolean, default: 1 }
   indexes:
     name: { fields: [name], type: unique}
     domain: { fields: [domain], type: unique}
