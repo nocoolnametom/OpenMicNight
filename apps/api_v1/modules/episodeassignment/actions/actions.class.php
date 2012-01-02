@@ -223,8 +223,6 @@ class episodeassignmentActions extends autoepisodeassignmentActions
         $q =  $q->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
                 ->andWhere('EpisodeAssignment.id <> Episode.episode_assignment_id')
                 ->orWhere('Episode.episode_assignment_id IS NULL');
-        
-        die($q->getSqlQuery());
 
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);

@@ -283,9 +283,9 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 ->getSecondsByAuthorAndSubreddit(
                 $author_type_id, $this->getEpisode()->getSubredditId()
         );
-        $release_date = new DateTime(EpisodeTable::getInstance()
+        $release_date = strtotime(EpisodeTable::getInstance()
                                 ->getCurrentReleaseDate($this->getEpisodeId()));
-        $now_and_deadline = new DateTime(date('Y-m-d H:i:s', time() + $deadline_seconds));
+        $now_and_deadline = time() + $deadline_seconds;
         if (($now_and_deadline > $release_date ) && !$this->getMissedDeadline()) {
             $this->setMissedDeadline(true);
         }

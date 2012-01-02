@@ -92,11 +92,11 @@ class pluploadActions extends sfActions
 
             $episode = EpisodeTable::getInstance()->find($id);
             if ($episode) {
-                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId() && !$episode->getIsApproved()) {
+                if ($this->getUser()->getApiUserId() == $episode->getEpisodeAssignment()->getSfGuardUserId() && !$episode->getIsApproved()) {
                     $valid_episode = true;
                     $this->getUser()->setAttribute('valid_episode', true);
                     $this->getUser()->setAttribute('valid_episode_id', $id);
-                    $this->getUser()->setAttribute('valid_episode_user_id', $episode->getSfGuardUserId());
+                    $this->getUser()->setAttribute('valid_episode_user_id', $episode->getEpisodeAssignment()->getSfGuardUserId());
                     $this->getUser()->setAttribute('valid_episode_audio_file_hash', $this->generateFilenamehashForAudio($filename));
                     $episode->setAudioFile($this->generateFilenamehashForAudio($filename));
                     $episode->setNiceFilename($filename);
@@ -130,11 +130,11 @@ class pluploadActions extends sfActions
 
             $episode = EpisodeTable::getInstance()->find($id);
             if ($episode) {
-                if ($this->getUser()->getApiUserId() == $episode->getSfGuardUserId() && !$episode->getIsApproved()) {
+                if ($this->getUser()->getApiUserId() == $episode->getEpisodeAssignment()->getSfGuardUserId() && !$episode->getIsApproved()) {
                     $valid_episode = true;
                     $this->getUser()->setAttribute('valid_episode', true);
                     $this->getUser()->setAttribute('valid_episode_id', $id);
-                    $this->getUser()->setAttribute('valid_episode_user_id', $episode->getSfGuardUserId());
+                    $this->getUser()->setAttribute('valid_episode_user_id', $episode->getEpisodeAssignment()->getSfGuardUserId());
                     $this->getUser()->setAttribute('valid_episode_image_file_hash', $this->generateFilenameHashForImage($filename));
                     $episode->setGraphicFile($this->generateFilenameHashForImage($filename));
                     $episode->save();

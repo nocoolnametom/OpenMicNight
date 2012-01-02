@@ -77,56 +77,16 @@ class Episode extends BaseEpisode
         $this->_set('episode_assignment_id', $episode_assignment_id);
     }
 
-    public function setSfGuardUserId($user_id)
-    {
-        $user_found = false;
-        $episode_user_id = null;
-        // Verify that the user exists in an EpisodeAssignment
-        foreach ($this->getEpisodeAssignments() as $assignment) {
-            /* @var $assignment EpisodeAssignment */
-            $episode_user_id = $assignment->getSfGuardUserId();
-            if ($episode_user_id == $user_id) {
-                $user_found = true;
-                break;
-            }
-        }
-        if (!$user_found && !is_null($user_id))
-            return;
-
-        // We found a user - are they within their Deadline?
-        if ($user_found) {
-            /* If they're not within their Deadline we cannot save them to the
-             * Episode.
-             */
-            if (!$assignment->isBeforeDeadlineForAuthorType()) {
-                return;
-            }
-        }
-
-        // Make sure that the user has been validated as a emmber of Reddit!
-        $user = sfGuardUserTable::getInstance()->find($user_id);
-        if ($user && !$user->getIsValidated())
-            return;
-
-        $this->_set('sf_guard_user_id', $episode_user_id);
-    }
-
     public function setIsSubmitted($is_submitted)
     {
-        // Episode Must already have a User
-        if (!$this->getSfGuardUser())
+        // Episode Must already have a User within their Deadline.
+        $assignment = $this->getEpisodeAssignment();
+        if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
             return;
+        }
 
         // Episode must also have a file attached
-        if (!$this->getAudioFile())
-            return;
-
-        // The User who is submitting must be within their Deadline.
-        $assignment = EpisodeAssignmentTable::getInstance()
-                ->getFirstByUserEpisodeAndSubreddit(
-                $this->getSfGuardUserId(), $this->getIncremented(),
-                $this->getSubredditId());
-        if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
+        if (!$this->getAudioFile()){
             return;
         }
 
@@ -178,16 +138,18 @@ class Episode extends BaseEpisode
 
     public function setIsApproved($is_approved)
     {
-        // Episode must already have a User
-        if (!$this->getSfGuardUser())
+        // Episode Must already have a User within their Deadline.
+        $assignment = $this->getEpisodeAssignment();
+        if (!$assignment || !$assignment->isBeforeDeadlineForAuthorType()) {
             return;
+        }
 
         // Episode must already have an Approver set beforehand
         if (!$this->getApprovedBy())
             return;
 
         // The Episode cannot be approved by its User
-        if ($this->getSfGuardUserId() == $this->getApprovedBy())
+        if ($this->getEpisodeAssignment()->getSfGuardUserId() == $this->getApprovedBy())
             return;
 
         // The Approver must actually *be* an approver in the Episode Subreddit.

@@ -81,15 +81,7 @@ class episodeActions extends sfActions
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
         $this->forward404Unless($permission || ($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId()));
 
-        if (!$permission) {
-            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&missed_deadline=0', true);
-        } else {
-            $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?episode_id=' . $quick_episode->getId() . '&sf_guard_user_id=' . $episode->getEpisodeAssignment()->getSfGuardUserId() . '&missed_deadline=0', true);
-        }
-        $this->forward404Unless(array_key_exists(0, $assignment_data['body']));
-        $assignment = ApiDoctrine::createQuickObject($assignment_data['body'][0]);
         $author_type_id = $assignment->getAuthorTypeId();
-
         $deadline_data = Api::getInstance()->setUser($auth_key)->get('subredditdeadline?subreddit_id=' . $quick_episode->getSubredditId() . '&author_type_id=' . $author_type_id, true);
         $this->forward404Unless(array_key_exists(0, $deadline_data['body']));
         $deadline = ApiDoctrine::createQuickObject($deadline_data['body'][0]);
