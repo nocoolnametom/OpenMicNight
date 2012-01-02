@@ -138,11 +138,11 @@ sfGuardLoginMessage:
     symfony:
       form:   false
       filter: false
-  actAs: [Timestampable]
+  actAs:
+    Timestampable: ~
   columns:
     user_id:
       type: integer
-      primary: true
     message:
       type: string(4000)
     displayed:

@@ -364,7 +364,7 @@ LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `
 WHERE ea.`missed_deadline` <> 1
 /* Is the episode past the deadline for the assignment in question? */
 AND UNIX_TIMESTAMP(`episode`.`release_date`) > (UNIX_TIMESTAMP() + `deadline`.`seconds`)
-ORDER BY `deadline`.`seconds` DESC";
+ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
         $q = new Doctrine_RawSql();
         $q->select('{ea.*}')
                 ->from($sql)
@@ -372,13 +372,13 @@ ORDER BY `deadline`.`seconds` DESC";
         $assignments = $q->execute();
         $episodes_affected = array();
         foreach ($assignments as $assignment) {
-            $episode = $assignment->getEpisode();
-            $author_type_id = $this->getNextDeadlineFrom(strtotime($episode->getReleaseDate()));
-            if ($assignment->getAuthorTypeId() == $author_type_id && !in_array($assignment->getEpisodeId(), $episodes_affected)) {
+            if (!in_array($assignment->getEpisodeId(), $episodes_affected))
+            {
                 $episodes_affected[] = $assignment->getEpisodeId();
-                $newly_assigned_assignments[] = $assignment;
+                $episode = $assignment->getEpisode();
                 $episode->setEpisodeAssignmentId($assignment->getIncremented());
                 $episode->save();
+                $newly_assigned_assignments[] = $assignment;
             }
         }
 
@@ -441,6 +441,7 @@ ORDER BY `deadline`.`seconds` DESC";
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
+            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('You have an episode that you can work with!');
     }
@@ -485,6 +486,7 @@ ORDER BY `deadline`.`seconds` DESC";
             if (sfConfig::get('sf_logging_enabled')) {
                 sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
             }
+            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
         }
         $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
     }
