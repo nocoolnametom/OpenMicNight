@@ -15,7 +15,9 @@
     <tr>
       <td><?php echo (array_key_exists($episode->getSubredditId(), $subreddits) ? $subreddits[$episode->getSubredditId()]->getName() : '')?></td>
       <td><a href="<?php echo url_for('episode/show?id='.$episode->getId()) ?>"><?php echo $episode->getTitle() ?></a><?php echo ($episode->getIsNsfw() ? '<span if="nsfw">NSFW</span>' : '') ?></td>
-      <td><?php echo $users[$assignments[$episode->getEpisodeAssignmentId()]->getSfGuardUserId()]->getUsername() ?></td>
+      <?php $assignment = $assignments[$episode->getEpisodeAssignmentId()] ;?>
+      <?php $user = $users[$assignment->getSfGuardUserId()]; ?>
+      <td><?php echo $user>getUsername() ?></td>
       <td><?php echo ($episode->getRedditPostUrl() ? link_to($episode->getRedditPostUrl(), $episode->getRedditPostUrl()) : '') ?></td>
     </tr>
     <?php endforeach; ?>
