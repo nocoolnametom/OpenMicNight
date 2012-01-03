@@ -146,6 +146,7 @@ class episodeActions extends autoepisodeActions
         if (isset($params['subreddit_id']))
         {
             $q->andWhereIn('Episode.subreddit_id', explode(',', $params['subreddit_id']));
+            unset($params['subreddit_id']);
         }
         
         $this->customQueryExecute($q, $params);
