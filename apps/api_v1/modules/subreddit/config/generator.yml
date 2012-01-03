@@ -31,4 +31,4 @@ generator:
 #        sort_custom:                   false   # set to true to allow the client to pass a sort_by and a sort_order parameter
 #        sort_default:                  []      # set to [column, asc|desc] in order to sort on a column
         filters:
-          domain                       { multiple: true }
+          domain:                       { multiple: true }
