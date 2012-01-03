@@ -21,7 +21,7 @@
         ?>
                 </strong>
                     <?php
-                    echo ($episode->getDescription() ? '<br/>' . strip_tags(html_entity_decode($sf_user->formatMarkdown($episode->getDescription())))
+                    echo ($episode->getTitle() ? '<br/>' . strip_tags($episode->getTitle())
                                 : '');
 
                     ?>
