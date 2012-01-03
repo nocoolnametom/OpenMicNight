@@ -10,8 +10,6 @@ all:
   sf_guard_plugin:
     only_login_with_email:    true
     signin_form:              sfGuardFormSigninApi
-  reddit_validation:
-    post_location:            http://www.reddit.com/comments/kdxhb.json
 # Remember to change the api key and shared secret before using the app in
 # production! Keep it secret, keep it safe!
   web_app_api_key:            75d32b53a0ccf8b92d7513c548351261d8d5cafe

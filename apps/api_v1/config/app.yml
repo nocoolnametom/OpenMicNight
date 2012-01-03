@@ -1,11 +1,7 @@
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/11-App
 
-# Remember to change the api key before using the app in production! Keep it
-# secret, keep it safe!
 all:
-  reddit_validation:
-    post_location:  http://www.reddit.com/comments/kdxhb.json
 # Remember to change the api key before using the app in production! Keep it
 # secret, keep it safe!
   web_app_api:
