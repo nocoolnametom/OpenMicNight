@@ -11,6 +11,7 @@
 class feedActions extends sfActions
 {
     protected $_users = array();
+    protected $_assignments = array();
     protected $_episode_location = 'episode/released';
     //protected $_episode_location = 'episode';
     protected $_time_to_cache = 120;
@@ -167,19 +168,31 @@ class feedActions extends sfActions
                     . implode(',', $subreddit_ids), true);
             $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
-
-        $user_ids = array();
+        
+        $assignment_ids = array();
         foreach ($episodes as $episode) {
-            if (!in_array($episode->getSfGuardUserId(), $user_ids))
-                $user_ids[] = $episode->getSfGuardUserId();
+            if (!in_array($episode->getEpisodeAssignmentId(), $assignment_ids))
+                $assignment_ids[] = $episode->getEpisodeAssignmentId();
         }
+        $assignment_data = Api::getInstance()->get('episodeassignment?id='
+                . implode(',', $assignment_ids), true);
+        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        
+        $user_ids = array();
+        $this->_assignments = array();
+        foreach ($assignments as $assignment) {
+            $this->_assignments[$assignment->getIncremented()] = $assignment;
+            if (!in_array($assignment->getSfGuardUserId(), $user_ids))
+                $user_ids[] = $assignment->getSfGuardUserId();
+        }
+        
         $user_data = Api::getInstance()->get('user?id='
                 . implode(',', $user_ids), true);
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
 
-        $this->users = array();
+        $this->_users = array();
         foreach ($users as $user) {
-            $this->users[$user->getIncremented()] = $user;
+            $this->_users[$user->getIncremented()] = $user;
         }
 
         return $episodes;
@@ -191,18 +204,30 @@ class feedActions extends sfActions
                 . $subreddit_id, true);
         $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
 
-        $user_ids = array();
+        $assignment_ids = array();
         foreach ($episodes as $episode) {
-            if (!in_array($episode->getSfGuardUserId(), $user_ids))
-                $user_ids[] = $episode->getSfGuardUserId();
+            if (!in_array($episode->getEpisodeAssignmentId(), $assignment_ids))
+                $assignment_ids[] = $episode->getEpisodeAssignmentId();
         }
+        $assignment_data = Api::getInstance()->get('episodeassignment?id='
+                . implode(',', $assignment_ids), true);
+        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        
+        $user_ids = array();
+        $this->_assignments = array();
+        foreach ($assignments as $assignment) {
+            $this->_assignments[$assignment->getIncremented()] = $assignment;
+            if (!in_array($assignment->getSfGuardUserId(), $user_ids))
+                $user_ids[] = $assignment->getSfGuardUserId();
+        }
+        
         $user_data = Api::getInstance()->get('user?id='
                 . implode(',', $user_ids), true);
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
 
-        $this->users = array();
+        $this->_users = array();
         foreach ($users as $user) {
-            $this->users[$user->getIncremented()] = $user;
+            $this->_users[$user->getIncremented()] = $user;
         }
 
         return $episodes;
@@ -230,18 +255,30 @@ class feedActions extends sfActions
             $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
 
-        $user_ids = array();
+        $assignment_ids = array();
         foreach ($episodes as $episode) {
-            if (!in_array($episode->getSfGuardUserId(), $user_ids))
-                $user_ids[] = $episode->getSfGuardUserId();
+            if (!in_array($episode->getEpisodeAssignmentId(), $assignment_ids))
+                $assignment_ids[] = $episode->getEpisodeAssignmentId();
         }
+        $assignment_data = Api::getInstance()->get('episodeassignment?id='
+                . implode(',', $assignment_ids), true);
+        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        
+        $user_ids = array();
+        $this->_assignments = array();
+        foreach ($assignments as $assignment) {
+            $this->_assignments[$assignment->getIncremented()] = $assignment;
+            if (!in_array($assignment->getSfGuardUserId(), $user_ids))
+                $user_ids[] = $assignment->getSfGuardUserId();
+        }
+        
         $user_data = Api::getInstance()->get('user?id='
                 . implode(',', $user_ids), true);
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
 
-        $this->users = array();
+        $this->_users = array();
         foreach ($users as $user) {
-            $this->users[$user->getIncremented()] = $user;
+            $this->_users[$user->getIncremented()] = $user;
         }
 
         return $episodes;
@@ -275,8 +312,8 @@ class feedActions extends sfActions
                 'modified' => strtotime($episode->getUpdatedAt()),
                 'released' => strtotime($episode->getReleaseDate()),
                 'author' => array(
-                    'name' => array_key_exists($episode->getSfGuardUserId(), $this->users) ? $this->users[$episode->getSfGuardUserId()]->getUsername() : '',
-                    'email' => array_key_exists($episode->getSfGuardUserId(), $this->users) ? $this->users[$episode->getSfGuardUserId()]->getEmailAddress() : '',
+                    'name' => $this->users[$this->_assignments[$episode->getEpisodeAssignmentId()]->getSfGuardUserId()]->getUsername(),
+                    'email' => $this->users[$this->_assignments[$episode->getEpisodeAssignmentId()]->getSfGuardUserId()]->getEmailAddress(),
                     'uri' => $this->getController()->genUrl('@homepage', true),
                 ),
                 'audio_location' => ($episode->getApprovedAt() ? $episode->getRemoteUrl()
