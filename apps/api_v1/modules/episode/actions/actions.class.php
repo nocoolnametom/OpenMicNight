@@ -143,6 +143,10 @@ class episodeActions extends autoepisodeActions
                 ->from('Episode Episode')
                 ->where('Episode.is_approved = ?', true)
                 ->andWhere('Episode.release_date <= ?', date('Y-m-d H:i:s'));
+        if (isset($params['subreddit_id']))
+        {
+            $q->andWhereIn('Episode.subreddit_id', explode(',', $params['subreddit_id']));
+        }
         
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
