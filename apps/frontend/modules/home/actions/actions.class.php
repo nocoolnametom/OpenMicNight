@@ -140,6 +140,7 @@ class homeActions extends sfActions
         $subreddit_ids = array();
 
         $subreddits = sfConfig::get('app_web_app_feed_default_subreddits');
+        sfConfig::set('default_subreddits', $subreddits);
         if (count($subreddits)) {
             $subreddit_data = Api::getInstance()->get('subreddit?domain='
                     . implode(',', $subreddits), true);
