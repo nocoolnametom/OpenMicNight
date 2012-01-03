@@ -40,6 +40,9 @@ class subredditActions extends autosubredditActions
     public function validateCreate($payload, sfWebRequest $request = null)
     {
         parent::validateCreate($payload, $request);
+        $user = $this->getUser()->getGuardUser();
+        if (!$user)
+            throw new sfException('Action requires an auth token.', 401);
         if (!$this->getUser()->isSuperAdmin())
             throw new sfException("Your user does not have permissions to "
                     . "create new Subreddits.", 403);
@@ -57,8 +60,11 @@ class subredditActions extends autosubredditActions
     {
         parent::validateUpdate($payload, $request);
         $params = $this->parsePayload($payload);
+        $user = $this->getUser()->getGuardUser();
         $primaryKey = $request->getParameter('id');
-        if (!$this->getUser()->isSuperAdmin())
+        $admin = sfGuardUserSubredditMembershipTable::getInstance()
+                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $primaryKey, array('admin'));
+        if (!$this->getUser()->isSuperAdmin() || $admin)
             throw new sfException("Your user does not have permissions to "
                     . "alter Subreddits.", 403);
     }
