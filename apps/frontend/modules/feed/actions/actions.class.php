@@ -176,7 +176,7 @@ class feedActions extends sfActions
         }
         $assignment_data = Api::getInstance()->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
-        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        $assignments = ApiDoctrine::createQuickObjectArray($assignment_data['body']);
         
         $user_ids = array();
         $this->_assignments = array();
@@ -211,7 +211,7 @@ class feedActions extends sfActions
         }
         $assignment_data = Api::getInstance()->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
-        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        $assignments = ApiDoctrine::createQuickObjectArray($assignment_data['body']);
         
         $user_ids = array();
         $this->_assignments = array();
@@ -262,7 +262,7 @@ class feedActions extends sfActions
         }
         $assignment_data = Api::getInstance()->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
-        $assignments = ApiDoctrine::createQuickObjectArray($user_data['body']);
+        $assignments = ApiDoctrine::createQuickObjectArray($assignment_data['body']);
         
         $user_ids = array();
         $this->_assignments = array();
