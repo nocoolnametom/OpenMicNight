@@ -201,7 +201,7 @@ class subredditActions extends sfActions
             $success = $this->checkHttpCode($create, 'post', 'subredditmembership',
                                         json_encode($new_membership));
             if ($success) {
-                if ($this->subreddit->getPreferredUsersAreFullMembers())
+                if ($this->subreddit->getPendingUsersAreFullMembers())
                     $this->getUser()->setFlash('notice', 'Joined subreddit!');
                 else
                     $this->getUser()->setFlash('notice',
