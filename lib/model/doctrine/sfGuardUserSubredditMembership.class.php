@@ -52,8 +52,8 @@ class sfGuardUserSubredditMembership extends BasesfGuardUserSubredditMembership
         // Make sure that the user has been validated as a emmber of Reddit!
         if (!$this->getSfGuardUser()->getIsValidated())
             $this->deleteWithException("Cannot create Membership association "
-                    . "because sfGuardUser " . $this->getSfGuardUserId()
-                    . " has not been validated yet.", 106);
+                    . "because User " . $this->getSfGuardUser()->getUsername()
+                    . " has not been validated yet.", 406);
 
         parent::save($conn);
     }
