@@ -484,7 +484,7 @@ class subredditActions extends sfActions
         {
             unset($this->form['is_active']);
             unset($this->form['bucket_name']);
-            usnet($this->form['creation_interval']);
+            unset($this->form['creation_interval']);
         }
     }
 
@@ -519,7 +519,7 @@ class subredditActions extends sfActions
         {
             unset($this->form['is_active']);
             unset($this->form['bucket_name']);
-            usnet($this->form['creation_interval']);
+            unset($this->form['creation_interval']);
         }
 
         $this->processForm($request, $this->form);
