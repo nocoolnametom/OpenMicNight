@@ -64,12 +64,12 @@ class episodeActions extends sfActions
         foreach($assignments as $assignment)
         {
             $this->assignments[$assignment->getIncremented()] = $assignment;
-                $user_ids[] = $assignment->getSfGuardUserId();
+            $user_ids[] = $assignment->getSfGuardUserId();
         }
         
         $user_data = Api::getInstance()->setUser($auth_key)->get('user/id='
                 . implode(',', $user_ids), true);
-        die(var_dump($user_data));
+        die(var_dump($assignment_data));
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
         $this->users = array();
         foreach($users as $user)
