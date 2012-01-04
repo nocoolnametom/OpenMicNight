@@ -61,7 +61,7 @@ class subredditActions extends autosubredditActions
         parent::validateUpdate($payload, $request);
         $params = $this->parsePayload($payload);
         $user = $this->getUser()->getGuardUser();
-        $primaryKey = $params['id'];
+        $primaryKey = $request->getParameter('id');
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
                     ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $primaryKey, array('admin'));
         if (!$this->getUser()->isSuperAdmin() && !$admin)
