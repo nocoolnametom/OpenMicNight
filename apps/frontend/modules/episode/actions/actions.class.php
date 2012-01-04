@@ -69,6 +69,7 @@ class episodeActions extends sfActions
         
         $user_data = Api::getInstance()->setUser($auth_key)->get('user/id='
                 . implode(',', $user_ids), true);
+        die(var_dump($user_data));
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
         $this->users = array();
         foreach($users as $user)
