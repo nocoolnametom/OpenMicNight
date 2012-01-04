@@ -27,7 +27,7 @@
 <h3>Released Episodes</h3>
 <ul>
     <?php foreach ($episodes as $episode): ?>
-        <li><a href="<?php echo url_for('episode/show?id='.$episode->getId()) ?>"><?php echo $episode->getTitle() ?></a><?php echo ($episode->getIsNsfw() ? '<span if="nsfw">NSFW</span>' : '') ?>(<?php echo date('Y-m-d', strtotime($episode->getReleaseDate())) ?>)</li>
+        <li><a href="<?php echo url_for('episode/show?id='.$episode->getId()) ?>"><?php echo $episode->getTitle() ?></a><?php echo ($episode->getIsNsfw() ? '<span if="nsfw">NSFW</span> ' : ' ') ?>(<?php echo date('Y-m-d', strtotime($episode->getReleaseDate())) ?>)</li>
     <?php endforeach; ?>
 </ul>
 <?php if (!(($page == 1 || $page == 0) && count($episodes) == 0)): ?>
