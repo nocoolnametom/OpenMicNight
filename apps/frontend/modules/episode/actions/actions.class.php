@@ -47,7 +47,7 @@ class episodeActions extends sfActions
             $assignment_ids[] = $episode->getEpisodeAssignmentId();
         }
         
-        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/id='
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit?id='
                 . implode(',', $subreddit_ids), true);
         $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
         $this->subreddits = array();
@@ -56,7 +56,7 @@ class episodeActions extends sfActions
             $this->subreddits[$subreddit->getIncremented()] = $subreddit;
         }
         
-        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/id='
+        $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
         $assignments = ApiDoctrine::createQuickObjectArray($assignment_data['body']);
         $this->assignments = array();
@@ -67,9 +67,8 @@ class episodeActions extends sfActions
             $user_ids[] = $assignment->getSfGuardUserId();
         }
         
-        $user_data = Api::getInstance()->setUser($auth_key)->get('user/id='
+        $user_data = Api::getInstance()->setUser($auth_key)->get('user?id='
                 . implode(',', $user_ids), true);
-        die(var_dump($assignment_data));
         $users = ApiDoctrine::createQuickObjectArray($user_data['body']);
         $this->users = array();
         foreach($users as $user)
