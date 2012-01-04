@@ -139,11 +139,11 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                 if (DeadlineTable::getInstance()
                                 ->getIfDeadlineRestrictedByAuthorTypeAndSubreddit(
                                         $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId())
-                        && !$this->isBeforeDeadlineForAuthorType($previous_author_type_id))
+                        && $this->isBeforeDeadlineForAuthorType($previous_author_type_id))
                     $this->deleteWithException("Cannot create "
                             . "EpisodeAssignment because the deadline has "
                             . "not yet passed for the previous AuthorType "
-                            . $this->getAuthorTypeId() . " within Subreddit "
+                            . $previous_author_type_id . " within Subreddit "
                             . $this->getEpisode()->getSubredditId(), 105);
 
             if (!$this->hasVerifiedUser())
@@ -214,7 +214,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         if ($pending_membership)
         {
             $subreddit = SubredditTable::getInstance()->find($this->getEpisode()->getSubredditId());
-            return ($subreddit->getPreferredUsersAreFullMembers() ? false : true);
+            return ($subreddit->getPendingUsersAreFullMembers() ? false : true);
         }
         return false;
     }

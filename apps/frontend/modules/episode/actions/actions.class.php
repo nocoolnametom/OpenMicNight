@@ -96,7 +96,7 @@ class episodeActions extends sfActions
         $success = $this->checkHttpCode($result, 'post', 'episodeassignment',
                                         json_encode($post_values));
         if ($success)
-            $this->getUser()->setFlash('notice', 'Registered for Episode!');
+            $this->getUser()->setFlash('notice', 'Registered for Episode!  You will be notified when it becomes available.');
 
         $this->redirect('subreddit/signup?domain=' . $episode->getSubreddit()->getDomain());
     }
