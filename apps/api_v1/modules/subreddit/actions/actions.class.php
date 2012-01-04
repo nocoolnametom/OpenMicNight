@@ -64,7 +64,7 @@ class subredditActions extends autosubredditActions
         $primaryKey = $params['id'];
         $admin = sfGuardUserSubredditMembershipTable::getInstance()
                     ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $primaryKey, array('admin'));
-        if (!$this->getUser()->isSuperAdmin() || $admin)
+        if (!$this->getUser()->isSuperAdmin() && !$admin)
             throw new sfException("Your user does not have permissions to "
                     . "alter Subreddits.", 403);
     }
