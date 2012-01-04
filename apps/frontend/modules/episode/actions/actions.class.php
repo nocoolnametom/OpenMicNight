@@ -64,9 +64,7 @@ class episodeActions extends sfActions
         foreach($assignments as $assignment)
         {
             $this->assignments[$assignment->getIncremented()] = $assignment;
-            if (!in_array($assignment->getSfGuardUserId(), $user_ids)) {
                 $user_ids[] = $assignment->getSfGuardUserId();
-            }
         }
         
         $user_data = Api::getInstance()->setUser($auth_key)->get('user/id='
