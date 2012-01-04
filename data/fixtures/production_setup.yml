@@ -54,75 +54,75 @@ ValidationPost:
 Deadline:
   # LDS Deadlines
   lds_seahorse:
-    AuthorType: seahorse
+    AuthorType: sun
     Subreddit:  lds
     # Three Days before release date
     seconds:    259200
     restricted_until_previous_misses_deadline: false
   lds_shark:
-    AuthorType: shark
+    AuthorType: moon
     Subreddit:  lds
     # Two Days before release date
     seconds:    172800
     restricted_until_previous_misses_deadline: false
   lds_squid:
-    AuthorType: squid
+    AuthorType: stars
     Subreddit:  lds
     # One Day before release date
     seconds:    86400
     restricted_until_previous_misses_deadline: false
   lds_blue_whale:
-    AuthorType: blue_whale
+    AuthorType: outer_darkness
     Subreddit:  lds
     # Zero Seconds (valid up until release date)
     seconds:    0
     restricted_until_previous_misses_deadline: true
   # Mormon Deadlines
   mormon_seahorse:
-    AuthorType: seahorse
+    AuthorType: first
     Subreddit:  mormon
     # Three Days before release date
     seconds:    259200
     restricted_until_previous_misses_deadline: false
   mormon_shark:
-    AuthorType: shark
+    AuthorType: second
     Subreddit:  mormon
     # Two Days before release date
     seconds:    172800
     restricted_until_previous_misses_deadline: false
   mormon_squid:
-    AuthorType: squid
+    AuthorType: third
     Subreddit:  mormon
     # One Day before release date
     seconds:    86400
     restricted_until_previous_misses_deadline: false
   mormon_blue_whale:
-    AuthorType: blue_whale
+    AuthorType: sudden_death
     Subreddit:  mormon
     # Zero Seconds (valid up until release date)
     seconds:    0
     restricted_until_previous_misses_deadline: true
   # Exmormon Deadlines
   exmormon_seahorse:
-    AuthorType: seahorse
+    AuthorType: gold
     Subreddit:  exmormon
     # Three Days before release date
     seconds:    259200
     restricted_until_previous_misses_deadline: false
   exmormon_shark:
-    AuthorType: shark
+    AuthorType: silver
     Subreddit:  exmormon
     # Two Days before release date
     seconds:    172800
     restricted_until_previous_misses_deadline: false
   exmormon_squid:
-    AuthorType: squid
+    AuthorType: bronze
     Subreddit:  exmormon
     # One Day before release date
     seconds:    86400
     restricted_until_previous_misses_deadline: false
   exmormon_blue_whale:
-    AuthorType: blue_whale
+    AuthorType: chocolate
     Subreddit:  exmormon
     # Zero Seconds (valid up until release date)
     seconds:    0

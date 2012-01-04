@@ -1,13 +1,37 @@
 AuthorType:
-  squid:
-    type:         squid
-    description: Smart little things.
-  shark:
-    type:         shark
-    description: The big predators.
-  seahorse:
-    type:         seahorse
-    description: Odd little things.
-  blue_whale:
-    type:         blue_whale
-    description: Really big things.
+  first:
+    type:         first_place
+    description:  First Place
+  second:
+    type:         second_place
+    description:  Second Place
+  third:
+    type:         third_place
+    description:  Third Place
+  sudden_death:
+    type:         sudden_death
+    description:  Sudden Death
+  sun:
+    type:         sun
+    description:  Sun
+  moon:
+    type:         moon
+    description:  Moon
+  stars:
+    type:         stars
+    description:  Stars
+  outer_darkness:
+    type:         outer_darkness
+    description:  Outer Darkness
+  gold:
+    type:         gold
+    description:  Gold
+  silver:
+    type:         silver
+    description:  Silver
+  bronze:
+    type:         bronze
+    description:  Bronze
+  chocolate:
+    type:         chocolate
+    description:  Chocolate
