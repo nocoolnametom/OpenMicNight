@@ -480,6 +480,12 @@ class subredditActions extends sfActions
         $this->getSubredditId($request);
 
         $this->form = new SubredditForm($this->subreddit);
+        if (!$this->getUser()->isSuperAdmin())
+        {
+            unset($this->form['is_active']);
+            unset($this->form['bucket_name']);
+            usnet($this->form['creation_interval']);
+        }
     }
 
     public function executeShow(sfWebRequest $request)
@@ -508,6 +514,13 @@ class subredditActions extends sfActions
         $this->getSubredditId($request);
 
         $this->form = new SubredditForm($this->subreddit);
+        
+        if (!$this->getUser()->isSuperAdmin())
+        {
+            unset($this->form['is_active']);
+            unset($this->form['bucket_name']);
+            usnet($this->form['creation_interval']);
+        }
 
         $this->processForm($request, $this->form);
 
