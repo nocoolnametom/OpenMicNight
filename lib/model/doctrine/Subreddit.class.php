@@ -308,6 +308,9 @@ AND episode_assignment.author_type_id = $longest_id;
         // We grab the Deadlines in descending order for the Subreddit;
         $deadline_rules = $this->getDeadlineRules();
 
+        $first_deadline_id = $this->getFirstDeadlineId();
+        $first_deadline = DeadlineTable::getInstance()->find($first_deadline_id);
+
         // Now we make sure that the first deadline assignment are already asigned
         //$this->assignUnassignedInLongestDeadline();
         // We establish the pool of emails we'll be sending.
@@ -321,7 +324,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $sql = "`episode_assignment` ea
 LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND `episode`.`episode_assignment_id` = ea.`id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Joing the deadline for the deadline seconds */
-LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = `episode`.`subreddit_id`)
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
 WHERE ea.`missed_deadline` <> 1
 /* Is the episode past the deadline for the assignment in question? */
@@ -336,7 +339,7 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
             $assignment->setMissedDeadline(true);
             $assignment->save();
             $episode = $assignment->getEpisode();
-            // Clean up the Episode for any new user.
+            // Clean up the Episode for any new user to use.
             $episode->setSfGuardUserId(null);
             $audio_file = $episode->getAudioFile();
             $nice_filename = $episode->getNiceFilename();
@@ -355,11 +358,12 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
             $episode->save();
         }
 
-        // Now all episodes are cleared and we need to see if they need to be reassigned to an existing asignment.
+        /* Now all episodes are cleared and we need to see if they need to be
+         * reassigned to an existing asignment. */
         $sql = "`episode_assignment` ea
 LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND (`episode`.`episode_assignment_id` IS NULL) AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Joing the deadline for the deadline seconds */
-LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = `episode`.`subreddit_id`)
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
 WHERE ea.`missed_deadline` <> 1
 /* Is the episode past the deadline for the assignment in question? */
@@ -369,16 +373,42 @@ ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
         $q->select('{ea.*}')
                 ->from($sql)
                 ->addComponent('ea', 'EpisodeAssignment ea');
+
+        /* Returns assignments closest to the front for each unassigned episode,
+         * in order of closeness. */
         $assignments = $q->execute();
         $episodes_affected = array();
+
         foreach ($assignments as $assignment) {
-            if (!in_array($assignment->getEpisodeId(), $episodes_affected))
-            {
+            if (!in_array($assignment->getEpisodeId(), $episodes_affected)) {
+                /* Ignore all subsequent assignments for an episode after the
+                 * first!  We should only be dealing with assignments that have
+                 * not missed their deadlines! */
                 $episodes_affected[] = $assignment->getEpisodeId();
                 $episode = $assignment->getEpisode();
-                $episode->setEpisodeAssignmentId($assignment->getIncremented());
-                $episode->save();
-                $newly_assigned_assignments[] = $assignment;
+                $assign_to_episode = false;
+
+                /* If the *first* assignment is in the first spot, then assign
+                 * it. */
+                if ($assignment->getAuthorTypeId() == $first_deadline->getAuthorTypeId()) {
+                    $assign_to_episode = true;
+                } else {
+                    /* Otherwise, check if we are past the deadline for the
+                     * previous deadline. */
+                    $previous_author_type_id = DeadlineTable::getInstance()
+                            ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
+                            $deadline_rules[$assignment->getAuthorTypeId()],
+                            $episode->getSubredditId());
+                    $past_deadline_for_previous = strtotime($episode->getReleaseDate()) - $deadline_rules[$previous_author_type_id] <= time();
+                    if ($past_deadline_for_previous) {
+                        $assign_to_episode = true;
+                    }
+                }
+                if ($assign_to_episode) {
+                    $episode->setEpisodeAssignmentId($assignment->getIncremented());
+                    $episode->save();
+                    $newly_assigned_assignments[] = $assignment;
+                }
             }
         }
 
