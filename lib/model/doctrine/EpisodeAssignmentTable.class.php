@@ -96,6 +96,15 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->getFirst();
         return $episode_assignments;
     }
+    
+    public function getByIdHash($id_hash)
+    {
+        $episode_assignments = $this->createQuery()
+                ->where('EpisodeAssignment.id_hash = ?', $id_hash)
+                ->execute()
+                ->getFirst();
+        return $episode_assignments;
+    }
 
     /**
      * Returns the first future EpisodeAssignment identified by a given Episode,

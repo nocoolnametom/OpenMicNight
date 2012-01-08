@@ -11,21 +11,24 @@
  */
 class episodeActions extends autoepisodeActions
 {
-    
+    protected $_temporary_file_location;
+    protected $_nice_filename;
+
     protected function doSave($params = array())
-  {
-    $this->object->save();
+    {
+        $this->object->save();
 
-    // Set a Location header with the path to the new / updated object
-    $this->getResponse()->setHttpHeader('Location', $this->getController()->genUrl(
-      array_merge(array(
-        'sf_route' => 'episode_show',
-        'sf_format' => $this->getFormat(),
-      ), $this->object->identifier(), $params)
-    ));
+        // Set a Location header with the path to the new / updated object
+        $this->getResponse()->setHttpHeader('Location',
+                                            $this->getController()->genUrl(
+                        array_merge(array(
+                            'sf_route' => 'episode_show',
+                            'sf_format' => $this->getFormat(),
+                                ), $this->object->identifier(), $params)
+                ));
 
-    return sfView::NONE;
-  }
+        return sfView::NONE;
+    }
 
     public function checkApiAuth($parameters, $content = null)
     {
@@ -66,12 +69,15 @@ class episodeActions extends autoepisodeActions
 
         if (!$this->getUser()->isSuperAdmin()) {
             $admin = sfGuardUserSubredditMembershipTable::getInstance()
-                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $episode->getSubredditId(), array('admin'));
+                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
+                                                            $episode->getSubredditId(),
+                                                            array('admin'));
             $moderator = sfGuardUserSubredditMembershipTable::getInstance()
-                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(), $episode->getSubredditId(), array('moderator'));
+                    ->getFirstByUserSubredditAndMemberships($user->getIncremented(),
+                                                            $episode->getSubredditId(),
+                                                            array('moderator'));
             if (!$admin) {
-                if (array_key_exists('episode_assignment_id', $params))
-                {
+                if (array_key_exists('episode_assignment_id', $params)) {
                     $assignment = EpisodeAssignmentTable::getInstance()->find($params['episode_assignment_id']);
                     if ($assignment->getSfGuardUserId() != $user->getIncremented())
                         throw new sfException('You are not allowed to change the EpisodeAssignment of the Episode!', 403);
@@ -92,8 +98,8 @@ class episodeActions extends autoepisodeActions
         if (!$user)
             throw new sfException('Action requires an auth token.', 401);
         if (!$this->getUser()->isSuperAdmin()) {
-            throw new sfException('Your user does not have permissions to "
-                    . "delete Episodes', 403);
+            throw new sfException('Your user does not have permissions to '
+                    . 'delete Episodes', 403);
         }
     }
 
@@ -126,7 +132,8 @@ class episodeActions extends autoepisodeActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -143,12 +150,12 @@ class episodeActions extends autoepisodeActions
                 ->from('Episode Episode')
                 ->where('Episode.is_approved = ?', true)
                 ->andWhere('Episode.release_date <= ?', date('Y-m-d H:i:s'));
-        if (isset($params['subreddit_id']))
-        {
-            $q->andWhereIn('Episode.subreddit_id', explode(',', $params['subreddit_id']));
+        if (isset($params['subreddit_id'])) {
+            $q->andWhereIn('Episode.subreddit_id',
+                           explode(',', $params['subreddit_id']));
             unset($params['subreddit_id']);
         }
-        
+
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
         if ($isset_pk && count($this->objects) == 0) {
@@ -166,7 +173,7 @@ class episodeActions extends autoepisodeActions
         $this->output = $serializer->serialize($this->objects, $this->model);
         unset($this->objects);
     }
-    
+
     /**
      * Retrieves a  collection of Episode objects
      * @param   sfWebRequest   $request a request object
@@ -196,7 +203,8 @@ class episodeActions extends autoepisodeActions
 
             // event filter to enable customisation of the error message.
             $result = $this->dispatcher->filter(
-                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
                     )->getReturnValue();
 
             if ($error === $result) {
@@ -212,7 +220,7 @@ class episodeActions extends autoepisodeActions
         $q = Doctrine_Query::create()
                 ->from('Episode Episode')
                 ->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'));
-        
+
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
         if ($isset_pk && count($this->objects) == 0) {
@@ -229,6 +237,117 @@ class episodeActions extends autoepisodeActions
         $this->getResponse()->setContentType($serializer->getContentType());
         $this->output = $serializer->serialize($this->objects, $this->model);
         unset($this->objects);
+    }
+
+    /**
+     * Retrieves a  collection of Episode objects
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeUpload(sfWebRequest $request)
+    {
+        // PUT makes more sense, but I am limited currently by my API to POST.
+
+        $this->forward404Unless($request->isMethod(sfRequest::POST));
+        $content = $request->getContent();
+
+        // Restores backward compatibility. Content can be the HTTP request full body, or a form encoded "content" var.
+        if (strpos($content, 'content=') === 0 || $request->hasParameter('content')) {
+            $content = $request->getParameter('content');
+        }
+
+        $request->setRequestFormat('html');
+
+        try {
+            $parameters = $request->getParameterHolder()->getAll();
+            $params = $this->getApiAuthFieldValues($parameters, $content);
+            $this->validateApiAuth($parameters, $content);
+            $this->validateUpload($content, $request);
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'),
+                            $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            $this->setTemplate('index');
+            return sfView::SUCCESS;
+        }
+
+        // We move the file from its temporary location to the Episode in question.
+        if ($this->_nice_filename && $this->_temporary_file_location) {
+            $targetDir = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(),
+                               '/');
+            $fileName = $this->generateFilenameHashForAudio($this->_nice_filename,
+                                                            $this->object);
+            rename($this->_temporary_file_location, $targetDir . '/' . $fileName);
+            // update and save it
+            $this->object->setAudioFile($fileName);
+            $this->object->setNiceFilename($this->_nice_filename);
+        }
+
+        return $this->doSave($params);
+    }
+
+    protected function generateFilenameHashForAudio($filename, $episode)
+    {
+        $pattern = '/\.([^\.]+)$/';
+        preg_match($pattern, $filename, $matches);
+        $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
+
+        $hash = sha1(
+                sfConfig::get('app_web_app_audio_hash_salt')
+                . $episode->getIncremented()
+                . $episode->getEpisodeAssignment()->getSfGuardUserId()
+        );
+        return $hash . '.' . $extension;
+    }
+
+    public function validateUpload($payload, sfWebRequest $request = null)
+    {
+        if (!$request->hasParameter('id_hash'))
+            throw new sfException('No "id_hash" argument found.', 401);
+
+        $content_file = $request->getFiles('file');
+        $this->_temporary_file_location = array_key_exists('tmp_name',
+                                                           $content_file) ? $content_file['tmp_name']
+                    : null;
+        $this->_nice_filename = array_key_exists('name', $content_file) ? $content_file['name']
+                    : null;
+
+        $user = $this->getUser()->getGuardUser();
+        if (!$user)
+            throw new sfException('Action requires an auth token.', 401);
+
+        $id_hash = $request->getParameter('id_hash');
+        $episode_assignment = EpisodeAssignmentTable::getInstance()->getByIdHash($id_hash);
+
+        if (!$episode_assignment)
+            throw new sfException('No assignment found for id hash' . $id_hash, 401);
+
+        /* Check that the Episode is assigned to the episode_assignment and that
+         * the current user is the user of the EpisodeAssignment or otherwise
+         * has permission to upload. */
+        if (!$this->getUser()->isSuperAdmin() && $episode_assignment->getIncremented() != $episode_assignment->getEpisode()->getEpisodeAssignmentId()) {
+            throw new sfException('Your user does not have permissions to '
+                    . 'upload audio for this Episode.', 403);
+        }
+        
+
+        //$this->object = $episode_assignment->getEpisode();
+        $this->object = EpisodeTable::getInstance()->find(1);
     }
 
     /**
@@ -261,23 +380,23 @@ class episodeActions extends autoepisodeActions
 
         return $query;
     }
-    
-    /**
-   * Execute the query for selecting a collection of objects, eventually
-   * along with related objects
-   *
-   * @param   array   $params  an array of criterions for the selection
-   */
-  public function customQueryExecute(Doctrine_Query $query, $params)
-  {
-    $this->objects = $this->dispatcher->filter(
-      new sfEvent(
-        $this,
-        'sfDoctrineRestGenerator.filter_results',
-        array()
-      ),
-      $this->addToQuery($query, $params)->execute(array(), Doctrine::HYDRATE_ARRAY)
-    )->getReturnValue();
-  }
 
+    /**
+     * Execute the query for selecting a collection of objects, eventually
+     * along with related objects
+     *
+     * @param   array   $params  an array of criterions for the selection
+     */
+    public function customQueryExecute(Doctrine_Query $query, $params)
+    {
+        $this->objects = $this->dispatcher->filter(
+                        new sfEvent(
+                                $this,
+                                'sfDoctrineRestGenerator.filter_results',
+                                array()
+                        ),
+                        $this->addToQuery($query, $params)->execute(array(),
+                                                                    Doctrine::HYDRATE_ARRAY)
+                )->getReturnValue();
+    }
 }

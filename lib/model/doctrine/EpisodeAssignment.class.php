@@ -19,6 +19,14 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         $this->set('id', $id, false);
         $this->_lastModified = array();
     }
+    
+    public function setIdHashIfNotSet()
+    {
+        if ($this->getIdHash())
+            return;
+        $hash = md5(microtime() . $this->getAuthorTypeId() . $this->getSubredditId() . $this->getEpisodeId());
+        $this->setIdHash($hash);
+    }
 
     /**
      * applies the changes made to this object into database
@@ -163,6 +171,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
         /* If the obejct is not new or has passed all rules for saving, we pass
          * it on to the parent save function.
          */
+        $this->setIdHashIfNotSet();
         parent::save($conn);
 
         if ($isNew) {

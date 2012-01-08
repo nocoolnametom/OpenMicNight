@@ -110,6 +110,9 @@ episode:
 released_episodes:
   url:   /episode/released
   param: { module: episode, action: released }
+upload_audio:
+  url:   /episode/upload/:id_hash
+  param: { module: episode, action: upload }
 subreddit:
   class:   sfObjectRouteCollection
   options:

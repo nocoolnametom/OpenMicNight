@@ -1,4 +1,5 @@
 apps/frontend/config/app.yml
+apps/api_v1/comfig/app.yml
 build/
 cache/
 config/databases.yml
