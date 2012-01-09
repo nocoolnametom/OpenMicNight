@@ -19,3 +19,6 @@
 [submodule "lib/vendor/fancybox"]
 	path = lib/vendor/fancybox
 	url = git://github.com/fancyapps/fancyBox.git
+[submodule "lib/vendor/tropo"]
+	path = lib/vendor/tropo
+	url = git://github.com/tropo/tropo-webapi-php.git
