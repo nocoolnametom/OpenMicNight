@@ -290,9 +290,17 @@ class episodeActions extends autoepisodeActions
         if ($this->_nice_filename && $this->_temporary_file_location) {
             $targetDir = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(),
                                '/');
-            $fileName = $this->generateFilenameHashForAudio($this->_nice_filename,
-                                                            $this->object);
+            $pattern = '/\.([^\.]+)$/';
+            preg_match($pattern, $filename, $matches);
+            $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
+
+            // We don't need the upload hash because we're not uploading AJAX-like in real time.
+            $hash = sha1(microtime() . $this->object->getIncremented());
+            $fileName = $hash . '.' . $extension;
+
+            //Move the file.
             rename($this->_temporary_file_location, $targetDir . '/' . $fileName);
+
             // update and save it
             $this->object->setAudioFile($fileName);
             $this->object->setNiceFilename($this->_nice_filename);
@@ -301,24 +309,10 @@ class episodeActions extends autoepisodeActions
         return $this->doSave($params);
     }
 
-    protected function generateFilenameHashForAudio($filename, $episode)
-    {
-        $pattern = '/\.([^\.]+)$/';
-        preg_match($pattern, $filename, $matches);
-        $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
-
-        $hash = sha1(
-                sfConfig::get('app_web_app_audio_hash_salt')
-                . $episode->getIncremented()
-                . $episode->getEpisodeAssignment()->getSfGuardUserId()
-        );
-        return $hash . '.' . $extension;
-    }
-
     public function validateUpload($payload, sfWebRequest $request = null)
     {
         if (!$request->hasParameter('id_hash'))
-            throw new sfException('No "id_hash" argument found.', 401);
+            throw new sfException('No "id_hash" argument found.', 404);
 
         $content_file = $request->getFiles('file');
         $this->_temporary_file_location = array_key_exists('tmp_name',
@@ -335,7 +329,7 @@ class episodeActions extends autoepisodeActions
         $episode_assignment = EpisodeAssignmentTable::getInstance()->getByIdHash($id_hash);
 
         if (!$episode_assignment)
-            throw new sfException('No assignment found for id hash' . $id_hash, 401);
+            throw new sfException('No assignment found for given id hash.', 404);
 
         /* Check that the Episode is assigned to the episode_assignment and that
          * the current user is the user of the EpisodeAssignment or otherwise
@@ -344,10 +338,8 @@ class episodeActions extends autoepisodeActions
             throw new sfException('Your user does not have permissions to '
                     . 'upload audio for this Episode.', 403);
         }
-        
 
-        //$this->object = $episode_assignment->getEpisode();
-        $this->object = EpisodeTable::getInstance()->find(1);
+        $this->object = $episode_assignment->getEpisode();
     }
 
     /**
