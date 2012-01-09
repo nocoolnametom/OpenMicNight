@@ -115,7 +115,7 @@ Email:
   episodeapprovalpending:
     EmailType: episodeapprovalpending
     language: en
-    subject: "~app_name~: Your Episode is Awaiting Approval!"
+    subject: "~app_name~: An Episode is Awaiting Your Approval!"
     body_text_html: |
       <p>Dear ~name~,</p>
       
@@ -129,6 +129,9 @@ Email:
       as an approver to decide that.  Remember that it your approval of this
       episode means that it complies with the aims of your subreddit as well as
       copyright laws.</p>
+      
+      <p>You can veiw all episodes at:
+      <a href="~personal_episodes_link~">~personal_episodes_link~</a></p>
       
       <p>Please take the time needed to approve this episode or to send it back to the
       submitter for further work.  Be honest and be fair.  There's a lot of
@@ -166,6 +169,8 @@ Email:
       for approval!  You need to ensure that your episode has been submitted and
       approval before ~deadline_date~.  If you miss your deadline, your episode
       will not be aired, and someone else may take your spot.</p>
+      
+      <p>Edit your episode at: <a href="~edit_link~">~edit_link~</a></p>
       
       <p>If you'd rather not submit an episode, feel free to just wait it out and let
       your episode spot roll over to someone else.  There's no pressure on this;

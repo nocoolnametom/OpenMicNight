@@ -118,6 +118,50 @@ class Email extends BaseEmail
                         ->generate('send_to_reddit_post');
         return $frontend_route;
     }
+    
+    protected function deriveEditLink($parameters)
+    {
+        $episode_id = $parameters['episode_id'];
+        $episode = EpisodeTable::getInstance()->find($episode_id);
+        if (!$episode)
+            throw new sfException('Cannot find Episode identified by ' . $episode_id);
+
+        $frontend_app_location = rtrim(ProjectConfiguration::getFrontendAppLocation(),
+                                       '/');
+        $frontendRouting = new sfPatternRouting(new sfEventDispatcher());
+
+        $config = new sfRoutingConfigHandler();
+        $routes = $config->evaluate(array(sfConfig::get('sf_apps_dir') . '/frontend/config/routing.yml'));
+
+        $frontendRouting->setRoutes($routes);
+
+        $frontend_route = $frontend_app_location . $frontendRouting
+                        ->generate('episode_edit', array(
+                            'id' => $episode_id,
+                        ), true);
+        return $frontend_route;
+    }
+    
+    protected function derivePersonalEpisodesLink($parameters)
+    {
+        $episode_id = $parameters['episode_id'];
+        $episode = EpisodeTable::getInstance()->find($episode_id);
+        if (!$episode)
+            throw new sfException('Cannot find Episode identified by ' . $episode_id);
+
+        $frontend_app_location = rtrim(ProjectConfiguration::getFrontendAppLocation(),
+                                       '/');
+        $frontendRouting = new sfPatternRouting(new sfEventDispatcher());
+
+        $config = new sfRoutingConfigHandler();
+        $routes = $config->evaluate(array(sfConfig::get('sf_apps_dir') . '/frontend/config/routing.yml'));
+
+        $frontendRouting->setRoutes($routes);
+
+        $frontend_route = $frontend_app_location . $frontendRouting
+                        ->generate('profile_episodes', array(), true);
+        return $frontend_route;
+    }
 
     protected function deriveSenderUsername($parameters)
     {
@@ -149,7 +193,7 @@ class Email extends BaseEmail
         $episode = EpisodeTable::getInstance()->find($episode_id);
         if (!$episode)
             throw new sfException('Cannot find Episode identified by ' . $episode_id);
-        return $episode->getReleaseDate('l, F n, Y \a\t g:ia');
+        return date('l, F n, Y \a\t g:ia', strtotime($episode->getReleaseDate()));
     }
 
     protected function deriveDeadlineDate($parameters)
