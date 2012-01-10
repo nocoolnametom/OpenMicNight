@@ -50,6 +50,15 @@ class subredditActions extends sfActions
         }
         return $this->subreddit_id;
     }
+    
+    public function executeTropo(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->getSubredditId($request);
+        $this->setLayout(false);
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/x-httpd-php', TRUE);
+        //$this->getResponse()->setHttpHeader('Content-Type', 'text/plain', TRUE);
+    }
 
     public function executeUsers(sfWebRequest $request)
     {
