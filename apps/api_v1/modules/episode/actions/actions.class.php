@@ -291,7 +291,7 @@ class episodeActions extends autoepisodeActions
                                '/');
             $pattern = '/\.([^\.]+)$/';
             preg_match($pattern, $filename, $matches);
-            $extension = (array_key_exists(1, $matches) ? $matches[1] : '');
+            $extension = (array_key_exists(1, $matches) ? $matches[1] : 'mp3');
 
             // We don't need the upload hash because we're not uploading AJAX-like in real time.
             $hash = sha1(microtime() . $this->object->getIncremented());

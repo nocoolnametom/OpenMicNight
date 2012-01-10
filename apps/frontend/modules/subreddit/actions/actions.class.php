@@ -57,7 +57,7 @@ class subredditActions extends sfActions
         //$this->getResponse()->setHttpHeader('Content-Type', 'text/plain');
 
         ProjectConfiguration::registerTropo();
-        
+
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "http://api.openmicnight/v1/api_v1_dev.php/episodeassignment/validhash?subreddit_id=2&id_hash=32");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -373,12 +373,10 @@ class subredditActions extends sfActions
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $my_membership = is_array($my_membership_data['body']) && array_key_exists(0, $my_membership_data['body']) ? ApiDoctrine::createQuickObject($my_membership_data['body'][0]) : null;
-        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
-        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
-          array(
-          'admin',
-          )
-         * )); */
+        $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(), array(
+                    'admin',
+                        )
+                ));
 
         $this->form = new DeadlineForm($deadline);
         unset($this->form['subreddit_id']);
@@ -404,11 +402,10 @@ class subredditActions extends sfActions
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $my_membership = is_array($my_membership_data['body']) && array_key_exists(0, $my_membership_data['body']) ? ApiDoctrine::createQuickObject($my_membership_data['body'][0]) : null;
         /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
-        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
-          array(
-          'admin',
-          )
-         * )); */
+        $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(), array(
+                    'admin',
+                        )
+                ));
 
         $this->form = new DeadlineForm();
         unset($this->form['subreddit_id']);
@@ -430,6 +427,55 @@ class subredditActions extends sfActions
             unset($this->form['bucket_name']);
             unset($this->form['creation_interval']);
         }
+    }
+
+    public function executePhone(sfWebRequest $request)
+    {
+        $this->forward404Unless($this->getUser()->isAuthenticated());
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $this->getSubredditId($request);
+
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
+        $this->membership = (array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null);
+        $this->forward404If(!$this->membership || (!in_array($this->membership->getMembership()->getType(), array('admin'))) && (!$this->getUser()->isSuperAdmin()));
+
+        $phone_data = Api::getInstance()->setUser($auth_key)->get('subreddittropo?subreddit_id=' . $this->subreddit_id, true);
+        $this->phone_numbers = ApiDoctrine::createQuickObjectArray($phone_data['body']);
+
+        $number = new SubredditTropoNumber();
+        $number->setSubredditId($this->subreddit_id);
+        $this->form = new SubredditTropoNumberForm($number);
+        unset($this->form['subreddit_id']);
+
+        if ($request->isMethod(sfRequest::POST)) {
+            $this->processTropoPhoneForm($request, $this->form);
+        }
+    }
+
+    public function executeRemovephone(sfWebRequest $request)
+    {
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $phone_data = Api::getInstance()->setUser($auth_key)->get('subreddittropo/' . $request->getParameter('id'), true);
+        $phone_number = ApiDoctrine::createQuickObject($phone_data['body']);
+        $this->forward404Unless($phone_number->getIncremented());
+
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $phone_number->getSubredditId(), true);
+        $this->subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+
+        // Check if the current user has permission to edit the deadline.
+        $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
+        $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
+        // @todo: uncomment the following lines so that the deadline editing is limited.
+        $this->forward404Unless($membership && in_array($membership->getMembership()->getType(), array(
+                    'admin',
+                )));
+
+        $result = Api::getInstance()->setUser($auth_key)->delete('subreddittropo/' . $phone_number->getId(), true);
+        $success = $this->checkHttpCode($result, 'delete', 'subreddittropo/' . $phone_number->getId());
+        if ($success)
+            $this->getUser()->setFlash('notice', 'Phone number was removed successfully.');
+
+        $this->redirect('subreddit/phone?domain=' . $this->subreddit->getDomain());
     }
 
     public function executeShow(sfWebRequest $request)
@@ -577,6 +623,28 @@ class subredditActions extends sfActions
 
 
             $this->redirect('subreddit/edit_deadline?id=' . $id);
+        }
+    }
+
+    protected function processTropoPhoneForm(sfWebRequest $request, sfForm $form)
+    {
+        $form->bind($request->getParameter($form->getName()), $request->getFiles($form->getName()));
+        if ($form->isValid()) {
+            $auth_key = $this->getUser()->getApiAuthKey();
+            // Create new item
+            $values = $form->getValues();
+            $deadline = $form->getObject();
+            foreach ($values as $key => $value) {
+                if (is_null($value))
+                    unset($values[$key]);
+            }
+            $values['subreddit_id'] = $this->subreddit_id;
+            $result = Api::getInstance()->setUser($auth_key)->post('subreddittropo', $values);
+            $success = $this->checkHttpCode($result, 'post', 'subreddittropo', json_encode($values));
+            if ($success) {
+                $this->getUser()->setFlash('notice', 'Phone number was added successfully.');
+            }
+            $this->redirect('subreddit/phone?domain=' . $this->subreddit->getDomain());
         }
     }
 

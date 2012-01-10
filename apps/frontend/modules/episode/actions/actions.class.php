@@ -137,6 +137,9 @@ class episodeActions extends sfActions
 
         $this->is_submitted = (bool) $quick_episode->getIsSubmitted();
         $this->is_approved = (bool) $quick_episode->getIsApproved();
+        
+        $phone_data = Api::getInstance()->setUser($auth_key)->get('subreddittropo?subreddit_id=' . $episode->getSubredditId(), true);
+        $this->phone_numbers = ApiDoctrine::createQuickObjectArray($phone_data['body']);
 
 
         $this->form = new EpisodeForm($episode);
@@ -401,6 +404,9 @@ class episodeActions extends sfActions
         $this->forward404Unless($permission || ($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId()));
 
         $episode->setIsNsfw($quick_episode->getIsNsfw());
+        
+        $phone_data = Api::getInstance()->setUser($auth_key)->get('subreddittropo?subreddit_id=' . $episode->getSubredditId(), true);
+        $this->phone_numbers = ApiDoctrine::createQuickObjectArray($phone_data['body']);
 
         $this->form = new EpisodeForm($episode);
         $this->form->setDefault('is_nsfw', $quick_episode->getIsNsfw());

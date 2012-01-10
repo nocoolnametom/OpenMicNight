@@ -24,13 +24,18 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         if ($this->getIdHash())
             return;
-        $hash = md5(microtime()
-                . $this->getAuthorTypeId()
-                . $this->getSfGuardUserId()
-                . $this->getEpisodeId());
-        // Since the hash is meant for uses such as phone call recording, we need to make sure it's only numbers.
-        $hash = str_replace(array('a', 'b', 'c', 'd', 'e', 'f'),
-                            array(0, 1, 2, 3, 4, 5), $hash);
+        $hash = '';
+        do {
+            $hash = md5(rand(0,10)
+                    . microtime()
+                    . $this->getAuthorTypeId()
+                    . $this->getSfGuardUserId()
+                    . $this->getEpisodeId());
+            // Since the hash is meant for uses such as phone call recording, we need to make sure it's only numbers.
+            $hash = str_replace(array('a', 'b', 'c', 'd', 'e', 'f'), array(0, 1, 2, 3, 4, 5), $hash);
+            $hash = substr($hash, 0, ProjectConfiguration::getTropoHashLength());
+        } while (EpisodeAssignmentTable::getInstance()->getByIdHash($hash, $this->getEpisode()->getSubredditId()));
+
         $this->setIdHash($hash);
     }
 
@@ -131,8 +136,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
              */
             $deadline_seconds = Doctrine::getTable('Deadline')
                     ->getSecondsByAuthorAndSubreddit(
-                    $this->getAuthorTypeId(),
-                    $this->getEpisode()->getSubredditId()
+                    $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId()
             );
             if ($deadline_seconds === false)
                 $this->deleteWithException("Cannot create EpisodeAssignment "
@@ -155,8 +159,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                  */
                 if (DeadlineTable::getInstance()
                                 ->getIfDeadlineRestrictedByAuthorTypeAndSubreddit(
-                                        $this->getAuthorTypeId(),
-                                        $this->getEpisode()->getSubredditId())
+                                        $this->getAuthorTypeId(), $this->getEpisode()->getSubredditId())
                         && $this->isBeforeDeadlineForAuthorType($previous_author_type_id)) {
                     $prev_author_type = AuthorTypeTable::getInstance()->find($previous_author_type_id);
                     $this->deleteWithException("Cannot create "
@@ -194,9 +197,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
                     $release_date = $this->getEpisode()->getReleaseDate('U');
                     $seconds = $deadline->getSeconds();
                     $deadline = $release_date - $seconds;
-                    $subreddit->sendEmailAboutNewAssignment($this->getSfGuardUserId(),
-                                                            $this->getEpisodeId(),
-                                                            $deadline);
+                    $subreddit->sendEmailAboutNewAssignment($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
                 }
             }
         }
@@ -214,8 +215,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $membership = Doctrine::getTable('sfGuardUserSubredditMembership')
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId(), array()
+                $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array()
         );
         return ($membership ? true : false);
     }
@@ -232,8 +232,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $membership = Doctrine::getTable('sfGuardUserSubredditMembership')
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId(), array('blocked')
+                $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array('blocked')
         );
         return ($membership ? true : false);
     }
@@ -250,8 +249,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $pending_membership = Doctrine::getTable('sfGuardUserSubredditMembership')
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId(), array('pending')
+                $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId(), array('pending')
         );
         if ($pending_membership) {
             $subreddit = SubredditTable::getInstance()->find($this->getEpisode()->getSubredditId());
@@ -283,8 +281,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
                 ->getFirstByUserAuthorTypeAndSubreddit(
-                $this->getAuthorTypeId(), $this->getSfGuardUserId(),
-                $this->getEpisode()->getSubredditId()
+                $this->getAuthorTypeId(), $this->getSfGuardUserId(), $this->getEpisode()->getSubredditId()
         );
         return ($assignment ? true : false);
     }
@@ -299,8 +296,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
     {
         $assignment = Doctrine::getTable('EpisodeAssignment')
                 ->getFirstByEpisodeAuthorTypeAndSubreddit(
-                $this->getAuthorTypeId(), $this->getEpisodeId(),
-                $this->getEpisode()->getSubredditId()
+                $this->getAuthorTypeId(), $this->getEpisodeId(), $this->getEpisode()->getSubredditId()
         );
         return ($assignment ? true : false);
     }
@@ -344,10 +340,10 @@ class EpisodeAssignment extends BaseEpisodeAssignment
      * @param long $code            An error code for the exception
      * @param sfException $previous A previously thrown exception.
      */
-    public function deleteWithException($message = null, $code = null,
-                                        $previous = null)
+    public function deleteWithException($message = null, $code = null, $previous = null)
     {
         $this->delete();
         throw new sfException($message, $code, $previous);
     }
+
 }

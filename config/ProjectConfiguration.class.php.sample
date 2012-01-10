@@ -129,5 +129,10 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return sfConfig::get('sf_web_dir') . '/uploads/graphics/';
     }
+    
+    static public function getTropoHashLength()
+    {
+        return 24;
+    }
 
 }

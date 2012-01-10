@@ -4,8 +4,8 @@ say("Welcome to the phone recorder for the <?php echo $subreddit->getName() ?> s
 $valid_hash = false;
 while (!$valid_hash)
 {
-    $result = ask("Please identify your episode by the 32 digit ID hash found on the edit page. You can either press the numbers or say them out loud.", array(
-        "choices"=>"[32 DIGITS]",
+    $result = ask("Please identify your episode by the <?php echo ProjectConfiguration::getTropoHashLength() ?> digit ID hash found on the edit page. You can either press the numbers or say them out loud.", array(
+    "choices"=>"[<?php echo ProjectConfiguration::getTropoHashLength() ?> DIGITS]",
         "timeout" => 15.0,
         "interdigitTimeout" => 15.0,
         "onTimeout" => "doThisOnTimeout",

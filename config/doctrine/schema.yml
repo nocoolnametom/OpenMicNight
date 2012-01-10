@@ -15,7 +15,7 @@ Subreddit:
     domain: { fields: [domain], type: unique}
     bucketName: { fields: [bucket_name], type: unique}
 
-SubredditTropoNumbers:
+SubredditTropoNumber:
   actAs:
     Timestampable: ~
   columns:
@@ -23,7 +23,6 @@ SubredditTropoNumbers:
     number: { type: text(255), notnull: true }
   relations:
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: TropoNumbers }
-  
 
 AuthorType:
   actAs:

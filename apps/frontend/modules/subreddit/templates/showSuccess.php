@@ -7,6 +7,7 @@
     <?php if ($membership && in_array($membership->getMembership()->getType(), array('admin'))): ?>
         <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?domain=' . $subreddit->getDomain()); ?></div>
         <div class="subreddit_users_link"><?php echo link_to('User Memberships', 'subreddit/users?domain=' . $subreddit->getDomain()); ?></div>
+        <div class="subreddit_phone_link"><?php echo link_to('Tropo Telephone Integration', 'subreddit/phone?domain=' . $subreddit->getDomain()); ?></div>
     <?php endif; ?>
     <div class="membership">
     <?php if (is_null($membership)): ?>

@@ -1,0 +1,9 @@
+generator:
+  class: sfDoctrineRestGenerator
+  param:
+    model_class:   SubredditTropoNumber
+
+    config:
+      default:
+      get:
+        additional_params:             [ api_key, time, signature, auth_key ]
