@@ -261,7 +261,7 @@ class episodeActions extends autoepisodeActions
         try {
             $parameters = $request->getParameterHolder()->getAll();
             $params = $this->getApiAuthFieldValues($parameters, $content);
-            $this->validateApiAuth($parameters, $content);
+            //$this->validateApiAuth($parameters, $content);
             $this->validateUpload($content, $request);
         } catch (Exception $e) {
             $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
@@ -316,7 +316,7 @@ class episodeActions extends autoepisodeActions
         if (!$request->hasParameter('subreddit_id'))
             throw new sfException('No "subreddit_id" argument found.', 404);
 
-        $content_file = $request->getFiles('file');
+        $content_file = $request->getFiles('filename');
         $this->_temporary_file_location = array_key_exists('tmp_name',
                                                            $content_file) ? $content_file['tmp_name']
                     : null;
