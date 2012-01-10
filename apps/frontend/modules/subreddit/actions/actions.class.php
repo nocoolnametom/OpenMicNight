@@ -53,8 +53,8 @@ class subredditActions extends sfActions
         $this->getSubredditId($request);
         $this->setLayout(false);
         sfConfig::set('sf_web_debug', false);
-        //$this->getResponse()->setHttpHeader('Content-Type', 'application/x-httpd-php-source');
-        $this->getResponse()->setHttpHeader('Content-Type', 'text/plain');
+        $this->getResponse()->setHttpHeader('Content-Type', 'application/x-httpd-php-source');
+        //$this->getResponse()->setHttpHeader('Content-Type', 'text/plain');
 
         ProjectConfiguration::registerTropo();
         
