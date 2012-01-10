@@ -24,7 +24,7 @@ class episodeassignmentActions extends autoepisodeassignmentActions
     public function getCreateValidators()
     {
         $validators = parent::getCreateValidators();
-        $validators['id_hash'] = new sfValidatorDateTime(array(
+        $validators['id_hash'] = new sfValidatorString(array(
                     'required' => false,
                 ));
         return $validators;

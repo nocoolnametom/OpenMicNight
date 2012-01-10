@@ -26,7 +26,7 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             return;
         $hash = md5(microtime()
                 . $this->getAuthorTypeId()
-                . $this->getSubredditId()
+                . $this->getSfGuardUserId()
                 . $this->getEpisodeId());
         // Since the hash is meant for uses such as phone call recording, we need to make sure it's only numbers.
         $hash = str_replace(array('a', 'b', 'c', 'd', 'e', 'f'),
