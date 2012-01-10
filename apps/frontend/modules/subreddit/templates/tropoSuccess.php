@@ -11,7 +11,7 @@
             "onTimeout" => "doThisOnTimeout",
             )
         );
-        $id_hash = $result->value;\
+        $id_hash = $result->value;
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash);
@@ -20,10 +20,10 @@
         curl_close($ch);
         $valid_hash = $output['is_valid'];
         if (!$valid_hash)
-            say('We're sorry; we couldn't find that ID hash.');
+            say("We're sorry; we couldn't find that ID hash.");
     }
 
-    say("At the tone, please start recording your episode.")
+    say("At the tone, please start recording your episode.");
     record("When you are done, please hang up and we'll attach your recording to your episode assignment.", array (
         "beep" => true,
         "timeout" => 10,
@@ -39,4 +39,3 @@
         exit();
     }
 ?>
-
