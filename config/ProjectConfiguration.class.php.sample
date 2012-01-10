@@ -10,6 +10,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     static protected $awsLoaded = false;
     static protected $zendLoaded = false;
     static protected $markdownLoaded = false;
+    static protected $tropoLoaded = false;
 
     public function setup()
     {
@@ -76,6 +77,17 @@ class ProjectConfiguration extends sfProjectConfiguration
         require_once sfConfig::get('sf_lib_dir') . '/vendor/php-markdown/markdown.php';
 
         self::$markdownLoaded = true;
+    }
+    
+    static public function registerTropo()
+    {
+        if (self::$tropoLoaded) {
+            return;
+        }
+
+        require_once sfConfig::get('sf_lib_dir') . '/vendor/tropo/tropo.class.php';
+
+        self::$tropoLoaded = true;
     }
 
     static public function getApplicationName()

@@ -261,7 +261,6 @@ class episodeActions extends autoepisodeActions
         try {
             $parameters = $request->getParameterHolder()->getAll();
             $params = $this->getApiAuthFieldValues($parameters, $content);
-            //$this->validateApiAuth($parameters, $content);
             $this->validateUpload($content, $request);
         } catch (Exception $e) {
             $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
@@ -312,9 +311,9 @@ class episodeActions extends autoepisodeActions
     public function validateUpload($payload, sfWebRequest $request = null)
     {
         if (!$request->hasParameter('id_hash'))
-            throw new sfException('No "id_hash" argument found.', 404);
+            throw new sfException('No "id_hash" argument found.', 400);
         if (!$request->hasParameter('subreddit_id'))
-            throw new sfException('No "subreddit_id" argument found.', 404);
+            throw new sfException('No "subreddit_id" argument found.', 400);
 
         $content_file = $request->getFiles('filename');
         $this->_temporary_file_location = array_key_exists('tmp_name',
@@ -322,10 +321,6 @@ class episodeActions extends autoepisodeActions
                     : null;
         $this->_nice_filename = array_key_exists('name', $content_file) ? $content_file['name']
                     : null;
-
-        $user = $this->getUser()->getGuardUser();
-        if (!$user)
-            throw new sfException('Action requires an auth token.', 401);
 
         $id_hash = $request->getParameter('id_hash');
         $subreddit_id = $request->getParameter('subreddit_id');
