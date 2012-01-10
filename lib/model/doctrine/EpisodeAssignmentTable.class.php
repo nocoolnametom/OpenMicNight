@@ -97,10 +97,12 @@ class EpisodeAssignmentTable extends Doctrine_Table
         return $episode_assignments;
     }
     
-    public function getByIdHash($id_hash)
+    public function getByIdHash($id_hash, $subreddit_id)
     {
         $episode_assignments = $this->createQuery()
+                ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('EpisodeAssignment.id_hash = ?', $id_hash)
+                ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->execute()
                 ->getFirst();
         return $episode_assignments;

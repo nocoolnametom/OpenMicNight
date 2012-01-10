@@ -313,6 +313,8 @@ class episodeActions extends autoepisodeActions
     {
         if (!$request->hasParameter('id_hash'))
             throw new sfException('No "id_hash" argument found.', 404);
+        if (!$request->hasParameter('subreddit_id'))
+            throw new sfException('No "subreddit_id" argument found.', 404);
 
         $content_file = $request->getFiles('file');
         $this->_temporary_file_location = array_key_exists('tmp_name',
@@ -326,10 +328,11 @@ class episodeActions extends autoepisodeActions
             throw new sfException('Action requires an auth token.', 401);
 
         $id_hash = $request->getParameter('id_hash');
-        $episode_assignment = EpisodeAssignmentTable::getInstance()->getByIdHash($id_hash);
+        $subreddit_id = $request->getParameter('subreddit_id');
+        $episode_assignment = EpisodeAssignmentTable::getInstance()->getByIdHash($id_hash, $subreddit_id);
 
         if (!$episode_assignment)
-            throw new sfException('No assignment found for given id hash.', 404);
+            throw new sfException('No assignment found for given id hash in the subreddit', 404);
 
         /* Check that the Episode is assigned to the episode_assignment and that
          * the current user is the user of the EpisodeAssignment or otherwise

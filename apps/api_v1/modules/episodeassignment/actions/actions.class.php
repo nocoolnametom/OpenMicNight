@@ -20,6 +20,15 @@ class episodeassignmentActions extends autoepisodeassignmentActions
             throw new sfException('API authorization failed.', 401);
         return true;
     }
+    
+    public function getCreateValidators()
+    {
+        $validators = parent::getCreateValidators();
+        $validators['id_hash'] = new sfValidatorDateTime(array(
+                    'required' => false,
+                ));
+        return $validators;
+    }
 
     public function validateCreate($payload, sfWebRequest $request = null)
     {
