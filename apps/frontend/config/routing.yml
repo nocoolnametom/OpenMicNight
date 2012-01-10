@@ -138,6 +138,10 @@ homepage:
   url:   /
   param: { module: home, action: index }
 
+subreddit_tropo:
+  url:   /r/:domain/tropo.php
+  param: { module: subreddit, action: tropo }
+
 subreddit_index:
   url:   /r/:domain
   param: { module: subreddit, action: show }
