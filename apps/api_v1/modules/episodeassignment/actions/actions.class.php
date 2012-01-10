@@ -9,7 +9,7 @@
  * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z xavier $
  * @see        class::autoepisodeassignmentActions
  */
-class episodeassignmentActions extends autoepisodeassignmentActions
+class episodeassignmentActions extends autoEpisodeassignmentActions
 {
 
     public function checkApiAuth($parameters, $content = null)
@@ -388,6 +388,64 @@ class episodeassignmentActions extends autoepisodeassignmentActions
         $this->getResponse()->setContentType($serializer->getContentType());
         $this->output = $serializer->serialize($this->objects, $this->model);
         unset($this->objects);
+    }
+    
+    /**
+     * Creates a token referring to an sfGuardUser object
+     * @param   sfWebRequest   $request a request object
+     * @return  string
+     */
+    public function executeValidhash(sfWebRequest $request)
+    {
+        $this->forward404Unless($request->isMethod(sfRequest::GET));
+        $params = $request->getParameterHolder()->getAll();
+
+        // notify an event before the action's body starts
+        $this->dispatcher->notify(new sfEvent($this, 'sfDoctrineRestGenerator.get.pre', array('params' => $params)));
+
+        $request->setRequestFormat('html');
+        $this->setTemplate('index');
+        $params = $this->cleanupParameters($params);
+        
+        $is_valid = false;
+
+        try {
+            $format = $this->getFormat();
+            if (!array_key_exists('subreddit_id', $params) && !array_key_exists('id_hash', $params))
+                throw new sfException('Missing reference to subreddit_id and id_hash!', 400);
+            if (!array_key_exists('subreddit_id', $params))
+                throw new sfException('Missing reference to subreddit_id!', 400);
+            if (!array_key_exists('id_hash', $params))
+                throw new sfException('Missing reference to id_hash!', 400);
+            $check = EpisodeAssignmentTable::getInstance()->getByIdHash($params['id_hash'], $params['subreddit_id']);
+            if ($check)
+                $is_valid = true;
+        } catch (Exception $e) {
+            $this->getResponse()->setStatusCode($e->getCode() ? $e->getCode() : 406);
+            $serializer = $this->getSerializer();
+            $this->getResponse()->setContentType($serializer->getContentType());
+            $error = $e->getMessage();
+
+            // event filter to enable customisation of the error message.
+            $result = $this->dispatcher->filter(
+                            new sfEvent($this, 'sfDoctrineRestGenerator.filter_error_output'), $error
+                    )->getReturnValue();
+
+            if ($error === $result) {
+                $error = array(array('message' => $error));
+                $this->output = $serializer->serialize($error, 'error');
+            } else {
+                $this->output = $serializer->serialize($result);
+            }
+
+            return sfView::SUCCESS;
+        }
+
+        $serializer = $this->getSerializer();
+        $this->getResponse()->setContentType($serializer->getContentType());
+        $this->output = $serializer->serialize(array(
+            'is_valid' => $is_valid,
+                ), $this->model, false);
     }
 
     /**

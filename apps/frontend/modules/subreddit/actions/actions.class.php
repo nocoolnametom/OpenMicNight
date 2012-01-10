@@ -57,6 +57,13 @@ class subredditActions extends sfActions
         $this->getResponse()->setHttpHeader('Content-Type', 'text/plain');
 
         ProjectConfiguration::registerTropo();
+        
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "http://api.openmicnight/v1/api_v1_dev.php/episodeassignment/validhash?subreddit_id=2&id_hash=32");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+        $is_valid = $output['is_valid'];
     }
 
     public function executeUsers(sfWebRequest $request)
