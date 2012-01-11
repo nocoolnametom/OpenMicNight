@@ -194,7 +194,10 @@ class EpisodeAssignment extends BaseEpisodeAssignment
             $deadline = DeadlineTable::getInstance()->find($subreddit->getFirstDeadlineId());
             if ($deadline) {
                 if ($this->getAuthorTypeId() == $deadline->getAuthorTypeId()) {
-                    $release_date = $this->getEpisode()->getReleaseDate('U');
+                    $episode = $this->getEpisode();
+                    $episode->setEpisodeAssignmentId($this->getIncremented());
+                    $episode->save();                    
+                    $release_date = strtotime($episode->getReleaseDate());
                     $seconds = $deadline->getSeconds();
                     $deadline = $release_date - $seconds;
                     $subreddit->sendEmailAboutNewAssignment($this->getSfGuardUserId(), $this->getEpisodeId(), $deadline);
