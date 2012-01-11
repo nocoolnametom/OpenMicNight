@@ -137,14 +137,21 @@ class profileActions extends sfActions
         }
         
         $subreddit_data = Api::getInstance()->get('subreddit?id=' . implode(',', $subreddit_ids), true);
-        
-        $subreddits = ApiDoctrine::createObjectArray('Subreddit', $subreddit_data['body']);
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
         $this->subreddits = array();
-        $this->deadline_rules_array = array();
         foreach($subreddits as $subreddit)
         {
             $this->subreddits[$subreddit->getId()] = $subreddit;
-            $this->deadline_rules_array[$subreddit->getId()] = $subreddit->getDeadlineRules();
+        }
+        
+        $deadline_data = Api::getInstance()->get('subredditdeadline?subreddit_id=' . implode(',', $subreddit_ids), true);
+        $deadlines = ApiDoctrine::createQuickObjectArray($deadline_data['body']);
+        $this->deadlines = array();
+        foreach($deadlines as $deadline)
+        {
+            if (!array_key_exists($deadline->getSubredditId(), $this->deadlines))
+                $this->deadlines[$deadline->getSubredditId()] = array();
+            $this->deadlines[$deadline->getSubredditId()][$deadline->getAuthorTypeId()] = $deadline->getSeconds();
         }
         
     }

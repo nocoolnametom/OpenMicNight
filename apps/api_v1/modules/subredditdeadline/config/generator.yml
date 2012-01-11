@@ -30,3 +30,5 @@ generator:
         sort_default:                  [seconds, desc]
 #        filters:                               # list here the filters
 #          created_at:                  { date_format: 'd-m-Y', multiple: true }  # for instance
+        filters:
+          subreddit_id:                { multiple: true }

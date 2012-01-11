@@ -22,7 +22,7 @@
         ?></span>
             <span class="deadline"><?php
         $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
-        $deadline_seconds = $deadline_rules_array[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
+        $deadline_seconds = $deadlines[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
         echo date("g:ia, D j M Y", $release_date - $deadline_seconds);
         ?></span>
         </div>
@@ -39,7 +39,7 @@
         ?></span>
             <span class="deadline"><?php
         $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
-        $deadline_seconds = $deadline_rules_array[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
+        $deadline_seconds = $deadlines[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
         echo date("g:ia, D j M Y", $release_date - $deadline_seconds);
         ?></span>
         </div>
