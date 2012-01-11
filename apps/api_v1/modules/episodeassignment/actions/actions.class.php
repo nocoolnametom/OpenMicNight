@@ -225,12 +225,15 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
 
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
-                ->leftJoin('EpisodeAssignment.Episode Episode ON (Episode.id = EpisodeAssignment.episode_id AND (EpisodeAssignment.id <> Episode.episode_assignment_id OR Episode.episode_assignment_id IS NULL))')
-                ->w1here('EpisodeAssignment.missed_deadline <> 1');
+                ->leftJoin('EpisodeAssignment.Episode Episode')
+                ->leftJoin('Deadline ON (Deadline.author_type_id = ea.author_type_id)')
+                ->where('Episode.id = EpisodeAssignment.episode_id')
+                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
-                ->andWhere('EpisodeAssignment.id <> Episode.episode_assignment_id');
+                ->andWhere('EpisodeAssignment.id <> Episode.episode_assignment_id')
+                ->orWhere('Episode.episode_assignment_id IS NULL');
 
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
