@@ -193,13 +193,13 @@ class Email extends BaseEmail
         $episode = EpisodeTable::getInstance()->find($episode_id);
         if (!$episode)
             throw new sfException('Cannot find Episode identified by ' . $episode_id);
-        return date('l, F n, Y \a\t g:ia', strtotime($episode->getReleaseDate()));
+        return date('l, F j, Y \a\t g:ia', strtotime($episode->getReleaseDate()));
     }
 
     protected function deriveDeadlineDate($parameters)
     {
         $deadline = $parameters['deadline'];
-        return date('l, F n, Y \a\t g:ia', strtotime($deadline));
+        return date('l, F j, Y \a\t g:ia', strtotime($deadline));
     }
 
     protected function deriveFrontendRoute($parameters)
