@@ -361,6 +361,7 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
          * actually BEEN assigned asn isn't added to the list of emails to send
          * out. */
         $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Joing the deadline for the deadline seconds */
 LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
