@@ -225,8 +225,8 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
 
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
+                ->leftJoin('Deadline ON (Deadline.author_type_id = EpisodeAssignment.author_type_id)')
                 ->leftJoin('EpisodeAssignment.Episode Episode ON (Episode.id = EpisodeAssignment.episode_id)')
-                //->leftJoin('Deadline ON (Deadline.author_type_id = EpisodeAssignment.author_type_id)')
                 //->where('Episode.id = EpisodeAssignment.episode_id')
                 ->where('EpisodeAssignment.missed_deadline <> 1');
         if (array_key_exists('sf_guard_user_id', $params))
