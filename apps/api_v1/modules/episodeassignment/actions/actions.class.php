@@ -226,7 +226,8 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
-                ->where('Episode.id = EpisodeAssignment.episode_id');
+                ->where('Episode.id = EpisodeAssignment.episode_id')
+                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
@@ -296,7 +297,8 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
-                ->where('Episode.id = EpisodeAssignment.episode_id');
+                ->where('Episode.id = EpisodeAssignment.episode_id')
+                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.episode_assignment_id = EpisodeAssignment.id')
@@ -365,7 +367,8 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
         $q = Doctrine_Query::create()
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
-                ->where('Episode.id = EpisodeAssignment.episode_id');
+                ->where('Episode.id = EpisodeAssignment.episode_id')
+                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.episode_assignment_id IS NOT NULL')

@@ -104,6 +104,7 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->where('EpisodeAssignment.id_hash = ?', $id_hash)
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('EpisodeAssignment.missed_deadline != ?', 1)
+                ->andWhere('EpisodeAssignment.is_approved != ?', 1)
                 ->execute()
                 ->getFirst();
         return $episode_assignments;
