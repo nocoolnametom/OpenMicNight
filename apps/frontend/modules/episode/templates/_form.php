@@ -12,15 +12,6 @@
                     &nbsp;<?php echo ($is_approved ? 'Approved' : ($is_submitted ? '<span class="submitted">Waiting for Approval</span>' : link_to('Submit For Approval', 'episode/submit?id=' . $form->getObject()->getId(), array('confirm' => 'Are you sure?'))) ) ?>
                     &nbsp;<?php echo link_to('Preview', 'episode/show?id=' . $form->getObject()->getId()) ?>
                     <input type="submit" value="Save" />
-                    <?php if ($is_admin): ?>
-                        <?php
-                        echo link_to('Delete Episode', '@episode_delete?id=' . $form->getObject()->getId(), array(
-                            'method' => 'delete',
-                            'confirm' => 'Are you sure? Like, REALLY sure?  There\'s no way at all that we\'ll ever be able to undo this.  It\'ll be GONE.',
-                            'style' => 'float: right;',
-                        ));
-                        ?>
-                    <?php endif; ?>
                 </td>
             </tr>
         </tfoot>
@@ -91,4 +82,13 @@
 <?php endif; ?>
         </tbody>
     </table>
+    <?php if ($is_admin): ?>
+        <?php
+        echo link_to('Delete Episode', '@episode_delete?id=' . $form->getObject()->getId(), array(
+            'method' => 'delete',
+            'confirm' => 'Are you sure? Like, REALLY sure?  There\'s no way at all that we\'ll ever be able to undo this.  It\'ll be GONE.',
+            'style' => 'float: right;',
+        ));
+        ?>
+    <?php endif; ?>
 </form>

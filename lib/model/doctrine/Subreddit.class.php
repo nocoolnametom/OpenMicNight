@@ -340,7 +340,7 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
             $assignment->save();
             $episode = $assignment->getEpisode();
             // Clean up the Episode for any new user to use.
-            $episode->setSfGuardUserId(null);
+            $episode->setEpisodeAssignmentId(null);
             $audio_file = $episode->getAudioFile();
             $nice_filename = $episode->getNiceFilename();
             $graphic_file = $episode->getGraphicFile();
