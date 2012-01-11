@@ -138,11 +138,13 @@ class profileActions extends sfActions
         
         $subreddit_data = Api::getInstance()->get('subreddit?id=' . implode(',', $subreddit_ids), true);
         
-        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        $subreddits = ApiDoctrine::createObjectArray('Subreddit', $subreddit_data['body']);
         $this->subreddits = array();
+        $this->deadline_rules_array = array();
         foreach($subreddits as $subreddit)
         {
             $this->subreddits[$subreddit->getId()] = $subreddit;
+            $this->deadline_rules_array[$subreddit->getId()] = $subreddit->getDeadlineRules();
         }
         
     }
