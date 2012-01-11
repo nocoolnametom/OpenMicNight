@@ -311,8 +311,6 @@ AND episode_assignment.author_type_id = $longest_id;
         $first_deadline_id = $this->getFirstDeadlineId();
         $first_deadline = DeadlineTable::getInstance()->find($first_deadline_id);
 
-        // Now we make sure that the first deadline assignment are already asigned
-        //$this->assignUnassignedInLongestDeadline();
         // We establish the pool of emails we'll be sending.
         // First to those who pass their deadline
         $passed_deadline_assignments = array();
@@ -356,6 +354,27 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
             $episode->setRemoteUrl(null);
             $episode->setRedditPostUrl(null);
             $episode->save();
+        }
+        
+        /* Now we make sure that all assignments past deadline are marked as
+         * such.  If the assignment is here, however, then it hasn't ever
+         * actually BEEN assigned asn isn't added to the list of emails to send
+         * out. */
+        $sql = "`episode_assignment` ea
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE ea.`missed_deadline` <> 1
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+        $assignments = $q->execute();
+        foreach ($assignments as $assignment) {
+            $assignment->setMissedDeadline(true);
+            $assignment->save();
         }
 
         /* Now all episodes are cleared and we need to see if they need to be
