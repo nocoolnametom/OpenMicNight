@@ -1,4 +1,4 @@
-<?php $audio_src = !$episode->getIsApproved() ?
+<?php $audio_src = !$episode->getFileIsRemote() ?
         ( $episode->getAudioFile() ? 
             url_for('@episode_audio?id=' . $episode->getId() . '&format=' . substr($episode->getAudioFile(), -3, 3), true)
             : '' )

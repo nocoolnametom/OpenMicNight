@@ -76,12 +76,11 @@ class subredditActions extends sfActions
         $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
 
-        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
-        /* $this->forward404Unless($membership instanceof ApiDoctrineQuick && in_array($membership->getMembership()->getType(),
-          array(
-          'admin',
-          )
-         * )); */
+        $this->forward404Unless($membership instanceof ApiDoctrineQuick
+                && in_array($membership->getMembership()->getType(), array(
+                    'admin',
+                        )
+                ));
     }
 
     public function executeMembership(sfWebRequest $request)
@@ -103,12 +102,11 @@ class subredditActions extends sfActions
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $my_membership = is_array($my_membership_data['body']) && array_key_exists(0, $my_membership_data['body']) ? ApiDoctrine::createQuickObject($my_membership_data['body'][0]) : null;
-        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
-        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
-          array(
-          'admin',
-          )
-         * )); */
+        $this->forward404Unless($my_membership instanceof ApiDoctrineQuick
+                && in_array($my_membership->getMembership()->getType(), array(
+                    'admin',
+                        )
+                ));
     }
 
     public function executeUpdatemembership(sfWebRequest $request)
@@ -127,12 +125,11 @@ class subredditActions extends sfActions
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $subreddit_id, true);
         $my_membership = is_array($my_membership_data['body']) && array_key_exists(0, $my_membership_data['body']) ? ApiDoctrine::createQuickObject($my_membership_data['body'][0]) : null;
-        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
-        /* $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(),
-          array(
-          'admin',
-          )
-         * )); */
+        $this->forward404Unless($my_membership instanceof ApiDoctrineQuick
+                && in_array($my_membership->getMembership()->getType(), array(
+                    'admin',
+                        )
+                ));
 
         $this->form = new sfGuardUserSubredditMembershipForm($membership);
         unset($this->form['sf_guard_user_id'], $this->form['subreddit_id'], $this->form['display_membership']);
@@ -288,12 +285,10 @@ class subredditActions extends sfActions
         // Check if the current user has permission to edit the deadline.
         $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
-        // @todo: uncomment the following lines so that the deadline editing is limited.
-        /* $this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
-          array(
-          'admin',
-          )));
-         */
+        $this->forward404Unless($membership
+                && in_array($membership->getMembership()->getType(), array(
+                    'admin',
+                )));
 
         $deadline = new Deadline();
         $deadline->setSubredditId($this->subreddit_id);
@@ -315,12 +310,10 @@ class subredditActions extends sfActions
         // Check if the current user has permission to edit the deadline.
         $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
-        // @todo: uncomment the following lines so that the deadline editing is limited.
-        /* $this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
-          array(
-          'admin',
-          )));
-         */
+        $this->forward404Unless($membership
+                && in_array($membership->getMembership()->getType(), array(
+                    'admin',
+                )));
 
         $this->form = new DeadlineForm($deadline);
         unset($this->form['subreddit_id']);
@@ -339,12 +332,10 @@ class subredditActions extends sfActions
         // Check if the current user has permission to edit the deadline.
         $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
-        // @todo: uncomment the following lines so that the deadline editing is limited.
-        /* $this->forward404Unless($membership && in_array($membership->getMembership()->getType(),
-          array(
-          'admin',
-          )));
-         */
+        $this->forward404Unless($membership
+                && in_array($membership->getMembership()->getType(), array(
+                    'admin',
+                )));
 
         $result = Api::getInstance()->setUser($auth_key)->delete('subredditdeadline/' . $deadline->getId(), true);
         $success = $this->checkHttpCode($result, 'delete', 'subredditdeadline/' . $deadline->getId());
@@ -401,7 +392,6 @@ class subredditActions extends sfActions
 
         $my_membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $my_membership = is_array($my_membership_data['body']) && array_key_exists(0, $my_membership_data['body']) ? ApiDoctrine::createQuickObject($my_membership_data['body'][0]) : null;
-        /* @todo:  The following line should be uncommented so that membership editing can only be done by subreddit leadership. */
         $this->forward404Unless($my_membership instanceof ApiDoctrineQuick && in_array($my_membership->getMembership()->getType(), array(
                     'admin',
                         )
@@ -465,8 +455,8 @@ class subredditActions extends sfActions
         // Check if the current user has permission to edit the deadline.
         $membership_data = Api::getInstance()->setUser($auth_key)->get('subredditmembership?sf_guard_user_id=' . $this->getUser()->getApiUserId() . '&subreddit_id=' . $this->subreddit_id, true);
         $membership = is_array($membership_data['body']) && array_key_exists(0, $membership_data['body']) ? ApiDoctrine::createQuickObject($membership_data['body'][0]) : null;
-        // @todo: uncomment the following lines so that the deadline editing is limited.
-        $this->forward404Unless($membership && in_array($membership->getMembership()->getType(), array(
+        $this->forward404Unless($membership
+                && in_array($membership->getMembership()->getType(), array(
                     'admin',
                 )));
 

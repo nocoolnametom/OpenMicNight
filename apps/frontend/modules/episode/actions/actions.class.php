@@ -176,10 +176,11 @@ class episodeActions extends sfActions
                                                                                                         true);
         $episode = ApiDoctrine::createQuickObject($episode_data['body']);
         $this->forward404Unless($episode && $episode->getId());
+        /* @var $episode Episode */
 
-        // If the episode is released, everyone is allowed to download the file from Amazon
-        if ($episode->getReleaseDate('U') > time()) {
-            // @todo Redirect to the Amazon location.
+        // If the episode's file is remote, everyone is allowed to download the file from Amazon
+        if ($episode->getFileIsRemote()) {
+            $this->redirect($episode->getRemoteUrl());
         }
 
         // If the episode is not released, only the admins and moderators can view it.

@@ -19,7 +19,7 @@ class ValidationTable extends Doctrine_Table
     
     public static function storeNewKeys($values)
     {
-        //@todo: The following is MySQL specific!  Not good!
+        //The following is MySQL specific, but so is a lot of other crap.
         if (!count($values))
             return;
         $sql = 'INSERT IGNORE INTO `validation` (`reddit_key`, `username`) VALUES (';
