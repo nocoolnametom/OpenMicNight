@@ -151,9 +151,7 @@ class profileActions extends sfActions
         {
             if (!array_key_exists($deadline->getSubredditId(), $this->deadlines))
                 $this->deadlines[$deadline->getSubredditId()] = array();
-            $rules = $this->deadlines[$deadline->getSubredditId()];
-            $rules[$deadline->getAuthorTypeId()] = $deadline->getSeconds();
-            $this->deadlines[$deadline->getSubredditId()] = $rules;
+            $this->deadlines[$deadline->getSubredditId()][$deadline->getAuthorTypeId()] = $deadline->getSeconds();
         }
         
     }
