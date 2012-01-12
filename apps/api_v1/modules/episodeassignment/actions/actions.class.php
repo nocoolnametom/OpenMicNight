@@ -227,12 +227,11 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('Episode.id = EpisodeAssignment.episode_id')
-                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
+                ->andWhere('EpisodeAssignment.missed_deadline != ?', true);
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.release_date > ?', date('Y-m-d H:i:s'))
-                ->andWhere('EpisodeAssignment.id <> Episode.episode_assignment_id')
-                ->orWhere('Episode.episode_assignment_id IS NULL');
+                ->andWhere('(EpisodeAssignment.id != Episode.episode_assignment_id OR Episode.episode_assignment_id IS NULL)');
 
         $this->customQueryExecute($q, $params);
         $isset_pk = (!isset($isset_pk) || $isset_pk) && isset($params['id']);
@@ -298,7 +297,7 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('Episode.id = EpisodeAssignment.episode_id')
-                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
+                ->andWhere('(EpisodeAssignment.missed_deadline != ? OR EpisodeAssignment.missed_deadline IS NULL)', true);
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.episode_assignment_id = EpisodeAssignment.id')
@@ -368,7 +367,7 @@ class episodeassignmentActions extends autoEpisodeassignmentActions
                 ->from('EpisodeAssignment EpisodeAssignment')
                 ->leftJoin('EpisodeAssignment.Episode Episode')
                 ->where('Episode.id = EpisodeAssignment.episode_id')
-                ->andWhere('EpisodeAssignment.missed_deadline <> 1');
+                ->andWhere('EpisodeAssignment.missed_deadline != ?', true);
         if (array_key_exists('sf_guard_user_id', $params))
            $q =  $q->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $params['sf_guard_user_id']);
         $q =  $q->andWhere('Episode.episode_assignment_id IS NOT NULL')
