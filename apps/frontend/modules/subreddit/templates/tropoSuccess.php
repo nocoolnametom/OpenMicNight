@@ -16,7 +16,7 @@ while (!$valid_hash)
     $output = json_decode(file_get_contents("<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash), true);
     $valid_hash = $output['is_valid'];
     if (!$valid_hash) {
-        say("We're sorry; we couldn't find the ID hash of " . $id_hash . " for subreddit <?php echo $subreddit_id ?>.  The dump is " . var_dump($valid_hash));
+        say("We're sorry; we couldn't find the ID hash of " . $id_hash);
     }
 }
 
