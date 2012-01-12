@@ -91,6 +91,7 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->andWhere('EpisodeAssignment.sf_guard_user_id = ?', $user_id)
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('Episode.release_date > NOW()')
+                ->andWhere('(EpisodeAssignment.missed_deadline != ? OR EpisodeAssignment.missed_deadline IS NULL)', true)
                 ->orderBy('EpisodeAssignment.created_at ASC')
                 ->execute()
                 ->getFirst();
@@ -170,6 +171,7 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->andWhere('EpisodeAssignment.episode_id = ?', $episode_id)
                 ->andWhere('Episode.subreddit_id = ?', $subreddit_id)
                 ->andWhere('Episode.release_date > NOW()')
+                ->andWhere('(EpisodeAssignment.missed_deadline != ? OR EpisodeAssignment.missed_deadline IS NULL)', true)
                 ->orderBy('EpisodeAssignment.created_at ASC')
                 ->execute()
                 ->getFirst();
