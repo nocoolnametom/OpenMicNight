@@ -324,7 +324,7 @@ LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_appro
 /* Joing the deadline for the deadline seconds */
 LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE ea.`missed_deadline` <> 1
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
 /* Is the episode past the deadline for the assignment in question? */
 AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
         $q = new Doctrine_RawSql();
@@ -365,7 +365,7 @@ LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`subreddi
 /* Joing the deadline for the deadline seconds */
 LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE ea.`missed_deadline` <> 1
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
 /* Is the episode past the deadline for the assignment in question? */
 AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
         $q = new Doctrine_RawSql();
@@ -385,7 +385,7 @@ LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_appro
 /* Joing the deadline for the deadline seconds */
 LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
 /* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE ea.`missed_deadline` <> 1
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
 /* Is the episode past the deadline for the assignment in question? */
 AND UNIX_TIMESTAMP(`episode`.`release_date`) > (UNIX_TIMESTAMP() + `deadline`.`seconds`)
 ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
