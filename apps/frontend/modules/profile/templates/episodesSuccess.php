@@ -40,7 +40,7 @@
         ?></span>
             <span class="deadline"><?php
         $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
-        die(var_dump($deadlines));
+        die(var_dump($deadlines[$assignment->getEpisode()->getSubredditId()]));
         $deadline_seconds = $deadlines[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
         echo date("g:ia, D j M Y", $release_date - $deadline_seconds);
         ?></span>
