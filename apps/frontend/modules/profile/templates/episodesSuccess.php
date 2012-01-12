@@ -2,7 +2,7 @@
 <?php slot('atom_feed') ?>
 <link href="<?php echo url_for('@feed_user_atom?reddit_validation_key=' . $key); ?>" type="application/atom+xml" rel="alternate" title="<?php echo $user->getUsername(); ?>" />
 <?php end_slot() ?>
-<?php $deadlines = $sf_data->getRaw($deadlines) ?>
+<?php $deadlines = $sf_data->getRaw('deadlines') ?>
 <?php if (count($approvals)): ?>
     <h2>Episodes Awaiting Approval</h2>
     <?php foreach ($approvals as $episode): ?>
