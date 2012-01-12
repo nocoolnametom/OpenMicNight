@@ -13,10 +13,16 @@ while (!$valid_hash)
     );
     $id_hash = $result->value;
 
-    $output = json_decode(file_get_contents("<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash), true);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    $output = json_decode(curl_exec($ch), true);
+    curl_close($ch);
     $valid_hash = $output['is_valid'];
     if (!$valid_hash) {
-        say("We're sorry; we couldn't find the ID hash of " . $id_hash);
+        say("We're sorry; we couldn't find that ID hash.");
     }
 }
 
@@ -35,4 +41,3 @@ function doThisOnTimeout($event) {
     say("Call timed out.  Please try calling again.  Goodbye!");
     exit();
 }
-
