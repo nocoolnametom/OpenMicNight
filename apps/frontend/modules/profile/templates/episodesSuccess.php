@@ -2,6 +2,7 @@
 <?php slot('atom_feed') ?>
 <link href="<?php echo url_for('@feed_user_atom?reddit_validation_key=' . $key); ?>" type="application/atom+xml" rel="alternate" title="<?php echo $user->getUsername(); ?>" />
 <?php end_slot() ?>
+<?php $deadlines = $sf_data->getRaw($deadlines) ?>
 <?php if (count($approvals)): ?>
     <h2>Episodes Awaiting Approval</h2>
     <?php foreach ($approvals as $episode): ?>
@@ -39,7 +40,6 @@
         ?></span>
             <span class="deadline"><?php
         $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
-        die(var_dump($deadlines->toArray()));
         $deadline_seconds = $deadlines[$assignment->getEpisode()->getSubredditId()][$assignment->getAuthorTypeId()];
         echo date("g:ia, D j M Y", $release_date - $deadline_seconds);
         ?></span>
