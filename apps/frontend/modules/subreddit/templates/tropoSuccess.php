@@ -14,7 +14,7 @@ while (!$valid_hash)
     $id_hash = $result->value;
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash);
+    curl_setopt($ch, CURLOPT_URL, "<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . number_format($id_hash, 0, '', ''));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
