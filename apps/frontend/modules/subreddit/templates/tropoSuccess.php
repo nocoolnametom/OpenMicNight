@@ -20,7 +20,7 @@ while (!$valid_hash)
     curl_close($ch);
     $valid_hash = $output['is_valid'];
     if (!$valid_hash) {
-        say("We're sorry; we couldn't find the ID hash of " . $id_hash);
+        say("We're sorry; we couldn't find the ID hash of " . $id_hash . " for subreddit <?php echo $subreddit_id ?>.  The dump is ' . var_dump($valid_hash));
     }
 }
 
