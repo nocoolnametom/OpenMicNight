@@ -22,7 +22,7 @@ while (!$valid_hash)
     curl_close($ch);
     $valid_hash = $output['is_valid'];
     if (!$valid_hash) {
-        say("We're sorry; we couldn't find that ID hash.");
+        say("We're sorry; we couldn't find the ID hash of " . $id_hash);
     }
 }
 
