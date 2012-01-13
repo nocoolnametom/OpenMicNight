@@ -31,7 +31,7 @@ while (!$valid_hash)
         doThisOnTimeout();
 }
 
-say("At the tone, please start recording your episode.");
+say("At the tone, please start recording your episode. Please remember to speak loudly!");
 record("When you are done, please hang up and we'll attach your recording to your episode assignment.", array (
     "beep" => true,
     "timeout" => 10,
