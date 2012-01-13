@@ -2,6 +2,7 @@
 
 say("Welcome to the phone recorder for the <?php echo $subreddit->getName() ?> subreddit in <?php echo ProjectConfiguration::getApplicationName() ?>!");
 $valid_hash = false;
+$iterator = 0;
 while (!$valid_hash)
 {
     $result = ask("Please identify your episode by the <?php echo ProjectConfiguration::getTropoHashLength() ?> digit ID hash found on the edit page. You can either press the numbers or say them out loud.", array(
@@ -14,9 +15,10 @@ while (!$valid_hash)
     $id_hash = $result->value;
 
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "<?php echo rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/' ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . number_format($id_hash, 0, '', ''));
+    curl_setopt($ch, CURLOPT_URL, "<?php echo str_replace('https:', 'http:', rtrim(sfConfig::get('app_web_app_api_location'), '/') . '/'); ?>episodeassignment/validhash?subreddit_id=<?php echo $subreddit_id ?>&id_hash=" . $id_hash);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Accept: application/json'));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     $output = json_decode(curl_exec($ch), true);
     curl_close($ch);
@@ -24,6 +26,9 @@ while (!$valid_hash)
     if (!$valid_hash) {
         say("We're sorry; we couldn't find the ID hash of " . $id_hash);
     }
+    $iterator++;
+    if ($iterator >= 5)
+        doThisOnTimeout();
 }
 
 say("At the tone, please start recording your episode.");
