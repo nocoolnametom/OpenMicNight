@@ -1,0 +1,30 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             ValidationPost
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            validationpost
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+    class_label:             Validation Post
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ post_address, is_active ]
+        sort:                [ cerated_at, desc ]
+      filter:
+        default:             [ is_active: true ]
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

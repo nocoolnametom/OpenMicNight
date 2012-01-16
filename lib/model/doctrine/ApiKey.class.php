@@ -13,6 +13,35 @@
 class ApiKey extends BaseApiKey
 {
 
+    public function setPublicKeyIfNotSet()
+    {
+        if ($this->getApiKey())
+            return;
+        $hash = '';
+        do {
+            $hash = md5(rand(0, 10)
+                    . microtime());
+        } while (ApiKeyTable::getInstance()->findOneBy('api_key', $hash));
+
+        $this->setApiKey($hash);
+    }
+
+    public function setSecretKeyIfNotSet()
+    {
+        if ($this->getSharedSecret())
+            return;
+        $hash = md5(rand(0, 10)
+                . microtime());
+        $this->setSharedSecret($hash);
+    }
+
+    public function save(Doctrine_Connection $conn = null)
+    {
+        $this->setPublicKeyIfNotSet();
+        $this->setSecretKeyIfNotSet();
+        parent::save($conn);
+    }
+
     /**
      * Request a new xAuth key for a user.
      *
@@ -33,8 +62,7 @@ class ApiKey extends BaseApiKey
             throw new sfException('Email address or password is incorrect.');
         // Find out how many failures in the past two minutes - max of five
         $failures = AuthFailureTable::getInstance()
-                ->countFailuresMadeInRecentSeconds($this->getIncremented(),
-                                                   $user->getIncremented(), 120);
+                ->countFailuresMadeInRecentSeconds($this->getIncremented(), $user->getIncremented(), 120);
         if ($failures >= 6)
             throw new sfException('Too many failures. Please wait a few minutes and try again.');
         if ($user && $user->checkPassword($password) && $user->getIsAuthorized() && $user->getIsActive()) {

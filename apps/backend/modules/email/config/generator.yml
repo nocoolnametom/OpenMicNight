@@ -1,0 +1,28 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             Email
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            email
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ EmailType, subject, language ]
+        sort:                [ email_type_id, asc ]
+      filter:                ~
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

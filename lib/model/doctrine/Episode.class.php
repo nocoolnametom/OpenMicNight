@@ -20,7 +20,7 @@ class Episode extends BaseEpisode
      */
     public function __toString()
     {
-        return $this->getTitle();
+        return (string)$this->getTitle();
     }
 
     public function setTitle($value)

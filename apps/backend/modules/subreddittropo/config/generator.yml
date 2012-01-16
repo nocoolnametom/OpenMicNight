@@ -1,0 +1,29 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             SubredditTropoNumber
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            subreddittropo
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+    class_label:             Subreddit Tropo Number
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ Subreddit, number]
+        sort:                [ subreddit_id, desc ]
+      filter:                ~
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

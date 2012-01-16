@@ -1,0 +1,29 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             Episode
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            episode
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ EpisodeAssignment, Subreddit, release_date, title, is_nsfw, is_submitted, is_approved ]
+        sort:                [ release_date, desc ]
+      filter:
+        - is_approved:       true 
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

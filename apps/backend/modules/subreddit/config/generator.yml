@@ -1,0 +1,30 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             Subreddit
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            subreddit
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ domain, name, is_active ]
+        sort:                [ domain, asc ]
+      filter:
+        default:
+          - is_active:       true
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

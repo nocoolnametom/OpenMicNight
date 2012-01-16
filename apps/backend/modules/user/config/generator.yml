@@ -1,0 +1,37 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             sfGuardUser
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            user
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+    class_label:             User
+
+    config:
+      actions:               ~
+      fields:
+        is_validated:
+          label: Validated
+        is_authorized:
+          label: Authorized
+        is_active:
+          label: Active
+      list:
+        display:             [ username, name, email_address, is_validated, is_authorized, is_active ]
+        sort:                [ username, asc ]
+      filter:                ~
+      form:
+        class:               sfGuardUserHadoriAdminForm
+      edit:                  ~
+      new:                   ~
+      show:
+        display:             [ id, email_address, username, reddit_validation_key, is_validated, email_authorization_key, is_authorized, authorized_at, full_name, preferred_name, website, twitter_account, avatar, short_bio, address_line_one, address_line_two, city, state, zip_code, country, display_location, preferred_language, last_login]
+      export:                ~

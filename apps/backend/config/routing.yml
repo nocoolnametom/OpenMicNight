@@ -1,3 +1,123 @@
+validationpost:
+  class: sfHadoriRouteCollection
+  options:
+    model:                ValidationPost
+    module:               validationpost
+    prefix_path:          /validationpost
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+email:
+  class: sfHadoriRouteCollection
+  options:
+    model:                Email
+    module:               email
+    prefix_path:          /email
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+api:
+  class: sfHadoriRouteCollection
+  options:
+    model:                ApiKey
+    module:               api
+    prefix_path:          /api
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+subreddittropo:
+  class: sfHadoriRouteCollection
+  options:
+    model:                SubredditTropoNumber
+    module:               subreddittropo
+    prefix_path:          /subreddittropo
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+subredditmembership:
+  class: sfHadoriRouteCollection
+  options:
+    model:                sfGuardUserSubredditMembership
+    module:               subredditmembership
+    prefix_path:          /subredditmembership
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+subredditdeadline:
+  class: sfHadoriRouteCollection
+  options:
+    model:                Deadline
+    module:               subredditdeadline
+    prefix_path:          /subredditdeadline
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+subreddit:
+  class: sfHadoriRouteCollection
+  options:
+    model:                Subreddit
+    module:               subreddit
+    prefix_path:          /subreddit
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+message:
+  class: sfHadoriRouteCollection
+  options:
+    model:                Message
+    module:               message
+    prefix_path:          /message
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+episodeassignment:
+  class: sfHadoriRouteCollection
+  options:
+    model:                EpisodeAssignment
+    module:               episodeassignment
+    prefix_path:          /episodeassignment
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+episode:
+  class: sfHadoriRouteCollection
+  options:
+    model:                Episode
+    module:               episode
+    prefix_path:          /episode
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+authortype:
+  class: sfHadoriRouteCollection
+  options:
+    model:                AuthorType
+    module:               authortype
+    prefix_path:          /authortype
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
+user:
+  class: sfHadoriRouteCollection
+  options:
+    model:                sfGuardUser
+    module:               user
+    prefix_path:          /user
+    column:               id
+    with_wildcard_routes: true
+    with_export:          true
+
 # You can find more information about this file on the symfony website:
 # http://www.symfony-project.org/reference/1_4/en/10-Routing
 

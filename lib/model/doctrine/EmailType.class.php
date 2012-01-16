@@ -12,4 +12,8 @@
  */
 class EmailType extends BaseEmailType
 {
+    public function __toString()
+    {
+        return $this->getType();
+    }
 }

@@ -9,6 +9,17 @@
     <?php include_javascripts() ?>
   </head>
   <body>
-    <?php echo $sf_content ?>
+    <div id="header">
+      <?php include_partial('global/nav') ?>
+        <h1 id="site-title"><?php echo ProjectConfiguration::getApplicationName() ?> Admin</h1>
+    </div>
+    <div id="content">
+      <?php include_partial('global/links') ?>
+      <div id="main">
+        <div id="main-inner">
+          <?php echo $sf_content ?>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

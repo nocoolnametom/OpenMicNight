@@ -1,0 +1,29 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             Message
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            message
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+    class_label:             User Message
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ recipient_id, sender_id, created_at, message ]
+        sort:                [ created_at, desc ]
+      filter:                ~
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

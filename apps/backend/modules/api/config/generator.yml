@@ -1,0 +1,31 @@
+generator:
+  class:                     sfHadoriGenerator
+  param:
+    model_class:             ApiKey
+    theme:                   hadori
+    non_verbose_templates:   true
+    with_show:               true
+    singular:                ~
+    plural:                  ~
+    route_prefix:            api
+    with_doctrine_route:     true
+    i18n:                    false
+    sortable:                false
+    actions_base_class:      sfActions
+    use_security_yaml_credentials: false
+    class_label:             API Key
+
+    config:
+      actions:               ~
+      fields:                ~
+      list:
+        display:             [ api_app_name, developer_name, developer_email, api_key, is_active ]
+        sort:                [ api_app_name, asc ]
+      filter:
+        default:
+          - is_active: true
+      form:                  ~
+      edit:                  ~
+      new:                   ~
+      show:                  ~
+      export:                ~

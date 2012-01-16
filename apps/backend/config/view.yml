@@ -12,9 +12,14 @@ default:
     #language:     en
     #robots:       index, follow
 
-  stylesheets:    [main.css]
+  stylesheets:
+    - main.css
+    - //fonts.googleapis.com/css?family=Arizonia
 
-  javascripts:    [http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js,http://ajax.microsoft.com/ajax/jquery.validate/1.7/jquery.validate.min.js]
+  javascripts:
+    - //ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js
+    - //ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js
+    - //ajax.googleapis.com/ajax/libs/webfont/1.0.23/webfont.js
 
   has_layout:     true
   layout:         layout

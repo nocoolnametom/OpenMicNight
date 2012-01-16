@@ -175,10 +175,6 @@ Session:
 ApiKey:
   actAs:
     Timestampable: ~
-  options:
-    symfony:
-      form: false
-      filter: false
   columns:
     api_key: { type: string(255), notnull: true }
     shared_secret: { type: string(255), notnull: true }
