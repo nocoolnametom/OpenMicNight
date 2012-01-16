@@ -111,6 +111,8 @@ class episodeActions extends sfActions
         $this->getUser()->getAttributeHolder()->remove('valid_episode_image_file_hash');
         $this->getUser()->getAttributeHolder()->remove('valid_episode_user_id');
 
+        $this->redirectUnless($this->getUser()->isAuthenticated() && $this->getUser()->getApiUserId(), '@sf_guard_signin');
+
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                                         true);
@@ -247,6 +249,8 @@ class episodeActions extends sfActions
 
     public function executeApproval(sfWebRequest $request)
     {
+        $this->redirectUnless($this->getUser()->isAuthenticated() && $this->getUser()->getApiUserId(), '@sf_guard_signin');
+        
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'),
                                                                                                         true);
