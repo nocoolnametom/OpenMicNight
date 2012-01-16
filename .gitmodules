@@ -22,3 +22,9 @@
 [submodule "lib/vendor/tropo"]
 	path = lib/vendor/tropo
 	url = git://github.com/tropo/tropo-webapi-php.git
+[submodule "plugins/sfThemeGeneratorPlugin"]
+	path = plugins/sfThemeGeneratorPlugin
+	url = git://github.com/bshaffer/sfThemeGeneratorPlugin.git
+[submodule "plugins/sfHadoriThemePlugin"]
+	path = plugins/sfHadoriThemePlugin
+	url = git://github.com/bshaffer/sfHadoriThemePlugin.git
