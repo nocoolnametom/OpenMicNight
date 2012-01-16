@@ -27,5 +27,7 @@ generator:
       form:                  ~
       edit:                  ~
       new:                   ~
-      show:                  ~
+      show:
+        title:               %%api_app_name%%
+        display:             [ developer_name, developer_email, api_key, shared_secret, created_at, updated_at ]
       export:                ~
