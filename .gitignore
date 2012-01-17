@@ -1,10 +1,11 @@
 apps/frontend/config/app.yml
-apps/api_v1/comfig/app.yml
+apps/api_v1/config/app.yml
 build/
 cache/
 config/databases.yml
 config/ProjectConfiguration.class.php
 data/fixtures/testdata.yml
+data/fixtures/production_setup.yml
 data/sql/
 data/temp/
 docs/output/
