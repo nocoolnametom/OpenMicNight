@@ -20,7 +20,7 @@ generator:
       fields:                ~
       list:
         display:             [ post_address, is_active ]
-        sort:                [ cerated_at, desc ]
+        sort:                [ created_at, desc ]
       filter:
         default:             [ is_active: true ]
       form:                  ~
