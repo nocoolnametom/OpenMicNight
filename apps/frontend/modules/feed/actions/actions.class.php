@@ -614,7 +614,8 @@ class feedActions extends sfActions
 
     protected function getRemoteInfo($url)
     {
-        $fp = fopen($url, 'r');
+        if (!($fp = @fopen($url, 'r')))
+         return NULL;
         $response = stream_get_meta_data($fp);
         $return = array(
             'length' => null,
@@ -633,7 +634,7 @@ class feedActions extends sfActions
                 $return['type'] = "audio/mpeg";
             }
         }
-        die(var_dump($return));
+        die(var_dump($response));
         return $return;
     }
 }
