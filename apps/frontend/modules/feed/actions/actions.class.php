@@ -545,17 +545,10 @@ class feedActions extends sfActions
         $itunes_subcategory = $doc->createElement('itunes:category');
         $itunes_subcategory->setAttribute('text', 'Podcasting');
         $itunes_category->appendChild($itunes_subcategory);
-        $itunes_owner = $doc->createElement('itunes:owner');
-        $itunes_name = $doc->createElement('itunes:name',
-                                           ProjectConfiguration::getApplicationName());
-        $itunes_email = $doc->createElement('itunes:email',
-                                            ProjectConfiguration::getApplicationEmailAddress());
-        $itunes_owner->appendChild($itunes_name);
-        $itunes_owner->appendChild($itunes_email);
+        // Including the itunes:owner messes with the feed by overriding the title in iTunes.
         $feed->appendChild($itunes_explicit);
         $feed->appendChild($itunes_summary);
         $feed->appendChild($itunes_category);
-        $feed->appendChild($itunes_owner);
 
         foreach ($feedArray['entries'] as $entry) {
             $fentry = $doc->createElement('entry');
