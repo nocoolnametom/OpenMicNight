@@ -402,7 +402,7 @@ class feedActions extends sfActions
         $channel->appendChild($c_atom_link_one);
         $channel->appendChild($itunes_author);
         $channel->appendChild($itunes_summary);
-        $channel->appendChild($itunes_name);
+        //$channel->appendChild($itunes_name);
         $rss->appendChild($channel);
 
         foreach ($feedArray['entries'] as $entry) {
@@ -430,7 +430,7 @@ class feedActions extends sfActions
                 $i_link = $doc->createElement('link', $entry['link']);
                 $i_image->appendChild($i_url);
                 $i_image->appendChild($i_link);
-                $item->appendChild($i_image);
+                //$item->appendChild($i_image);
                 $i_media_content = $doc->createElement('media:content');
                 $i_media_content->setAttribute('url', $entry['thumbnail']);
                 $i_media_content->setAttribute('media', 'image');
@@ -462,7 +462,7 @@ class feedActions extends sfActions
             $item->appendChild($i_pubdate);
             $item->appendChild($i_link);
             $item->appendChild($i_guid);
-            $item->appendChild($i_author);
+            //$item->appendChild($i_author);
             $item->appendChild($i_dc_creator);
             $item->appendChild($i_content);
             $item->appendChild($i_enclosure);
@@ -625,7 +625,7 @@ class feedActions extends sfActions
                 $return['length'] = (int) str_replace('Content-Length: ', '',
                                                       $header);
             } else {
-                $return['length'] = 0;
+                $return['length'] = 1;
             }
             if (strpos($header, 'Content-Type') !== false) {
                 $return['type'] = str_replace('Content-Type: ', '', $header);
@@ -633,6 +633,7 @@ class feedActions extends sfActions
                 $return['type'] = "audio/mpeg";
             }
         }
+        die(var_dump($return));
         return $return;
     }
 }
