@@ -626,6 +626,17 @@ class feedActions extends sfActions
             $fentry->appendChild($e_author);
             $fentry->appendChild($e_enclosure);
             $fentry->appendChild($e_content);
+            
+            $i_itunes_author = $doc->createElement('itunes:author',
+                                                   $entry['author']['name']);
+            $i_itunes_summary = $doc->createElement('itunes:summary',
+                                                    strip_tags($entry['description']));
+            $i_itunes_explicit = $doc->createElement('itunes:explicit',
+                                                   $entry['is_nsfw']);
+            $fentry->appendChild($i_itunes_author);
+            $fentry->appendChild($i_itunes_summary);
+            $fentry->appendChild($i_itunes_explicit);
+            
             $feed->appendChild($fentry);
         }
 
