@@ -384,7 +384,7 @@ class feedActions extends sfActions
         $itunes_summary = $doc->createElement('itunes:summary',
                                               $feedArray['description']);
         $itunes_owner = $doc->createElement('itunes:owner');
-        $itunes_name = $doc->createElement('itunes:name',
+        $itunes_name = $doc->createElement('itunes:title',
                                            ProjectConfiguration::getApplicationName());
         $itunes_email = $doc->createElement('itunes:email',
                                             ProjectConfiguration::getApplicationEmailAddress());
@@ -397,7 +397,7 @@ class feedActions extends sfActions
         $channel->appendChild($c_pubdate);
         $channel->appendChild($c_generator);
         $channel->appendChild($c_link);
-        $channel->appendChild($c_author);
+        //$channel->appendChild($c_author);
         $channel->appendChild($c_dc_creator);
         $channel->appendChild($c_atom_link_one);
         $channel->appendChild($itunes_author);
@@ -436,8 +436,8 @@ class feedActions extends sfActions
                 $i_media_content->setAttribute('media', 'image');
                 $i_mc_title = $doc->createElement('media:title', $entry['title']);
                 $i_mc_title->setAttribute('type', 'html');
-                $i_media_content->appendChild($i_mc_title);
-                $item->appendChild($i_media_content);
+                //$i_media_content->appendChild($i_mc_title);
+                //$item->appendChild($i_media_content);
             }
             if ($entry['reddit_post_url']) {
                 $e_comments = $doc->createElement('comments',
