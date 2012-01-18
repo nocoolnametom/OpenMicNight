@@ -1,5 +1,6 @@
 <?php slot('atom_feed') ?>
-<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?>" />
+<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?> Atom" />
+<link href="<?php echo url_for('@feed_subreddit_rss?domain=' . $subreddit->getDomain()) ?>" type="application/rss+xml" rel="alternate" title="<?php echo $subreddit ?> RSS" />
 <?php end_slot() ?>
 <div id="feed_link" style="float: right;"><?php echo link_to(image_tag('rss.svg', array('style' => 'height: 32px; width: auto;')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?></div>
 <h2><?php echo $subreddit ?></h2>

@@ -1,5 +1,6 @@
 <?php slot('atom_feed') ?>
-<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?>" />
+<link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?> Atom" />
+<link href="<?php echo url_for('@feed_subreddit_rss?domain=' . $subreddit->getDomain()) ?>" type="application/rss+xml" rel="alternate" title="<?php echo $subreddit ?> RSS" />
 <?php end_slot() ?>
 <h2><?php echo $subreddit ?></h2>
 <h3>Tropo Telephone Integration</h3>

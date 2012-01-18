@@ -1,5 +1,6 @@
 <?php slot('atom_feed') ?>
-<link href="<?php echo url_for('@feed_index_atom') ?>" type="application/atom+xml" rel="alternate" title="Main Feed" />
+<link href="<?php echo url_for('@feed_index_atom') ?>" type="application/atom+xml" rel="alternate" title="Main Feed Atom" />
+<link href="<?php echo url_for('@feed_index_rss') ?>" type="application/rss+xml" rel="alternate" title="Main Feed RSS" />
 <?php end_slot() ?>
 <h2>Subreddits</h2>
 

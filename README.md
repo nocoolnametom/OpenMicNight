@@ -55,16 +55,38 @@ It’s open mic night!
    pulled into the application from the command `git submodule update --init
    lib/vendor/plupload;`.
 
+ * Tropo PHP Library for phone recording integration. This can be pulled into
+   the application from the command `git submodule update --init
+   lib/vendor/plupload;`.
+
  * PHPUnit is required to run the unit tests.
 
  * MySQL (or one of its derivatives, like MariaDB) due to some MySQL-specific
    raw queries at use in the application.
 
+ * cUrl is used within the web application to interact with the API and other
+   aspects of the app.
+
+ * PHP should have the openssl extension compiled, installed, and enabled in
+   order to best interact with Amazon Web Services and with itself.
 
 ## Installation
 
 Make sure that you grab whatever submodules you require for the application
-when you clone the codebase.
+when you clone the codebase.  You can grab all submodules by issuing the
+following commands:
+
+    git submodule init;
+    git submodule update;
+
+You need to at least initialize the symfony plugins that are included as
+submodules:
+
+ * sfDoctrineRestGeneratorPlugin
+
+ * sfThemeGeneratorPlugin
+
+ * sfHadoriThemePlugin
 
 
 ### ProjectConfiguration.class.php
@@ -91,7 +113,7 @@ solution for the application.  Save the file and verify that it's working by
 using the symfony CLI to create the database tables and load the basic data
 fixtures by running:
 
-`./symfony doctrine:build --all --and-load;`
+    ./symfony doctrine:build --all --and-load;
 
 
 ### app.yml

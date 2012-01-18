@@ -23,7 +23,7 @@ class feedActions extends sfActions
      */
     public function executeIndex(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', 'atom');
+        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
         
         header('content-type: text/xml');
         if (function_exists('apc_fetch'))
@@ -61,7 +61,7 @@ class feedActions extends sfActions
      */
     public function executeUser(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', 'atom');
+        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
         
         header('content-type: text/xml');
         $reddit_key = $request->getParameter('reddit_validation_key');
@@ -112,7 +112,7 @@ class feedActions extends sfActions
      */
     public function executeSubreddit(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', 'atom');
+        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
         
         header('content-type: text/xml');
         $domain = $request->getParameter('domain');

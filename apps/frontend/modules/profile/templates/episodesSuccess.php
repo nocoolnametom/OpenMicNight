@@ -1,6 +1,7 @@
 <?php $key = $user->getRedditValidationKey(); ?>
 <?php slot('atom_feed') ?>
-<link href="<?php echo url_for('@feed_user_atom?reddit_validation_key=' . $key); ?>" type="application/atom+xml" rel="alternate" title="<?php echo $user->getUsername(); ?>" />
+<link href="<?php echo url_for('@feed_user_atom?reddit_validation_key=' . $key); ?>" type="application/atom+xml" rel="alternate" title="<?php echo $user->getUsername(); ?> Atom" />
+<link href="<?php echo url_for('@feed_user_rss?reddit_validation_key=' . $key); ?>" type="application/rss+xml" rel="alternate" title="<?php echo $user->getUsername(); ?> RSS" />
 <?php end_slot() ?>
 <?php $deadlines = $sf_data->getRaw('deadlines') ?>
 <?php if (count($approvals)): ?>
