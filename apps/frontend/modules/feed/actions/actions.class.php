@@ -291,7 +291,7 @@ class feedActions extends sfActions
     }
 
     protected function createFeedArray($episode_array, $title, $link,
-                                       $atom_link, $description)
+                                       $atom_link, $description, $is_nsfw = false)
     {
         $feedArray = array(
             'title' => ProjectConfiguration::getApplicationName() . ' - ' . $title,
@@ -301,6 +301,7 @@ class feedActions extends sfActions
             'language' => 'en-us',
             'charset' => sfConfig::get('sf_charset'),
             'pubDate' => time(),
+            'is_nsfw' => ($is_nsfw ? 'yes' : 'no'),
             'entries' => array()
         );
 
@@ -330,7 +331,7 @@ class feedActions extends sfActions
                 'thumbnail' => '',
                 'reddit_post_url' => ($episode->getRedditPostUrl() ? $episode->getRedditPostUrl()
                             : ''),
-                'nsfw' => ($episode->getIsNsfw() ? 'nsfw' : ''),
+                'is_nsfw' => ($episode->getIsNsfw() ? 'yes' : 'no'),
             );
             if ($episode->getGraphicFile())
                 $new_entry['thumbnail'] = str_replace('frontend_dev.php/', '',
@@ -383,10 +384,13 @@ class feedActions extends sfActions
 
         $itunes_author = $doc->createElement('itunes:author',
                                              ProjectConfiguration::getApplicationName());
+        $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
         $itunes_subtitle = $doc->createElement('itunes:subtitle',
                                               $feedArray['description']);
         $itunes_summary = $doc->createElement('itunes:summary',
                                               $feedArray['description']);
+        $itunes_category = $doc->createElement('itunes:category',
+                                              'Internet');
         $itunes_owner = $doc->createElement('itunes:owner');
         $itunes_name = $doc->createElement('itunes:title',
                                            ProjectConfiguration::getApplicationName());
@@ -406,7 +410,10 @@ class feedActions extends sfActions
         $channel->appendChild($c_atom_link_one);
         $channel->appendChild($itunes_author);
         $channel->appendChild($itunes_summary);
+        $channel->appendChild($itunes_category);
+        $channel->appendChild($itunes_email);
         //$channel->appendChild($itunes_name);
+        $channel->appendChild($itunes_explicit);
         $rss->appendChild($channel);
 
         foreach ($feedArray['entries'] as $entry) {
@@ -451,7 +458,7 @@ class feedActions extends sfActions
             $cdata_content = $doc->createCDATASection($thumbnail_tag . $entry['description']);
             $i_content->appendChild($cdata_content);
             $i_enclosure = $doc->createElement('enclosure');
-            $i_enclosure->setAttribute('url', $entry['audio_location']);
+            $i_enclosure->setAttribute('url', str_replace('https://', 'http://', $entry['audio_location']));
             $audio_info = $this->getRemoteInfo($entry['audio_location']);
             $i_enclosure->setAttribute('type', $audio_info['type']);
             $i_enclosure->setAttribute('length', $audio_info['length']);
@@ -460,6 +467,8 @@ class feedActions extends sfActions
                                                    $entry['author']['name']);
             $i_itunes_summary = $doc->createElement('itunes:summary',
                                                     strip_tags($entry['description']));
+            $i_itunes_explicit = $doc->createElement('itunes:explicit',
+                                                   $entry['is_nsfw']);
 
             $item->appendChild($i_title);
             $item->appendChild($i_description);
@@ -472,6 +481,7 @@ class feedActions extends sfActions
             $item->appendChild($i_enclosure);
             $item->appendChild($i_itunes_author);
             $item->appendChild($i_itunes_summary);
+            $item->appendChild($i_itunes_explicit);
             $channel->appendChild($item);
         }
 
