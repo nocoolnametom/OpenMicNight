@@ -494,6 +494,7 @@ class feedActions extends sfActions
         $doc = new DomDocument('1.0', 'utf-8');
 
         $feed = $doc->createElement('feed');
+        $feed->setAttribute('xmlns:itunes', 'http://www.itunes.com/dtds/podcast-1.0.dtd');
         $feed->setAttribute('xmlns', 'http://www.w3.org/2005/Atom');
         $feed->setAttribute('xml:lang', $feedArray['language']);
         $doc->appendChild($feed);
