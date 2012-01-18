@@ -527,7 +527,7 @@ class feedActions extends sfActions
 
         foreach ($feedArray['entries'] as $entry) {
             $fentry = $doc->createElement('entry');
-            $fentry->setAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
+            //$fentry->setAttribute('xmlns:xhtml', 'http://www.w3.org/1999/xhtml');
             $e_title = $doc->createElement('title');
             $e_title->setAttribute('type', 'html');
             $cdata_title = $doc->createCDATASection($entry['title']);
@@ -563,17 +563,18 @@ class feedActions extends sfActions
             $e_enclosure->setAttribute('type', $audio_info['type']);
             $e_enclosure->setAttribute('href', $entry['audio_location']);
             $e_enclosure->setAttribute('length', $audio_info['length']);
+            $e_enclosure->setAttribute('title', 'Audio');
             $e_content = $doc->createElement('content');
-            $e_content->setAttribute('xmlns:xhtml',
-                                     'http://www.w3.org/1999/xhtml');
+            //$e_content->setAttribute('xmlns:xhtml',
+            //                         'http://www.w3.org/1999/xhtml');
             $e_content->setAttribute('type', 'xhtml'); {
                 $fragment = $doc->createDocumentFragment();
                 $fragment->appendXML($thumbnail_tag . $entry['content']);
-                $e_xhtml_div = $doc->createElement('xhtml:div');
-                $e_xhtml_div->setAttribute('xmlns:xhtml',
+                $e_div = $doc->createElement('div');
+                $e_div->setAttribute('xmlns',
                                            'http://www.w3.org/1999/xhtml');
-                $e_xhtml_div->appendChild($fragment);
-                $e_content->appendChild($e_xhtml_div);
+                $e_div->appendChild($fragment);
+                $e_content->appendChild($e_div);
             }
             if ($entry['reddit_post_url']) {
                 $e_comments = $doc->createElement('link');
@@ -614,8 +615,7 @@ class feedActions extends sfActions
 
     protected function getRemoteInfo($url)
     {
-        if (!($fp = @fopen($url, 'r')))
-         return NULL;
+        $fp = fopen($url, 'r');
         $response = stream_get_meta_data($fp);
         $return = array(
             'length' => null,
@@ -625,16 +625,11 @@ class feedActions extends sfActions
             if (strpos($header, 'Content-Length') !== false) {
                 $return['length'] = (int) str_replace('Content-Length: ', '',
                                                       $header);
-            } else {
-                $return['length'] = 1;
             }
             if (strpos($header, 'Content-Type') !== false) {
                 $return['type'] = str_replace('Content-Type: ', '', $header);
-            } else {
-                $return['type'] = "audio/mpeg";
             }
         }
-        die(var_dump($response));
         return $return;
     }
 }
