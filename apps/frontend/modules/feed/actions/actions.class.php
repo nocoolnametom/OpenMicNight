@@ -373,20 +373,16 @@ class feedActions extends sfActions
         $c_generator = $doc->createElement('generator',
                                            ProjectConfiguration::getApplicationName() . ' Feed Module');
         $c_link = $doc->createElement('link', $feedArray['link']);
-        $c_author = $doc->createElement('author',
-                                        ProjectConfiguration::getApplicationEmailAddress() . ' (' . ProjectConfiguration::getApplicationName() . ')');
         $c_dc_creator = $doc->createElement('dc:creator',
                                             ProjectConfiguration::getApplicationName());
-        $c_atom_link_one = $doc->createElement('atom:link');
-        $c_atom_link_one->setAttribute('rel', 'self');
-        $c_atom_link_one->setAttribute('type', 'application/atom+xml');
-        $c_atom_link_one->setAttribute('href', $feedArray['atom_link']);
+        $c_atom_link = $doc->createElement('atom:link');
+        $c_atom_link->setAttribute('rel', 'self');
+        $c_atom_link->setAttribute('type', 'application/atom+xml');
+        $c_atom_link->setAttribute('href', $feedArray['atom_link']);
 
         $itunes_author = $doc->createElement('itunes:author',
                                              ProjectConfiguration::getApplicationName());
         $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
-        $itunes_subtitle = $doc->createElement('itunes:subtitle',
-                                              $feedArray['description']);
         $itunes_summary = $doc->createElement('itunes:summary',
                                               $feedArray['description']);
         $itunes_category = $doc->createElement('itunes:category');
@@ -395,7 +391,7 @@ class feedActions extends sfActions
         $itunes_subcategory->setAttribute('text', 'Podcasting');
         $itunes_category->appendChild($itunes_subcategory);
         $itunes_owner = $doc->createElement('itunes:owner');
-        $itunes_name = $doc->createElement('itunes:title',
+        $itunes_name = $doc->createElement('itunes:name',
                                            ProjectConfiguration::getApplicationName());
         $itunes_email = $doc->createElement('itunes:email',
                                             ProjectConfiguration::getApplicationEmailAddress());
@@ -408,9 +404,8 @@ class feedActions extends sfActions
         $channel->appendChild($c_pubdate);
         $channel->appendChild($c_generator);
         $channel->appendChild($c_link);
-        //$channel->appendChild($c_author);
         $channel->appendChild($c_dc_creator);
-        $channel->appendChild($c_atom_link_one);
+        $channel->appendChild($c_atom_link);
         $channel->appendChild($itunes_author);
         $channel->appendChild($itunes_summary);
         $channel->appendChild($itunes_category);
