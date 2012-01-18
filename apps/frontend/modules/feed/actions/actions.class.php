@@ -614,8 +614,7 @@ class feedActions extends sfActions
 
     protected function getRemoteInfo($url)
     {
-        if (!($fp = @fopen($url, 'r')))
-         return NULL;
+        $fp = fopen($url, 'r');
         $response = stream_get_meta_data($fp);
         $return = array(
             'length' => null,
@@ -625,16 +624,11 @@ class feedActions extends sfActions
             if (strpos($header, 'Content-Length') !== false) {
                 $return['length'] = (int) str_replace('Content-Length: ', '',
                                                       $header);
-            } else {
-                $return['length'] = 1;
             }
             if (strpos($header, 'Content-Type') !== false) {
                 $return['type'] = str_replace('Content-Type: ', '', $header);
-            } else {
-                $return['type'] = "audio/mpeg";
             }
         }
-        die(var_dump($response));
         return $return;
     }
 }
