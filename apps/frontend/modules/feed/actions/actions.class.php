@@ -414,7 +414,7 @@ class feedActions extends sfActions
         $channel->appendChild($itunes_author);
         $channel->appendChild($itunes_summary);
         $channel->appendChild($itunes_category);
-        //$channel->appendChild($itunes_name);
+        $channel->appendChild($itunes_owner);
         $channel->appendChild($itunes_explicit);
         $rss->appendChild($channel);
 
