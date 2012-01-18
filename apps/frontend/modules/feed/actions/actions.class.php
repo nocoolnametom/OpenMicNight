@@ -535,6 +535,29 @@ class feedActions extends sfActions
         $feed->appendChild($link_self);
         $feed->appendChild($id);
         $feed->appendChild($author);
+        
+        $itunes_author = $doc->createElement('itunes:author',
+                                             ProjectConfiguration::getApplicationName());
+        $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
+        $itunes_summary = $doc->createElement('itunes:summary',
+                                              $feedArray['description']);
+        $itunes_category = $doc->createElement('itunes:category');
+        $itunes_category->setAttribute('text', 'Technology');
+        $itunes_subcategory = $doc->createElement('itunes:category');
+        $itunes_subcategory->setAttribute('text', 'Podcasting');
+        $itunes_category->appendChild($itunes_subcategory);
+        $itunes_owner = $doc->createElement('itunes:owner');
+        $itunes_name = $doc->createElement('itunes:name',
+                                           ProjectConfiguration::getApplicationName());
+        $itunes_email = $doc->createElement('itunes:email',
+                                            ProjectConfiguration::getApplicationEmailAddress());
+        $itunes_owner->appendChild($itunes_name);
+        $itunes_owner->appendChild($itunes_email);
+        $feed->appendChild($itunes_author);
+        $feed->appendChild($itunes_explicit);
+        $feed->appendChild($itunes_summary);
+        $feed->appendChild($itunes_category);
+        $feed->appendChild($itunes_owner);
 
         foreach ($feedArray['entries'] as $entry) {
             $fentry = $doc->createElement('entry');
