@@ -1,5 +1,6 @@
 <?php slot('atom_feed') ?>
-<link href="<?php echo url_for('@feed_index_atom') ?>" type="application/atom+xml" rel="alternate" title="Main Feed" />
+<link href="<?php echo url_for('@feed_index_atom') ?>" type="application/atom+xml" rel="alternate" title="Main Feed Atom" />
+<link href="<?php echo url_for('@feed_index_rss') ?>" type="text/xml" rel="alternate" title="Main Feed RSS" />
 <?php end_slot() ?>
 <div id="app_subtitle" style="width: 100%; min-height: 1.5em; vertical-align: middle; max-width: 960px; background-color: orangered; color: white; margin-top: 1em;">
     <h2 style="font-weight: bolder; padding: 5px; margin: 0;">

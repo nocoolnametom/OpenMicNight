@@ -47,7 +47,7 @@ class feedActions extends sfActions
             );
 
             $output = $this->produceFeed($feedArray, $format);
-            if (function_exists('apc_add_' . $format))
+            if (function_exists('apc_add'))
                 apc_add('index_feed_' . $format, $output, $this->_time_to_cache);
         }
         echo $output;
@@ -61,11 +61,13 @@ class feedActions extends sfActions
      */
     public function executeUser(sfWebRequest $request)
     {
+        $format = $request->getParameter('format', 'atom');
+        
         header('content-type: text/xml');
         $reddit_key = $request->getParameter('reddit_validation_key');
         $this->forward404Unless($reddit_key);
         if (function_exists('apc_fetch'))
-            $output = apc_fetch('user_feed_' . $reddit_key, $success);
+            $output = apc_fetch('user_feed_' . $reddit_key . '_' . $format, $success);
         else
             $success = false;
         if (!$success) {
@@ -84,7 +86,7 @@ class feedActions extends sfActions
             $feedArray = $this->createFeedArray(
                     $episodes, $user->getUsername(),
                     $this->getController()->genUrl('@profile', true),
-                                                   $this->getController()->genUrl('@feed_user_atom?reddit_validation_key=' . $user->getRedditValidationKey(),
+                                                   $this->getController()->genUrl('@feed_user_' . $format. '?reddit_validation_key=' . $user->getRedditValidationKey(),
                                                                                   true),
                                                                                   ProjectConfiguration::getApplicationName() . ' is a collection'
                     . ' of user-submitted audio episodes that cover an incredibly'
@@ -94,9 +96,9 @@ class feedActions extends sfActions
                     . ' communities.'
             );
 
-            $output = $this->produceFeed($feedArray, 'atom');
+            $output = $this->produceFeed($feedArray, $format);
             if (function_exists('apc_add'))
-                apc_add('user_feed_' . $reddit_key, $output,
+                apc_add('user_feed_' . $reddit_key . '_' . $format, $output,
                         $this->_time_to_cache);
         }
         echo $output;
@@ -110,11 +112,13 @@ class feedActions extends sfActions
      */
     public function executeSubreddit(sfWebRequest $request)
     {
+        $format = $request->getParameter('format', 'atom');
+        
         header('content-type: text/xml');
         $domain = $request->getParameter('domain');
         $this->forward404Unless($domain);
         if (function_exists('apc_fetch'))
-            $output = apc_fetch('subreddit_feed' . $domain, $success);
+            $output = apc_fetch('subreddit_feed' . $domain . '_' . $format, $success);
         else
             $success = false;
         if (!$success) {
@@ -132,7 +136,7 @@ class feedActions extends sfActions
                     $episodes, $subreddit->getName(),
                     $this->getController()->genUrl('@subreddit_index?domain='
                             . $subreddit->getDomain(), true),
-                                                   $this->getController()->genUrl('@feed_subreddit_atom?domain='
+                                                   $this->getController()->genUrl('@feed_subreddit_' . $format . '?domain='
                             . $subreddit->getDomain(), true),
                                                                                   ProjectConfiguration::getApplicationName() . ' is a collection'
                     . ' of user-submitted audio episodes that cover an incredibly'
@@ -141,9 +145,9 @@ class feedActions extends sfActions
                     . $subreddit->getName() . ' subreddit community.'
             );
 
-            $output = $this->produceFeed($feedArray, 'atom');
+            $output = $this->produceFeed($feedArray, $format);
             if (function_exists('apc_add'))
-                apc_add('subreddit_feed' . $domain, $output,
+                apc_add('subreddit_feed' . $domain . '_' . $format, $output,
                         $this->_time_to_cache);
         }
         echo $output;

@@ -46,17 +46,17 @@ feed_index_atom:
   url:  /atom.rss
   param: { module: feed, action: index, format: atom }
 
-#feed_user_rss:
-#  url:  /user/:reddit_validation_key/feed.rss
-#  param: { module: feed, action: user, format: rss }
+feed_user_rss:
+  url:  /user/:reddit_validation_key/feed.rss
+  param: { module: feed, action: user, format: rss }
 
 feed_user_atom:
   url:  /user/:reddit_validation_key/atom.rss
   param: { module: feed, action: user, format: atom }
 
-#feed_subreddit_rss:
-#  url:  /r/:domain/feed.rss
-#  param: { module: feed, action: subreddit, format: rss }
+feed_subreddit_rss:
+  url:  /r/:domain/feed.rss
+  param: { module: feed, action: subreddit, format: rss }
   
 feed_subreddit_atom:
   url:  /r/:domain/atom.rss
