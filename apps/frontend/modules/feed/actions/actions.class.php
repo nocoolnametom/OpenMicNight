@@ -389,8 +389,11 @@ class feedActions extends sfActions
                                               $feedArray['description']);
         $itunes_summary = $doc->createElement('itunes:summary',
                                               $feedArray['description']);
-        $itunes_category = $doc->createElement('itunes:category',
-                                              'Internet');
+        $itunes_category = $doc->createElement('itunes:category');
+        $itunes_category->setAttribute('text', 'Technology');
+        $itunes_subcategory = $doc->createElement('itunes:category');
+        $itunes_subcategory->setAttribute('text', 'Podcasting');
+        $itunes_category->appendChild($itunes_subcategory);
         $itunes_owner = $doc->createElement('itunes:owner');
         $itunes_name = $doc->createElement('itunes:title',
                                            ProjectConfiguration::getApplicationName());
@@ -411,7 +414,6 @@ class feedActions extends sfActions
         $channel->appendChild($itunes_author);
         $channel->appendChild($itunes_summary);
         $channel->appendChild($itunes_category);
-        $channel->appendChild($itunes_email);
         //$channel->appendChild($itunes_name);
         $channel->appendChild($itunes_explicit);
         $rss->appendChild($channel);
