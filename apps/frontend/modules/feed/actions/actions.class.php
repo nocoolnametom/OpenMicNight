@@ -537,8 +537,6 @@ class feedActions extends sfActions
         $feed->appendChild($id);
         $feed->appendChild($author);
         
-        $itunes_author = $doc->createElement('itunes:author',
-                                             ProjectConfiguration::getApplicationName());
         $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
         $itunes_summary = $doc->createElement('itunes:summary',
                                               $feedArray['description']);
