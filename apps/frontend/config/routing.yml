@@ -38,9 +38,9 @@ feed:
     column:               id
     with_wildcard_routes: true
 
-#feed_index_rss:
-#  url:  /feed.rss
-#  param: { module: feed, action: index, format: rss }
+feed_index_rss:
+  url:  /feed.rss
+  param: { module: feed, action: index, format: rss }
 
 feed_index_atom:
   url:  /atom.rss
