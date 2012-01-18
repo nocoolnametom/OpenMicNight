@@ -552,7 +552,6 @@ class feedActions extends sfActions
                                             ProjectConfiguration::getApplicationEmailAddress());
         $itunes_owner->appendChild($itunes_name);
         $itunes_owner->appendChild($itunes_email);
-        $feed->appendChild($itunes_author);
         $feed->appendChild($itunes_explicit);
         $feed->appendChild($itunes_summary);
         $feed->appendChild($itunes_category);
