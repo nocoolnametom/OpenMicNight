@@ -336,29 +336,31 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
                 ->from($sql)
                 ->addComponent('ea', 'EpisodeAssignment ea');
         $assignments = $q->execute();
+        $episodes = new Doctrine_Collection('Episode');
+        $e = -1;
         for($i = 0; $i < count($assignments); $i++)
         {
             $passed_deadline_assignments[] = $assignments[$i];
             $assignments[$i]->setMissedDeadline(true);
-            $episode = $assignments[$i]->getEpisode();
+            $episodes[++$e] = $assignments[$i]->getEpisode();
             // Clean up the Episode for any new user to use.
-            $episode->setEpisodeAssignmentId(null);
-            $audio_file = $episode->getAudioFile();
-            $nice_filename = $episode->getNiceFilename();
-            $graphic_file = $episode->getGraphicFile();
-            $episode->setAudioFile(null);
-            $episode->setNiceFilename(null);
-            $episode->setGraphicFile(null);
-            $episode->setIsNsfw(false);
-            $episode->setTitle(null);
-            $episode->setDescription(null);
-            $episode->setIsSubmitted(false);
-            $episode->setSubmittedAt(null);
-            $episode->setFileIsRemote(null);
-            $episode->setRemoteUrl(null);
-            $episode->setRedditPostUrl(null);
-            $episode->save();
+            $episodes[$e]->setEpisodeAssignmentId(null);
+            $audio_file = $episodes[$e]->getAudioFile();
+            $nice_filename = $episodes[$e]->getNiceFilename();
+            $graphic_file = $episodes[$e]->getGraphicFile();
+            $episodes[$e]->setAudioFile(null);
+            $episodes[$e]->setNiceFilename(null);
+            $episodes[$e]->setGraphicFile(null);
+            $episodes[$e]->setIsNsfw(false);
+            $episodes[$e]->setTitle(null);
+            $episodes[$e]->setDescription(null);
+            $episodes[$e]->setIsSubmitted(false);
+            $episodes[$e]->setSubmittedAt(null);
+            $episodes[$e]->setFileIsRemote(null);
+            $episodes[$e]->setRemoteUrl(null);
+            $episodes[$e]->setRedditPostUrl(null);
         }
+        $episodes->save();
         $assignments->save();
         
         /* Now we make sure that all assignments past deadline are marked as
