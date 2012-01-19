@@ -32,7 +32,7 @@ class Subreddit extends BaseSubreddit
 
     public function save(Doctrine_Connection $conn = null)
     {
-        if ($this->isNew() || (in_array('name', $this->_modified) && $this->_get('name'))) {
+        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('name', $this->_modified) && $this->_get('name')))) {
             if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
                 $bucket_name = $this->createAmazonBucketName(
                         ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
@@ -152,6 +152,7 @@ class Subreddit extends BaseSubreddit
      */
     public function calculateCreationInterval()
     {
+        $original = $this->getCreationInterval();
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
 
         $start = $creation_schedule->getNextRunDate();
@@ -163,7 +164,11 @@ class Subreddit extends BaseSubreddit
                 ($diff->d * 24 * 60 * 60) +
                 ($diff->h * 60 * 60) +
                 $diff->s;
-        $this->setCreationInterval($seconds_between);
+        if ($original != $seconds_between)
+        {
+            $this->setCreationInterval($seconds_between);
+            $this->save();
+        }
     }
 
     /**
@@ -196,7 +201,8 @@ class Subreddit extends BaseSubreddit
 
         $episode_date = $last_episode;
 
-        $new_episodes = array();
+        $new_episodes = new Doctrine_Collection('Episode');
+        $i = 0;
         while ($episode_schedule->getNextRunDate($episode_date)->getTimestamp()
         <= $stop_creating->getTimestamp()) {
             $episode_date = $episode_schedule->getNextRunDate($episode_date);
@@ -204,10 +210,8 @@ class Subreddit extends BaseSubreddit
             $episode = new Episode();
             $episode->setSubreddit($this);
             $episode->setReleaseDate($episode_date->format('Y-m-d H:i:s'));
-            $new_episodes[] = $episode;
+            $new_episodes[$i++] = $episode;
         }
-
-        $this->save();
 
         return $new_episodes;
     }
@@ -332,11 +336,11 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
                 ->from($sql)
                 ->addComponent('ea', 'EpisodeAssignment ea');
         $assignments = $q->execute();
-        foreach ($assignments as $assignment) {
-            $passed_deadline_assignments[] = $assignment;
-            $assignment->setMissedDeadline(true);
-            $assignment->save();
-            $episode = $assignment->getEpisode();
+        for($i = 0; $i < count($assignments); $i++)
+        {
+            $passed_deadline_assignments[] = $assignments[$i];
+            $assignments[$i]->setMissedDeadline(true);
+            $episode = $assignments[$i]->getEpisode();
             // Clean up the Episode for any new user to use.
             $episode->setEpisodeAssignmentId(null);
             $audio_file = $episode->getAudioFile();
@@ -355,10 +359,11 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
             $episode->setRedditPostUrl(null);
             $episode->save();
         }
+        $assignments->save();
         
         /* Now we make sure that all assignments past deadline are marked as
          * such.  If the assignment is here, however, then it hasn't ever
-         * actually BEEN assigned asn isn't added to the list of emails to send
+         * actually BEEN assigned and isn't added to the list of emails to send
          * out. */
         $sql = "`episode_assignment` ea
 LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
@@ -373,10 +378,11 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
                 ->from($sql)
                 ->addComponent('ea', 'EpisodeAssignment ea');
         $assignments = $q->execute();
-        foreach ($assignments as $assignment) {
-            $assignment->setMissedDeadline(true);
-            $assignment->save();
+        for($i = 0; $i < count($assignments); $i++)
+        {
+            $assignments[$i]->setMissedDeadline(true);
         }
+        $assignments->save();
 
         /* Now all episodes are cleared and we need to see if they need to be
          * reassigned to an existing asignment. */

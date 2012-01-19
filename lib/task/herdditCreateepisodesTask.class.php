@@ -61,9 +61,7 @@ EOF;
             $episodes = $subreddit->collectGeneratedEpisodes();
             if (!$quiet)
                 echo ' (' . count($episodes) . ')';
-            foreach ($episodes as $episode) {
-                $episode->save();
-            }
+            $episodes->save();
         }
         if (!$quiet)
             echo "\nFinished.\n";

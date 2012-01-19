@@ -154,12 +154,33 @@ respective app config directories (eg, `apps/api_v1/config/app.yml` and
 configuration files see the
 [symfony documentation](http://www.symfony-project.org/gentle-introduction/1_4/en/05-Configuring-Symfony).
 
+Since episode files can be uploaded through the API, make sure that the server
+handling the API instance of the application is set up to allow the maximum file
+size from a POST.  The web applications uses the Pluploader to upload large
+files in small chunks, thus you don't need to set the allowable POST for the web
+application to be very high.  You can place the following within the declaration
+of a VirtualHost in an Apache configuration file to allow php file uploads and
+POSTs of the default size within the codebase of 250 MB.  Change it to whatever
+you feel is needed.
+
+    php_value post_max_size 250M
+    php_value upload_max_filesize 250M
+
 Remember to make the data/temp directory writable by the web user so that users
 can upload episode files.  Episodes are served via
 Apache [X-Sendfile](https://tn123.org/mod_xsendfile/),
 nginx [X-Accel-Redirect](http://wiki.nginx.org/XSendfile), or lighttpd
 [X-LIGHTTPD-send-file](http://redmine.lighttpd.net/wiki/1/X-LIGHTTPD-send-file)
-so the files are not executed when delivered.
+so the files are not executed when delivered.  Also remember to deactviate the
+execution of PHP scripts within these directories.  You can place the following
+within the declaration of a VirtualHost in an Apache configuration file:
+
+    <Directory "/[path to application root]/web/uploads">
+        php_admin_flag engine off
+     </Directory>
+     <Directory "/[path to application root]/data/temp">
+        php_admin_flag engine off
+     </Directory>
 
 
 ### Configure nginx for X-Accel-Redirect
