@@ -9,6 +9,8 @@ Subreddit:
     episode_schedule_cron_formatted: { type: string(32), notnull: true }
     creation_interval: { type: integer, notnull: true, default: 0 }
     bucket_name: { type: string(64) }
+    cf_dist_id: { type: string(64) }
+    cf_domain_name: { type: string(64) }
     pending_users_are_full_members: { type: boolean, default: 1 }
   indexes:
     name: { fields: [name], type: unique}

@@ -32,11 +32,19 @@ class Subreddit extends BaseSubreddit
 
     public function save(Doctrine_Connection $conn = null)
     {
-        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('name', $this->_modified) && $this->_get('name')))) {
+        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('name',
+                                                                                      $this->_modified) && $this->_get('name')))) {
             if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
                 $bucket_name = $this->createAmazonBucketName(
                         ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
                 $this->setBucketName($bucket_name);
+            }
+            if (!$this->getCfDistId() || strlen($this->getCfDistId() == 0)) {
+                $results = $this->createAmazonDistribution($bucket_name);
+                if ($results !== false) {
+                    $this->setCfDistId($results['dist_id']);
+                    $this->setCfDomainName($results['domain_name']);
+                }
             }
         }
         parent::save($conn);
@@ -57,6 +65,11 @@ class Subreddit extends BaseSubreddit
                 $exists = $s3->if_bucket_exists($name);
                 $attempts++;
             }
+            if (!$exists) {
+                $cdn = new AmazonCloudFront();
+                $cdn->create_distribution($name,
+                                          md5('caller_reference_' . microtime()));
+            }
             return $name;
         }
         $response = $s3->get_bucket_policy($name);
@@ -73,12 +86,55 @@ class Subreddit extends BaseSubreddit
         }
     }
 
+    public function createAmazonDistribution($bucket_name)
+    {
+        ProjectConfiguration::registerAws();
+        $cdn = new AmazonCloudFront();
+        $response = $cdn->create_distribution($bucket_name,
+                                              md5(ProjectConfiguration::getApplicationName() . microtime()));
+        if ($response->isOK()) {
+            $dist_id = $response->body->Id;
+            $domain_name = $response->body->DomainName;
+            return array(
+                'dist_id' => $dist_id,
+                'domain_name' => $domain_name,
+            );
+        }
+        return false;
+    }
+
+    public function deleteAmazonDistribution($dist_id)
+    {
+        ProjectConfiguration::registerAws();
+        $cdn = new AmazonCloudFront();
+        $original = $cdn->get_distribution_config($dist_id);
+        if ($original->isOK()) {
+            $etag = $original->header['etag'];
+
+            $new_xml = $cdn->update_config_xml($original,
+                                               array(
+                'Enabled' => false,
+                    ));
+
+            $response = $cdn->set_distribution_config($dist_id, $new_xml, $etag);
+            if ($response->isOK()) {
+                $response = $cdn->delete_distribution($dist_id, $etag);
+                return $response->isOK();
+            }
+        }
+        return false;
+    }
+
     public function delete(Doctrine_Connection $conn = null)
     {
         $bucket_name = $this->getBucketName();
+        $dist_id = $this->getCfDistId();
         parent::delete($conn);
         if ($bucket_name) {
             $this->deleteAmazonBucket($bucket_name);
+        }
+        if ($dist_id) {
+            $this->deleteAmazonDistribution($dist_id);
         }
     }
 
@@ -164,8 +220,7 @@ class Subreddit extends BaseSubreddit
                 ($diff->d * 24 * 60 * 60) +
                 ($diff->h * 60 * 60) +
                 $diff->s;
-        if ($original != $seconds_between)
-        {
+        if ($original != $seconds_between) {
             $this->setCreationInterval($seconds_between);
             $this->save();
         }
@@ -323,23 +378,10 @@ AND episode_assignment.author_type_id = $longest_id;
         $newly_assigned_assignments = array();
 
         // Now we can start on the assignments that are misassigned
-        $sql = "`episode_assignment` ea
-LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND `episode`.`episode_assignment_id` = ea.`id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Joing the deadline for the deadline seconds */
-LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
-/* Is the episode past the deadline for the assignment in question? */
-AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
-        $q = new Doctrine_RawSql();
-        $q->select('{ea.*}')
-                ->from($sql)
-                ->addComponent('ea', 'EpisodeAssignment ea');
-        $assignments = $q->execute();
+        $assignments = EpisodeAssignmentTable::getInstance()->getMisassignedEpisodes($this->getIncremented());
         $episodes = new Doctrine_Collection('Episode');
         $e = -1;
-        for($i = 0; $i < count($assignments); $i++)
-        {
+        for ($i = 0; $i < count($assignments); $i++) {
             $passed_deadline_assignments[] = $assignments[$i];
             $assignments[$i]->setMissedDeadline(true);
             $episodes[++$e] = $assignments[$i]->getEpisode();
@@ -362,49 +404,23 @@ AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`s
         }
         $episodes->save();
         $assignments->save();
-        
+
         /* Now we make sure that all assignments past deadline are marked as
          * such.  If the assignment is here, however, then it hasn't ever
          * actually BEEN assigned and isn't added to the list of emails to send
          * out. */
-        $sql = "`episode_assignment` ea
-LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Joing the deadline for the deadline seconds */
-LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
-/* Is the episode past the deadline for the assignment in question? */
-AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
-        $q = new Doctrine_RawSql();
-        $q->select('{ea.*}')
-                ->from($sql)
-                ->addComponent('ea', 'EpisodeAssignment ea');
-        $assignments = $q->execute();
-        for($i = 0; $i < count($assignments); $i++)
-        {
+        $assignments = EpisodeAssignmentTable::getInstance()->getUnmarkedEpisodesThatMissedDeadlines($this->getIncremented());
+        for ($i = 0; $i < count($assignments); $i++) {
             $assignments[$i]->setMissedDeadline(true);
         }
         $assignments->save();
 
         /* Now all episodes are cleared and we need to see if they need to be
          * reassigned to an existing asignment. */
-        $sql = "`episode_assignment` ea
-LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND (`episode`.`episode_assignment_id` IS NULL) AND `episode`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Joing the deadline for the deadline seconds */
-LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = " . $this->getIncremented() . ")
-/* Make sure we're using the right deadlines for the episode's subreddit */
-WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
-/* Is the episode past the deadline for the assignment in question? */
-AND UNIX_TIMESTAMP(`episode`.`release_date`) > (UNIX_TIMESTAMP() + `deadline`.`seconds`)
-ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
-        $q = new Doctrine_RawSql();
-        $q->select('{ea.*}')
-                ->from($sql)
-                ->addComponent('ea', 'EpisodeAssignment ea');
 
         /* Returns assignments closest to the front for each unassigned episode,
          * in order of closeness. */
-        $assignments = $q->execute();
+        $assignments = EpisodeAssignmentTable::getInstance()->getEpisodesPossiblyNeedingAssignment($this->getIncremented());
         $episodes_affected = array();
 
         foreach ($assignments as $assignment) {

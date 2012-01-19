@@ -89,5 +89,221 @@ class SubredditTable extends Doctrine_Table
                 ->fetchArray();
         return (count($results) ? strtotime($results[0]['release_date']) : time());
     }
+    
+    public function advanceEpisodeAssignments()
+    {   
+        $subreddit_first_deadlines = array();
+        $subreddit_deadline_rules = array();
+
+        // We establish the pool of emails we'll be sending.
+        // First to those who pass their deadline
+        $passed_deadline_assignments = array();
+
+        // And to the new episode assignments that are reassigned
+        $newly_assigned_assignments = array();
+
+        // Now we can start on the assignments that are misassigned
+        $assignments = EpisodeAssignmentTable::getInstance()->getMisassignedEpisodes();
+        $episodes = new Doctrine_Collection('Episode');
+        $e = -1;
+        for($i = 0; $i < count($assignments); $i++)
+        {
+            $passed_deadline_assignments[] = $assignments[$i];
+            $assignments[$i]->setMissedDeadline(true);
+            $episodes[++$e] = $assignments[$i]->getEpisode();
+            // Clean up the Episode for any new user to use.
+            $episodes[$e]->setEpisodeAssignmentId(null);
+            $audio_file = $episodes[$e]->getAudioFile();
+            $nice_filename = $episodes[$e]->getNiceFilename();
+            $graphic_file = $episodes[$e]->getGraphicFile();
+            $episodes[$e]->setAudioFile(null);
+            $episodes[$e]->setNiceFilename(null);
+            $episodes[$e]->setGraphicFile(null);
+            $episodes[$e]->setIsNsfw(false);
+            $episodes[$e]->setTitle(null);
+            $episodes[$e]->setDescription(null);
+            $episodes[$e]->setIsSubmitted(false);
+            $episodes[$e]->setSubmittedAt(null);
+            $episodes[$e]->setFileIsRemote(null);
+            $episodes[$e]->setRemoteUrl(null);
+            $episodes[$e]->setRedditPostUrl(null);
+        }
+        $episodes->save();
+        $assignments->save();
+        
+        /* Now we make sure that all assignments past deadline are marked as
+         * such.  If the assignment is here, however, then it hasn't ever
+         * actually BEEN assigned and isn't added to the list of emails to send
+         * out. */
+        $assignments = EpisodeAssignmentTable::getInstance()->getUnmarkedEpisodesThatMissedDeadlines();
+        for($i = 0; $i < count($assignments); $i++)
+        {
+            $assignments[$i]->setMissedDeadline(true);
+        }
+        $assignments->save();
+
+        /* Now all episodes are cleared and we need to see if they need to be
+         * reassigned to an existing asignment. */
+
+        /* Returns assignments closest to the front for each unassigned episode,
+         * in order of closeness. */
+        $assignments = EpisodeAssignmentTable::getInstance()->getEpisodesPossiblyNeedingAssignment();
+        $episodes_affected = array();
+
+        foreach ($assignments as $assignment) {
+            if (!in_array($assignment->getEpisodeId(), $episodes_affected)) {
+                /* Ignore all subsequent assignments for an episode after the
+                 * first!  We should only be dealing with assignments that have
+                 * not missed their deadlines! */
+                $episodes_affected[] = $assignment->getEpisodeId();
+                $episode = $assignment->getEpisode();
+                $assign_to_episode = false;
+
+                /* If the *first* assignment is in the first spot, then assign
+                 * it. */
+                if (!array_key_exists($assignment->getEpisode()->getSubredditId(), $subreddit_first_deadlines))
+                {
+                    $first_deadline_id = $assignment->getEpisode()->getSubreddit()->getFirstDeadlineId();
+                    $first_deadline = DeadlineTable::getInstance()->find($first_deadline_id);
+                    $subreddit_first_deadlines[$assignment->getEpisode()->getSubredditId()] = $first_deadline;
+                }
+                $first_deadline = $subreddit_first_deadlines[$assignment->getEpisode()->getSubredditId()];
+                
+                if (!array_key_exists($assignment->getEpisode()->getSubredditId(), $subreddit_deadline_rules))
+                {
+                    $deadline_rules = $assignment->getEpisode()->getSubreddit()->getDeadlineRules();
+                    $subreddit_deadline_rules[$assignment->getEpisode()->getSubredditId()] = $deadline_rules;
+                }
+                $deadline_rules = $subreddit_deadline_rules[$assignment->getEpisode()->getSubredditId()];
+                
+                if ($assignment->getAuthorTypeId() == $first_deadline->getAuthorTypeId()) {
+                    $assign_to_episode = true;
+                } else {
+                    /* Otherwise, check if we are past the deadline for the
+                     * previous deadline. */
+                    $previous_author_type_id = DeadlineTable::getInstance()
+                            ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
+                            $deadline_rules[$assignment->getAuthorTypeId()],
+                            $episode->getSubredditId());
+                    $past_deadline_for_previous = strtotime($episode->getReleaseDate()) - $deadline_rules[$previous_author_type_id] <= time();
+                    if ($past_deadline_for_previous) {
+                        $assign_to_episode = true;
+                    }
+                }
+                if ($assign_to_episode) {
+                    $episode->setEpisodeAssignmentId($assignment->getIncremented());
+                    $episode->save();
+                    $newly_assigned_assignments[] = $assignment;
+                }
+            }
+        }
+
+        // We send the emails for the current deadline we're checking.
+        foreach ($passed_deadline_assignments as $assignment) {
+            $this->sendEmailAboutPassedDeadline($assignment->getSfGuardUserId(),
+                                                $assignment->getEpisodeId());
+        }
+
+        foreach ($newly_assigned_assignments as $assignment) {
+            $episode = $assignment->getEpisode();
+            $release_date = strtotime($episode->getReleaseDate());
+            $seconds = $deadline_rules[$assignment->getAuthorTypeId()];
+            $deadline = $release_date - $seconds;
+            $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
+                                               $episode->getIncremented(),
+                                               $deadline);
+        }
+    }
+    
+    public function sendEmailAboutNewAssignment($user_id, $episode_id, $deadline)
+    {
+        // Send an email to that user telling them their EpisodeAssignment is now valid
+        ProjectConfiguration::registerZend();
+
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-MailGenerator',
+                         ProjectConfiguration::getApplicationName());
+        $parameters = array(
+            'user_id' => $user_id,
+            'episode_id' => $episode_id,
+            'deadline' => date('Y-m-d H:i:s', $deadline),
+        );
+        $user = sfGuardUserTable::getInstance()->find($user_id);
+
+        $prefer_html = $user->getPreferHtml();
+        $address = $user->getEmailAddress();
+        $name = ($user->getPreferredName() ?
+                        $user->getPreferredName() : $user->getFullName());
+
+        $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('NewlyOpenedEpisode',
+                                                                           $user->getPreferredLanguage());
+
+        $subject = $email->generateSubject($parameters);
+        $body = $email->generateBodyText($parameters, $prefer_html);
+
+        $mail->setBodyText($body);
+
+        $mail->setFrom(sfConfig::get('app_email_address',
+                                     ProjectConfiguration::getApplicationEmailAddress()),
+                                     sfconfig::get('app_email_name',
+                                                   ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->addTo($address, $name);
+        $mail->setSubject($subject);
+        if (sfConfig::get('sf_environment') == 'prod') {
+            $mail->send();
+        } else {
+            //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+            if (sfConfig::get('sf_logging_enabled')) {
+                sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
+            }
+            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
+        }
+        $user->addLoginMessage('You have an episode that you can work with!');
+    }
+
+    public function sendEmailAboutPassedDeadline($user_id, $episode_id)
+    {
+        // Send an email to that user telling them their EpisodeAssignment is now valid
+        ProjectConfiguration::registerZend();
+
+        $mail = new Zend_Mail();
+        $mail->addHeader('X-MailGenerator',
+                         ProjectConfiguration::getApplicationName());
+        $parameters = array(
+            'user_id' => $user_id,
+            'episode_id' => $episode_id
+        );
+        $user = sfGuardUserTable::getInstance()->find($user_id);
+
+        $prefer_html = $user->getPreferHtml();
+        $address = $user->getEmailAddress();
+        $name = ($user->getPreferredName() ?
+                        $user->getPreferredName() : $user->getFullName());
+
+        $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('PassedDeadlineOnEpisode',
+                                                                           $user->getPreferredLanguage());
+
+        $subject = $email->generateSubject($parameters);
+        $body = $email->generateBodyText($parameters, $prefer_html);
+
+        $mail->setBodyText($body);
+
+        $mail->setFrom(sfConfig::get('app_email_address',
+                                     ProjectConfiguration::getApplicationEmailAddress()),
+                                     sfconfig::get('app_email_name',
+                                                   ProjectConfiguration::getApplicationName() . 'Team'));
+        $mail->addTo($address, $name);
+        $mail->setSubject($subject);
+        if (sfConfig::get('sf_environment') == 'prod') {
+            $mail->send();
+        } else {
+            //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
+            if (sfConfig::get('sf_logging_enabled')) {
+                sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
+            }
+            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
+        }
+        $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
+    }
 
 }

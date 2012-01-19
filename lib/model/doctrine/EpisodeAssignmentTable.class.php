@@ -185,4 +185,74 @@ class EpisodeAssignmentTable extends Doctrine_Table
                 ->execute();
         return $episode_assignments;
     }
+    
+    public function getMisassignedEpisodes($subreddit_id = null)
+    {
+        $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND `episode`.`episode_assignment_id` = ea.`id`";
+        $sql .= (is_null($subreddit_id) ? '' : " AND `episode`.`subreddit_id` = " . $subreddit_id);
+        $sql .= ")
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = ";
+        $sql .= (is_null($subreddit_id) ? '`episode`.`subreddit_id`' : $subreddit_id);
+        $sql .= ")
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+        $assignments = $q->execute();
+        return $assignments;
+    }
+    
+    public function getUnmarkedEpisodesThatMissedDeadlines($subreddit_id = null)
+    {
+        $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id`";
+        $sql .= (is_null($subreddit_id) ? '' : " AND `episode`.`subreddit_id` = " . $subreddit_id);
+        $sql .= ")
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = ";
+        $sql .= (is_null($subreddit_id) ? '`episode`.`subreddit_id`' : $subreddit_id);
+        $sql .= ")
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) < (UNIX_TIMESTAMP() + `deadline`.`seconds`)";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+        $assignments = $q->execute();
+        return $assignments;
+    }
+    
+    public function getEpisodesPossiblyNeedingAssignment($subreddit_id = null)
+    {
+        $sql = "`episode_assignment` ea
+LEFT JOIN `episode` ON (`episode`.`id` = ea.`episode_id` AND `episode`.`is_approved` <> 1 AND `episode`.`release_date` > NOW() AND (`episode`.`episode_assignment_id` IS NULL)";
+        $sql .= (is_null($subreddit_id) ? '' : " AND `episode`.`subreddit_id` = " . $subreddit_id);
+        $sql .= ")
+/* Joing the deadline for the deadline seconds */
+LEFT JOIN `deadline` ON (`deadline`.`author_type_id` = ea.`author_type_id` AND `deadline`.`subreddit_id` = ";
+        $sql .= (is_null($subreddit_id) ? '`episode`.`subreddit_id`' : $subreddit_id);
+        $sql .= ")
+/* Make sure we're using the right deadlines for the episode's subreddit */
+WHERE (ea.`missed_deadline` <> 1 OR ea.`missed_deadline` IS NULL)
+/* Is the episode past the deadline for the assignment in question? */
+AND UNIX_TIMESTAMP(`episode`.`release_date`) > (UNIX_TIMESTAMP() + `deadline`.`seconds`)
+ORDER BY `episode`.`id`,`deadline`.`seconds` DESC";
+        $q = new Doctrine_RawSql();
+        $q->select('{ea.*}')
+                ->from($sql)
+                ->addComponent('ea', 'EpisodeAssignment ea');
+
+        /* Returns assignments closest to the front for each unassigned episode,
+         * in order of closeness. */
+        $assignments = $q->execute();
+        return $assignments;
+    }
 }

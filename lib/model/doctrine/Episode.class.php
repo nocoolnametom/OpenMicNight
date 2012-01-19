@@ -203,8 +203,12 @@ class Episode extends BaseEpisode
                 'acl' => AmazonS3::ACL_PUBLIC,
                     ));
             if ($response->isOK()) {
-                $this->setRemoteUrl($s3->get_object_url($bucket,
-                                                        $this->getNiceFilename()));
+                //$this->setRemoteUrl($s3->get_object_url($bucket,
+                //                                        $this->getNiceFilename()));
+                $this->setRemoteUrl('http://'
+                        . $this->getSubreddit()->getCfDomainName()
+                        . '/'
+                        . urlencode($this->getNiceFilename()));
                 $this->deleteLocalFile($this->getAudioFile());
             }
         } else {
