@@ -80,5 +80,15 @@ class DeadlineTable extends Doctrine_Table
                 ->fetchArray();
         return (count($deadlines) ? $deadlines[0]['author_type_id'] : null);
     }
+    
+    public function getDeadlinesForGivenSubreddits($subreddit_ids = array())
+    {
+        $deadlines = $this->createQuery()
+                ->select('Deadline.subreddit_id, Deadline.author_type_id, Deadline.seconds')
+                ->whereIn('Deadline.subreddit_id', $subreddit_ids)
+                ->orderBy('Deadline.subreddit_id ASC, Deadline.seconds DESC')
+                ->fetchArray();
+        return $deadlines;
+    }
 
 }

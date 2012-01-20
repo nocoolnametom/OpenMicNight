@@ -148,51 +148,82 @@ class SubredditTable extends Doctrine_Table
         /* Returns assignments closest to the front for each unassigned episode,
          * in order of closeness. */
         $assignments = EpisodeAssignmentTable::getInstance()->getEpisodesPossiblyNeedingAssignment();
+        $subreddit_ids = EpisodeAssignmentTable::getInstance()->getSubrbedditsOfEpisodesPossiblyNeedingAssignment();
+        $deadlines = DeadlineTable::getInstance()->getDeadlinesForGivenSubreddits($subreddit_ids);
+        $subreddit_first_authortypes = array();
+        $subreddit_deadline_rules = array();
+        $begun = false;
+        $prev_subreddit_id = null;
+        foreach($deadlines as $deadline)
+        {
+            $subreddit_id = $deadline['subreddit_id'];
+            if ($prev_subreddit_id != $subreddit_id && $begun)
+            {
+                $begun = false;
+                $prev_subreddit_id = $subreddit_id;
+            }
+            if (!$begun)
+            {
+                $subreddit_deadline_rules[$subreddit_id] = array(
+                    $deadline['author_type_id'] => $deadline['seconds'],
+                );
+                $subreddit_first_authortypes[$subreddit_id] = $deadline['author_type_id'];
+                $begun = true;
+            } else {
+                $author_type_id = $deadline['author_type_id'];
+                $subreddit_deadline_rules[$subreddit_id][$author_type_id] = $deadline['seconds'];
+            }
+        }
+        
         $episodes_affected = array();
 
+        // Things used from assignment: episode_id, epsiode, author_type_id, id, sf_guard_user_id
+        // Things used from episode: subreddit_id, surbeddit, release_date, 
+        // Things used from subreddit: getFirstDeadlineId(), getDeadlineRules()
         foreach ($assignments as $assignment) {
-            if (!in_array($assignment->getEpisodeId(), $episodes_affected)) {
+            if (!in_array($assignment['episode_id'], $episodes_affected)) {
                 /* Ignore all subsequent assignments for an episode after the
                  * first!  We should only be dealing with assignments that have
                  * not missed their deadlines! */
-                $episodes_affected[] = $assignment->getEpisodeId();
-                $episode = $assignment->getEpisode();
+                $episodes_affected[] = $assignment['episode_id'];
                 $assign_to_episode = false;
+                $subreddit_id = $assignment['subreddit_id'];
+                $subreddit = SubredditTable::getInstance()->find($subreddit_id);
 
                 /* If the *first* assignment is in the first spot, then assign
-                 * it. */
-                if (!array_key_exists($assignment->getEpisode()->getSubredditId(), $subreddit_first_deadlines))
-                {
-                    $first_deadline_id = $assignment->getEpisode()->getSubreddit()->getFirstDeadlineId();
-                    $first_deadline = DeadlineTable::getInstance()->find($first_deadline_id);
-                    $subreddit_first_deadlines[$assignment->getEpisode()->getSubredditId()] = $first_deadline;
-                }
-                $first_deadline = $subreddit_first_deadlines[$assignment->getEpisode()->getSubredditId()];
+                 * it. */                
+                $deadline_rules = $subreddit_deadline_rules[$subreddit_id];
                 
-                if (!array_key_exists($assignment->getEpisode()->getSubredditId(), $subreddit_deadline_rules))
-                {
-                    $deadline_rules = $assignment->getEpisode()->getSubreddit()->getDeadlineRules();
-                    $subreddit_deadline_rules[$assignment->getEpisode()->getSubredditId()] = $deadline_rules;
-                }
-                $deadline_rules = $subreddit_deadline_rules[$assignment->getEpisode()->getSubredditId()];
+                $author_type_id = $assignment['author_type_id'];
                 
-                if ($assignment->getAuthorTypeId() == $first_deadline->getAuthorTypeId()) {
+                if ($author_type_id == $subreddit_first_authortypes[$subreddit_id]) {
                     $assign_to_episode = true;
                 } else {
                     /* Otherwise, check if we are past the deadline for the
                      * previous deadline. */
-                    $previous_author_type_id = DeadlineTable::getInstance()
+                    
+                    /*$previous_author_type_id = DeadlineTable::getInstance()
                             ->getFirstAuthorTypeIdBySubredditWhereDeadlineIsGreaterThan(
-                            $deadline_rules[$assignment->getAuthorTypeId()],
-                            $episode->getSubredditId());
-                    $past_deadline_for_previous = strtotime($episode->getReleaseDate()) - $deadline_rules[$previous_author_type_id] <= time();
+                            $deadline_rules[$author_type_id],
+                            $subreddit_id);*/
+                    $inverse_deadline_rules = array_reverse($deadline_rules, true);
+                    $previous_author_type_id = null;
+                    foreach($inverse_deadline_rules as $author_type => $seconds)
+                    {
+                        if ($seconds > $deadline_rules[$author_type_id]) {
+                            $previous_author_type_id = $author_type;
+                            break;
+                        }
+                    }
+                    $past_deadline_for_previous = strtotime($assignment['release_date']) - $deadline_rules[$previous_author_type_id] <= time();
                     if ($past_deadline_for_previous) {
                         $assign_to_episode = true;
                     }
                 }
                 if ($assign_to_episode) {
-                    $episode->setEpisodeAssignmentId($assignment->getIncremented());
-                    $episode->save();
+                    $saved_episode = EpisodeTable::getInstance()->find($assignment['episode_id']);
+                    $saved_episode->setEpisodeAssignmentId($assignment['id']);
+                    $saved_episode->save();
                     $newly_assigned_assignments[] = $assignment;
                 }
             }
@@ -200,17 +231,17 @@ class SubredditTable extends Doctrine_Table
 
         // We send the emails for the current deadline we're checking.
         foreach ($passed_deadline_assignments as $assignment) {
-            $this->sendEmailAboutPassedDeadline($assignment->getSfGuardUserId(),
-                                                $assignment->getEpisodeId());
+            $this->sendEmailAboutPassedDeadline($assignment['sf_guard_user_id'],
+                                                $assignment['episode_id']);
         }
 
         foreach ($newly_assigned_assignments as $assignment) {
-            $episode = $assignment->getEpisode();
-            $release_date = strtotime($episode->getReleaseDate());
-            $seconds = $deadline_rules[$assignment->getAuthorTypeId()];
+            $release_date = strtotime($assignment['release_date']);
+            $author_type_id = $assignment['author_type_id'];
+            $seconds = $deadline_rules[$author_type_id];
             $deadline = $release_date - $seconds;
-            $this->sendEmailAboutNewAssignment($assignment->getSfGuardUserId(),
-                                               $episode->getIncremented(),
+            $this->sendEmailAboutNewAssignment($assignment['sf_guard_user_id'],
+                                               $assignment['episode_id'],
                                                $deadline);
         }
     }

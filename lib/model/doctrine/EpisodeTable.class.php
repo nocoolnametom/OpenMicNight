@@ -18,6 +18,11 @@ class EpisodeTable extends Doctrine_Table
         return Doctrine_Core::getTable('Episode');
     }
 
+    public static function grabIdFromArray($value)
+    {
+        return (is_array($value) ? $value['id'] : null);
+    }
+
     /**
      * Returns the first Episode found where the release date is within a given
      * number of seconds from now.
@@ -32,21 +37,50 @@ class EpisodeTable extends Doctrine_Table
      * @param int $episode_id The incremented ID of an Episode object
      * @return Episode        The first found Episode object.
      */
-    public function getOneEpisodeReleasedWithinSeconds($seconds,
-                                                       $episode_id = null)
+    public function getOneEpisodeReleasedWithinSeconds($seconds, $episode_id = null)
     {
         $episode_assignments = $this->createQuery()
-                ->where('(Episode.release_date - NOW()) < ?',
-                           $seconds);
+                ->where('(Episode.release_date - NOW()) < ?', $seconds);
         if ($episode_id)
-            $episode_assignments = $episode_assignments->andWhere('Episode.id = ?',
-                                                               $episode_id);
+            $episode_assignments = $episode_assignments->andWhere('Episode.id = ?', $episode_id);
 
         $episode_assignments = $episode_assignments->execute()
                 ->getFirst();
         return $episode_assignments;
     }
-    
+
+    public function getUnassignedFutureEpisodes($subreddit_id = null)
+    {
+        $episodes = $this->createQuery()
+                ->where('Episode.release_date > ?', date('Y-m-d H:i:s'))
+                ->andWhere('Episode.episode_assignment_id IS NULL');
+        if ($subreddit_id)
+            $episodes = $episodes->andWhere('Episode.subreddit_id = ?', $subreddit_id);
+        $episodes = $episodes->execute();
+        return $episodes;
+    }
+
+    public function getRandomUnassignedFutureEpisode($subreddit_id = null)
+    {
+        $t = microtime();
+        $subquery = $this->createQuery()
+                ->select('Episode.id')
+                ->where('Episode.release_date > ?', date('Y-m-d H:i:s'));
+        if ($subreddit_id)
+            $subquery = $subquery->andWhere('Episode.subreddit_id = ?', $subreddit_id);
+        $subquery = $subquery
+                ->andWhere('Episode.episode_assignment_id IS NULL')
+                ->execute(array(), Doctrine_Core::HYDRATE_NONE);
+        $t = microtime();
+        $random_key = rand(0, count($subquery)-1);
+        $random_id = $subquery[$random_key];
+        $query = $this->createQuery()
+                ->where('Episode.id = ?', $random_id[0]);
+        $result = $query->execute()
+                ->getFirst();
+        return $result;
+    }
+
     public function getCurrentReleaseDate($episode_id)
     {
         $release_date = $this->createQuery()
