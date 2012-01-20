@@ -46,29 +46,15 @@ EOF;
         ProjectConfiguration::registerCron();
 
         $quiet = (bool) $options['quiet'];
-        
+
         $passed = array();
-        
+
         $assigned = array();
 
         if ($arguments['subreddit'] == '%') {
-            // Cycle through all subreddits.
-            /*
-            $subreddits = SubredditTable::getInstance()->findAll();
-            $num_of_subreddits = count($subreddits);
+
             if (!$quiet)
-                echo "Advancing EpisodeAssignments for $num_of_subreddits Subreddits...";
-            $first = true;
-            $iterator = 0;
-            foreach ($subreddits as $subreddit) {
-                $iterator++;
-                if (!$quiet)
-                    echo ($first ? "\n Subreddit: " : " ") . $iterator;
-                $subreddit->advanceEpisodeAssignments();
-                $first = false;
-            }
-            */
-            echo "Advancing EpisodeAssignments for all Subreddits...";
+                echo "Advancing EpisodeAssignments for all Subreddits...";
             SubredditTable::getInstance()->advanceEpisodeAssignments();
         } else {
             $subreddit = SubredditTable::getInstance()->findOneByName($arguments['subreddit']);
@@ -80,7 +66,7 @@ EOF;
                 throw new sfException('Cannot find Subreddit: ' . $arguments['subreddit']);
             }
         }
-        
+
         if (!$quiet)
             echo "\n";
     }
