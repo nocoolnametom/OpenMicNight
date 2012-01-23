@@ -1,6 +1,6 @@
 <?php use_helper('I18N', 'recaptcha') ?>
 
-<h2><?php echo __('Send Feedback', null, 'home') ?></h2>
+<h2 class="orangeredbar"><?php echo __('Send Feedback', null, 'home') ?></h2>
 
 <?php echo form_tag('@feedback_send'); ?>
     <table>

@@ -2,8 +2,8 @@
 <link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?> Atom" />
 <link href="<?php echo url_for('@feed_subreddit_rss?domain=' . $subreddit->getDomain()) ?>" type="application/rss+xml" rel="alternate" title="<?php echo $subreddit ?> RSS" />
 <?php end_slot() ?>
-<div id="feed_link" style="float: right;"><?php echo link_to(image_tag('rss.svg', array('style' => 'height: 32px; width: auto;')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?></div>
-<h2><?php echo $subreddit ?></h2>
+<div id="feed_link"><?php echo link_to(image_tag('rss.svg'), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?></div>
+<h2 class="orangeredbar"><?php echo $subreddit ?></h2>
 <?php if ($sf_user->isAuthenticated()): ?>
     <?php if ($membership && in_array($membership->getMembership()->getType(), array('admin'))): ?>
         <div class="subreddit_edit_link"><?php echo link_to('Edit', 'subreddit/edit?domain=' . $subreddit->getDomain()); ?></div>

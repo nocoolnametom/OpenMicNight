@@ -1,4 +1,4 @@
-<h1>Edit Deadline</h1>
+<h2 class="orangeredbar">Edit Deadline</h2>
 
 <?php use_stylesheets_for_form($form) ?>
 <?php use_javascripts_for_form($form) ?>

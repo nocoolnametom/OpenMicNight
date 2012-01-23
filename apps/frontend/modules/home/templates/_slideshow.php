@@ -1,4 +1,4 @@
-<div id="slideshow" style="border:1px solid black; width: 100%; max-width: 570px; height: 230px;">
+<div id="slideshow">
     <?php
     include_partial('build_slideshow',
                     array(

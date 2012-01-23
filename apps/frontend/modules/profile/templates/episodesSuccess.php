@@ -3,16 +3,17 @@
 <link href="<?php echo url_for('@feed_user_atom?reddit_validation_key=' . $key); ?>" type="application/atom+xml" rel="alternate" title="<?php echo $user->getUsername(); ?> Atom" />
 <link href="<?php echo url_for('@feed_user_rss?reddit_validation_key=' . $key); ?>" type="application/rss+xml" rel="alternate" title="<?php echo $user->getUsername(); ?> RSS" />
 <?php end_slot() ?>
+<h2  class="orangeredbar">My Episodes</h2>
 <?php $deadlines = $sf_data->getRaw('deadlines') ?>
 <?php if (count($approvals)): ?>
-    <h2>Episodes Awaiting Approval</h2>
+    <h2 class="orangeredbar">Episodes Awaiting Approval</h2>
     <?php foreach ($approvals as $episode): ?>
         <div class="episode">
             <span class="subreddit_name">/r/<?php echo $subreddits[$episode->getSubredditId()]->getDomain(); ?></span>
             <span class="release_date"><?php
         echo link_to(date("g:ia, D j M Y", strtotime($episode->getReleaseDate())), 'episode/approval?id=' . $episode->getIncremented());
         ?></span>
-            <span class="deadline" style="font-size: smaller; font-style: italic"><?php
+            <span class="deadline"><?php
         if (array_key_exists($assignment->getEpisode()->getSubredditId(), $deadlines)
                 && array_key_exists($assignment->getAuthorTypeId(), $deadlines[$assignment->getEpisode()->getSubredditId()])) {
             $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
@@ -34,7 +35,7 @@
             <span class="release_date"><?php
         echo link_to(date("g:ia, D j M Y", strtotime($assignment->getEpisode()->getReleaseDate())), 'episode/edit?id=' . $assignment->getEpisode()->getIncremented());
         ?></span>
-            <span class="deadline" style="font-size: smaller; font-style: italic"><?php
+            <span class="deadline"><?php
         if (array_key_exists($assignment->getEpisode()->getSubredditId(), $deadlines)
                 && array_key_exists($assignment->getAuthorTypeId(), $deadlines[$assignment->getEpisode()->getSubredditId()])) {
             $release_date = strtotime($assignment->getEpisode()->getReleaseDate());
@@ -56,7 +57,7 @@
             <span class=""><?php
         echo date("g:ia, D j M Y", strtotime($assignment->getEpisode()->getReleaseDate()));
                 ?></span>
-            <span class="deadline" style="font-size: smaller; font-style: italic"><?php
+            <span class="deadline"><?php
         if (array_key_exists($assignment->getEpisode()->getSubredditId(), $deadlines)
                 && array_key_exists($assignment->getAuthorTypeId(), $deadlines[$assignment->getEpisode()->getSubredditId()])) {
             $release_date = strtotime($assignment->getEpisode()->getReleaseDate());

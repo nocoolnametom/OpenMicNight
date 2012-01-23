@@ -49,7 +49,7 @@
             $('#' + file.id + " b").html(file.percent + "%");
             if (file.percent != 100)
             {    
-                $('#audio_uploadfiles_span').html("<span style=\"text-size: smaller;\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
+                $('#audio_uploadfiles_span').html("<span class=\"pluploader_warning\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
             }
             $('#remove_audio').html("");
         });
@@ -77,7 +77,7 @@
 <div id="audio_uploader">
     <?php include_partial('episode/html5_audio_player', array(
         'episode' => $form->getObject(),
-        'width' => 0,
+        'class' => 'not_full',
     )); ?>
     <?php if ($form->getObject()->getAudioFile() && !$form->getObject()->getSubmittedAt() && !$form->getObject()->getApprovedAt()): ?>
         <div id="remove_audio">

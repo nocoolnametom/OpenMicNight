@@ -1,4 +1,4 @@
-<h1>Episodes List</h1>
+<h2>Episodes List</h2>
 
 <?php if (count($episodes)): ?>
 <table>

@@ -1,4 +1,4 @@
-<h1>Deadlines for <?php echo $subreddit->getName() ?></h1>
+<h2 class="orangeredbar">Deadlines for <?php echo $subreddit->getName() ?></h2>
 
 <?php echo link_to('Back to Subreddit',
                     'subreddit/show?domain=' . $subreddit->getDomain());

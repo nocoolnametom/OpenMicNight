@@ -1,4 +1,4 @@
-<h1>Add Deadline</h1>
+<h2 class="orangeredbar">Add Deadline</h2>
 
 <?php use_stylesheets_for_form($form) ?>
 <?php use_javascripts_for_form($form) ?>
@@ -9,7 +9,7 @@
       <tr>
         <td colspan="2">
           <?php echo $form->renderHiddenFields(false) ?>
-          <a href="<?php echo url_for('subreddit/deadlines?id=' . $subreddit->getDomain()) ?>">Back to Deadlines</a>
+          <a href="<?php echo url_for('subreddit/deadlines?domain=' . $subreddit->getDomain()) ?>">Back to Deadlines</a>
           <input type="submit" value="Save" />
         </td>
       </tr>

@@ -1,4 +1,4 @@
-<h1>Subreddit Membership</h1>
+<h2 class="orangeredbar">Subreddit Membership</h2>
 <?php echo link_to('Back to Subreddit', 'subreddit/show?domain=' . $subreddit->getDomain()) ?>
 
 <table>

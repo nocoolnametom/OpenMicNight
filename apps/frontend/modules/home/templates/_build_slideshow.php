@@ -16,7 +16,7 @@
                 <strong>
                     /r/<?php echo $subreddits[$episode->getSubredditId()]->getDomain() ?>
         <?php
-        echo ($episode->getIsNsfw() ? '<span style="color:red;">nsfw</span>' : '');
+        echo ($episode->getIsNsfw() ? '<span class="nsfw">nsfw</span>' : '');
 
         ?>
                 </strong>

@@ -1,4 +1,4 @@
-<h1>Edit Episode</h1>
+<h2>Edit Episode</h2>
 <?php if (strtotime($form->getObject()->getReleaseDate()) > time()): ?>
     <?php $submitted_at = date("g:ia, D j M Y", strtotime($form->getObject()->getSubmittedAt())); ?>
     <?php $approved_at = date("g:ia, D j M Y", strtotime($form->getObject()->getApprovedAt())); ?>

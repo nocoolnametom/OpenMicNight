@@ -87,7 +87,7 @@
         echo link_to('Delete Episode', '@episode_delete?id=' . $form->getObject()->getId(), array(
             'method' => 'delete',
             'confirm' => 'Are you sure? Like, REALLY sure?  There\'s no way at all that we\'ll ever be able to undo this.  It\'ll be GONE.',
-            'style' => 'float: right;',
+            'id' => 'episode_delete_link',
         ));
         ?>
     <?php endif; ?>

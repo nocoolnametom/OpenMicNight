@@ -1,2 +1,2 @@
-<?php $class = $sf_user->getApiUserId() ? 'fancybox fancybox.ajax' : ''; ?>
-<a href="<?php echo url_for('@feedback') ?>" class="<?php echo $class; ?>" style="<?php echo (isset($link_style) ? $link_style : '') ?>"><?php echo $feedback_text ?></a>
+<?php $feedback_class = $sf_user->getApiUserId() ? ' fancybox fancybox.ajax' : ''; ?>
+<a href="<?php echo url_for('@feedback') ?>" class="<?php if (isset($class)) {echo $class;} ?><?php echo $feedback_class; ?>" ><?php echo $feedback_text ?></a>

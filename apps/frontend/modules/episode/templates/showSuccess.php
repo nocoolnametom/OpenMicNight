@@ -14,9 +14,9 @@ echo link_to($subreddit->getName(),
 
 ?></h4>
 
-<div id="episode_content" style="width: 100%; max-width: 960px;">
+<div id="episode_content">
     <?php if ($sf_user->getApiUserId() == $assignment->getSfGuardUserId()): ?>
-        <div id="edit_link" style="float: right;">
+        <div id="edit_link">
             <?php
             echo link_to('Edit Episode', 'episode/edit?id=' . $episode->getId());
 
@@ -28,16 +28,16 @@ echo link_to($subreddit->getName(),
         echo date('Y-m-d g:ia', strtotime($episode->getReleaseDate()));
         ?>, by <?php echo $user->getUsername(); ?>
     </div>
-    <div id="episode_title" style="width: 100%; min-height: 2em; vertical-align: middle; max-width: 960px; background-color: orangered; color: white;">
-        <h2 style="font-weight: bolder; padding: 10px; margin: 0;">
+    <div id="episode_title">
+        <h2>
             <?php echo $episode->getTitle(); ?>
             <?php if ($episode->getIsNsfw()): ?>
-                <span class="nsfw" style="font-weight: lighter; font-size: smaller;"> (nsfw)</span>
+                <span class="nsfw"> (nsfw)</span>
             <?php endif; ?>
         </h2>
     </div>
-    <div id="content_columns" style="margin-top: -0.25em;">
-        <div id="media_column" style="max-width: 575px; float: left; margin-left: -3px; margin-right: 10px;">
+    <div id="content_columns">
+        <div id="media_column">
             <table>
                 <?php if ($episode->getGraphicFile()): ?>
                 <tr>
@@ -47,12 +47,12 @@ echo link_to($subreddit->getName(),
                 </tr>
                 <?php endif; ?>
                 <tr>
-                    <td style="min-width: 290px;">
+                    <td class="episode_audio_player">
                         <?php
                         include_partial('episode/html5_audio_player',
                                         array(
                             'episode' => $episode,
-                            'width' => '100%',
+                            'class' => 'full',
                         ));
 
                         ?>
@@ -60,9 +60,9 @@ echo link_to($subreddit->getName(),
                 </tr>
             </table>
         </div>
-        <div id="episode_description" style="padding-top: 0.25em;">
+        <div id="episode_description">
             <?php echo html_entity_decode($sf_user->formatMarkdown($episode->getDescription())); ?>
         </div>
     </div>
-    <div id="reddit_post" style="clear: both;"><?php echo '';//link_to('View this on Reddit', 'http://www.reddit.com/'); ?></div>
+    <div id="reddit_post"><?php echo '';//link_to('View this on Reddit', 'http://www.reddit.com/'); ?></div>
 </div>

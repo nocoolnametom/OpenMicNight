@@ -1,4 +1,4 @@
-<h1>Edit Membership for <?php echo $username ?></h1>
+<h2 class="orangeredbar">Edit Membership for <?php echo $username ?></h2>
 
 <?php use_stylesheets_for_form($form) ?>
 <?php use_javascripts_for_form($form) ?>

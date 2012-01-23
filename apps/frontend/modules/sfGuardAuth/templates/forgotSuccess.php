@@ -1,5 +1,5 @@
 <?php use_helper('I18N', 'recaptcha') ?>
-<h2><?php echo __('Forgot your password?', null, 'sf_guard') ?></h2>
+<h2 class="orangeredbar"><?php echo __('Forgot your password?', null, 'sf_guard') ?></h2>
 <p>
 <?php echo __('Fill out the form with your email address to reset your password.', null, 'sf_guard') ?>
 </p>

@@ -2,17 +2,17 @@
 <link href="<?php echo url_for('@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>" type="application/atom+xml" rel="alternate" title="<?php echo $subreddit ?> Atom" />
 <link href="<?php echo url_for('@feed_subreddit_rss?domain=' . $subreddit->getDomain()) ?>" type="application/rss+xml" rel="alternate" title="<?php echo $subreddit ?> RSS" />
 <?php end_slot() ?>
-<h2><?php echo $subreddit ?></h2>
+<h2 class="orangeredbar"><?php echo $subreddit ?></h2>
 <h3>Tropo Telephone Integration</h3>
 <?php echo link_to('Back', 'subreddit/show?domain=' . $subreddit->getDomain()) ?>
 <div id="tropo_instructions">
-    <div style="padding-top: 1em;">You can add the ability to record episodes using a phone for those on
+    <p>You can add the ability to record episodes using a phone for those on
         your subreddit who may not have access to regular recording equipment.
         While the quality is much poorer than recording on a computer with a
         microphone, it can be a great asset to help people participate
-        more.</div>
+        more.</p>
 
-    <div style="padding-top: 1em;">To enable phone recording, you will have to
+    <p>To enable phone recording, you will have to
         create an account at
         <?php echo link_to('Tropo.com', 'http://tropo.com') ?>.  Tropo has
         specialized "applications" that handle telephone interactions, so we'll
@@ -22,37 +22,37 @@
         already been done, so to be fair you should sign up for a production
         account.  Tropo should have the pricing listed on their home page.  We
         can't prevent you from using a development account, but it's not a nice
-        thing to do.</div>
+        thing to do.</p>
 
-    <div style="padding-top: 1em;">Once you have an account, go to your account
+    <p>Once you have an account, go to your account
         page, and under the "Your Application" area create  a new application.
         For the style select "Tropo Scripting"; this means that
         <?php echo ProjectConfiguration::getApplicationName() ?> will give
-        Tropo the information it needs to answer calls.</div>
+        Tropo the information it needs to answer calls.</p>
 
-    <div style="padding-top: 1em;">You can give your Tropo application any name
+    <p>You can give your Tropo application any name
         you want, but it'd be a good idea to have something that will remind you
         that it's handling the <?php echo $subreddit ?> subreddit in
         <?php echo ProjectConfiguration::getApplicationName() ?>.  In the box
         that asks what URL powers your app, enter the following:
         <blockquote><?php echo url_for('@subreddit_tropo?domain=' . $subreddit->getDomain(), true) ?></blockquote>
-        Then click the button to create your application.</div>
+        Then click the button to create your application.</p>
 
-    <div style="padding-top: 1em;">The phone numbers section should display a
+    <p>The phone numbers section should display a
         list of free computer-based telephony access numbers.  To add a phone
         number that a physical phone can dial you'll have to add a new phone
         number.  Different numbers have different prices, so makes sure you get
-        the cheapest number that will serve the majority of your users.</div>
+        the cheapest number that will serve the majority of your users.</p>
 
-    <div style="padding-top: 1em;">Once you have the phone numbers you want,
+    <p>Once you have the phone numbers you want,
         enter them into the form on this page.  These phone numbers will then
-        appear to users as an option for recording their episodes.</div>
+        appear to users as an option for recording their episodes.</p>
 
-    <div style="padding-top: 1em;">It's your responsibility to keep the phone
+    <p>It's your responsibility to keep the phone
         numbers contained here on <?php echo ProjectConfiguration::getApplicationName() ?>
         accurate to what your Tropo application offers.  To turn off Tropo
         integration simply delete all phone numbers both her and on
-        Tropo.</div>
+        Tropo.</p>
 </div>
 
 <div id="phone_add_form">

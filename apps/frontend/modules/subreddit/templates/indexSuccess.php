@@ -2,12 +2,12 @@
 <link href="<?php echo url_for('@feed_index_atom') ?>" type="application/atom+xml" rel="alternate" title="Main Feed Atom" />
 <link href="<?php echo url_for('@feed_index_rss') ?>" type="application/rss+xml" rel="alternate" title="Main Feed RSS" />
 <?php end_slot() ?>
-<h2>Subreddits</h2>
+<h2 class="orangeredbar">Subreddits</h2>
 
-<ul style="list-style: none; margin: 0; padding: 0;">
+<ul id ="subreddit_list">
     <?php foreach ($subreddits as $subreddit): ?>
-        <li style="padding-bottom: 0.25em;">
-            <?php echo link_to(image_tag('rss.svg',array('style' => 'height: 1em; width: auto;')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>
+        <li>
+            <?php echo link_to(image_tag('rss.svg',array('class' => 'little_rss_icon')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>
             <?php echo link_to($subreddit->getName(), url_for('subreddit/show?domain=' . $subreddit->getDomain())) ?>
         </li>
         <?php endforeach; ?>

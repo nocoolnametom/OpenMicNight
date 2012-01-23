@@ -1,11 +1,11 @@
-<h2>About Us</h2>
+<h2 class="orangeredbar">About Us</h2>
 
-<div class="about_person" style="clear: both; width: 100%; height: auto; background-color: linen;">
-    <figure class="about_person_image-left" style="float: left; display: table; width: 1px;">
-        <?php echo image_tag('doggetto.jpg', array('style' => 'display: table-row;')) ?>
-        <figcaption style="font-size: smaller; font-style: italic; display: table-row;">Tom looks a lot like this, only a bit older and fatter.</figcaption>
+<div class="about_person">
+    <figure class="about_person_image-left">
+        <?php echo image_tag('doggetto.jpg') ?>
+        <figcaption>Tom looks a lot like this, only a bit older and fatter.</figcaption>
     </figure>
-    <div class="about_person_description" style="font-size: larger;">
+    <div class="about_person_description">
         <h3>Tom Doggett</h3>
         <h4>Currently Everyman<br/>Lead Developer, Designer, Programmer,
             Creator, Owner, and Ruler</h4>

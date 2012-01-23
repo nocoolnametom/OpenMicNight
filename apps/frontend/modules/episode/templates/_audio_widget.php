@@ -31,4 +31,4 @@
 </script>
 
 <div id="audio_uploader">There was an error creating the download window.</div>
-<div style="font-size:small;">Please wait before your file is uploaded before submitting any further changes to the episode.</div>
+<div class="pluploader_warning">Please wait before your file is uploaded before submitting any further changes to the episode.</div>

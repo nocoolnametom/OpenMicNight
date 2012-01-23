@@ -14,6 +14,7 @@ default:
 
   stylesheets:
     - main.css
+    - herddit.css
     - //fonts.googleapis.com/css?family=Arizonia
     - coin-slider-styles.css
     - fancybox/jquery.fancybox.css

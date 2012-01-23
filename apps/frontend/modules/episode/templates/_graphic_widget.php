@@ -52,7 +52,7 @@
             $('#' + file.id + " b").html(file.percent + "%");
             if (file.percent != 100)
             {    
-                $('#graphic_uploadfiles_span').html("<span style=\"text-size: smaller;\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
+                $('#graphic_uploadfiles_span').html("<span class=\"pluploader_warning\">Please wait before your file is uploaded before submitting any further changes to the episode.</span>");
             }
             $('#remove_graphic').html("");
         });

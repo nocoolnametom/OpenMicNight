@@ -1,3 +1,5 @@
+<h2 class="orangeredbar">My Messages</h2>
+
 <?php if (count($received_messages)): ?>
 <h2>Received</h2>
 <table>
