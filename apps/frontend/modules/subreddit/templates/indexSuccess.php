@@ -7,7 +7,7 @@
 <ul id ="subreddit_list">
     <?php foreach ($subreddits as $subreddit): ?>
         <li>
-            <?php echo link_to(image_tag('rss.svg',array('class' => 'little_rss_icon')), '@feed_subreddit_atom?domain=' . $subreddit->getDomain()) ?>
+            <?php echo link_to(image_tag('rss.svg',array('class' => 'little_rss_icon')), '@feed_subreddit_rss?domain=' . $subreddit->getDomain()) ?>
             <?php echo link_to($subreddit->getName(), url_for('subreddit/show?domain=' . $subreddit->getDomain())) ?>
         </li>
         <?php endforeach; ?>
