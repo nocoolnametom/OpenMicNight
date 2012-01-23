@@ -121,6 +121,20 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return 'herddit-';
     }
+    
+    /* Ignores the prefix set above. */
+    /* You will have to set this one up manually. */
+    static public function getApplicationAmazonBucketName()
+    {
+        return 'herdditmainstuff';
+    }
+    
+    /* Ignores the prefix set above. */
+    /* You will have to set this one up manually. */
+    static public function getApplicationAmazonCloudFrontUrl()
+    {
+        return '//d1v6agip99w3iq.cloudfront.net/';
+    }
 
     static public function getEpisodeAudioFileLocalDirectory()
     {
