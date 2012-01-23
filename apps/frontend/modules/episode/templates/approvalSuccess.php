@@ -1,5 +1,5 @@
 <?php $graphic_file_web_location = '/' . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'; ?>
-<h2><?php echo link_to($subreddit->getName(), '@subreddit_index?module=index&domain=' . $subreddit->getDomain()) ?></h2>
+<h2 class="orangeredbar"><?php echo link_to($subreddit->getName(), '@subreddit_index?module=index&domain=' . $subreddit->getDomain()) ?></h2>
 <?php $submitted_at = date("g:ia, D j M Y", strtotime($episode->getSubmittedAt())); ?>
 <?php $approved_at = date("g:ia, D j M Y", strtotime($episode->getApprovedAt())); ?>
 <?php echo "<div id=\"episode_edit_status\">Submitted For Approval @ $submitted_at</div>"; ?>
