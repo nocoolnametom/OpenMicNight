@@ -153,7 +153,7 @@ class Episode extends BaseEpisode
     {
         if (!$this->getGraphicFile())
             return null;
-        if ($this->getIsApproved()) {
+        if () {time() > strtotime($this->getReleaseDate());
             return rtrim(ProjectConfiguration::getApplicationAmazonCloudFrontUrl(), '/') . '/upload/' . $this->getGraphicFile();
         } else {
             return rtrim(ProjectConfiguration::getApplicationAmazonBucketUrl(), '/') . '/upload/' . $this->getGraphicFile();
