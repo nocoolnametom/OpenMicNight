@@ -155,7 +155,7 @@ class homeActions extends sfActions
         if (count($subreddit_ids)) {
             $episode_data = Api::getInstance()->get('episode/released?nwfw=&subreddit_id='
                     . implode(',', $subreddit_ids), true);
-            $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
+            $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
         }
 
         return $episodes;
