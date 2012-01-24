@@ -39,8 +39,8 @@ class Subreddit extends BaseSubreddit
                         ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
                 $this->setBucketName($bucket_name);
             }
-            if (!$this->getCfDistId() || strlen($this->getCfDistId() == 0)) {
-                $results = $this->createAmazonDistribution($bucket_name);
+            if ($this->getBucketName() && (!$this->getCfDistId() || strlen($this->getCfDistId() == 0))) {
+                $results = $this->createAmazonDistribution($this->getBucketName());
                 if ($results !== false) {
                     $this->setCfDistId($results['dist_id']);
                     $this->setCfDomainName($results['domain_name']);
