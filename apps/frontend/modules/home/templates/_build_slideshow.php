@@ -4,11 +4,7 @@
     <?php foreach ($episodes as $episode): ?>
         <a href="<?php echo url_for('@episode_show?id=' . $episode->getIncremented()) ?>" target="_blank">
             <?php
-            $image = ($episode->getGraphicFile() && !$episode->getIsNsfw() ? '/'
-                            . trim(str_replace(sfConfig::get('sf_web_dir'), '',
-                                                             ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()),
-                                                             '/') . '/'
-                            . $episode->getGraphicFile() : 'gradient.jpg');
+            $image = ($episode->getGraphicFile() && !$episode->getIsNsfw() ? $episode->getGraphicUrl() : 'gradient.jpg');
 
             ?>
             <?php echo image_tag($image) ?>
