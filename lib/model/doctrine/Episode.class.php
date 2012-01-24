@@ -13,6 +13,18 @@
 class Episode extends BaseEpisode
 {
 
+    public $_skip_backup = false;
+
+    public function setSkipBackup($value)
+    {
+        $this->_skip_backup = (bool) $value;
+    }
+
+    public function getSkipBackup($value)
+    {
+        return (bool) $this->_skip_backup;
+    }
+
     /**
      * Returns the Episode title
      *
@@ -20,7 +32,7 @@ class Episode extends BaseEpisode
      */
     public function __toString()
     {
-        return (string)$this->getTitle();
+        return (string) $this->getTitle();
     }
 
     public function setTitle($value)
@@ -66,7 +78,7 @@ class Episode extends BaseEpisode
 
         if (is_null($episode_assignment_id) || is_null($episode_assignment))
             return;
-        
+
         /* If they're not within their Deadline we cannot save them to the
          * Episode.
          */
@@ -89,7 +101,7 @@ class Episode extends BaseEpisode
         }
 
         // Episode must also have a file attached
-        if (!$this->getAudioFile()){
+        if (!$this->getAudioFile()) {
             return;
         }
 
@@ -116,8 +128,7 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $approver_id, $this->getSubredditId(),
-                array('moderator', 'admin')
+                $approver_id, $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -134,9 +145,19 @@ class Episode extends BaseEpisode
     {
         $nice_filename = $this->_get('nice_filename');
         $nice_filename = ($nice_filename ? $nice_filename : $this->getAudioFile());
-        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_",
-                                      $nice_filename);
+        $nice_filename = preg_replace("/[^a-zA-Z0-9\-:\(\)\.]/", "_", $nice_filename);
         return $nice_filename;
+    }
+
+    public function getGraphicUrl()
+    {
+        if (!$this->getGraphicFile())
+            return null;
+        if ($this->getIsApproved()) {
+            return rtrim(ProjectConfiguration::getApplicationAmazonCloudFrontUrl(), '/') . '/upload/' . $this->getGraphicFile();
+        } else {
+            return rtrim(ProjectConfiguration::getApplicationAmazonBucketUrl(), '/') . '/upload/' . $this->getGraphicFile();
+        }
     }
 
     public function setIsApproved($is_approved)
@@ -161,8 +182,7 @@ class Episode extends BaseEpisode
         // The Approver must actually *be* an approver in the Episode Subreddit.
         $membership = sfGuardUserSubredditMembershipTable::getInstance()
                 ->getFirstByUserSubredditAndMemberships(
-                $this->getApprovedBy(), $this->getSubredditId(),
-                array('moderator', 'admin')
+                $this->getApprovedBy(), $this->getSubredditId(), array('moderator', 'admin')
         );
         if (!$membership)
             return;
@@ -185,6 +205,60 @@ class Episode extends BaseEpisode
         $this->_set('is_approved', $is_approved);
     }
 
+    public function saveFileToApplicationBucket($file_location, $filename, $prefix, $permissions = null)
+    {
+        $permissions = is_null($permissions) ? AmazonS3::ACL_PRIVATE : $permissions;
+        $location = $file_location . $filename;
+        if (!file_exists($location))
+            throw new Exception("No local file to upload!");
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
+        if ($s3->if_bucket_exists($bucket)) {
+            $s3->delete_object($bucket, $prefix . '/' . $filename);
+            $response = $s3->create_object($bucket, $prefix . '/' . $filename, array(
+                'fileUpload' => $location,
+                'acl' => $permissions,
+                    ));
+            if (!$response->isOK()) {
+                throw new Exception("Error uploading file!");
+            }
+        } else {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        return $response;
+    }
+    
+    public function pullAudioFileFromApplicationBucket()
+    {
+        ProjectConfiguration::registerAws();
+        $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
+        $s3 = new AmazonS3;
+        $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
+        if (!$s3->if_bucket_exists($bucket)) {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        $response = $s3->get_object($bucket, 'audio/' . $this->getAudioFile(), array(
+            'fileDownload' => $file_location . $this->getAudioFile()
+                ));
+    }
+    
+    public function removeFileFromApplicationBucket($filename, $prefix)
+    {
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
+        if ($s3->if_bucket_exists($bucket)) {
+            $response =$s3->delete_object($bucket, $prefix . '/' . $filename);
+            if (!$response->isOK()) {
+                throw new Exception("Error deleting file!");
+            }
+        } else {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        return $response;
+    }
+
     public function moveEpisodeFileToAmazon()
     {
         if (!$this->getAudioFile())
@@ -197,8 +271,7 @@ class Episode extends BaseEpisode
         $s3 = new AmazonS3;
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
-            $response = $s3->create_object($bucket, $this->getNiceFilename(),
-                                           array(
+            $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
                 'fileUpload' => $file_location . $this->getAudioFile(),
                 'acl' => AmazonS3::ACL_PUBLIC,
                     ));
@@ -226,8 +299,7 @@ class Episode extends BaseEpisode
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
         }
-        $response = $s3->get_object($bucket, $this->getNiceFilename(),
-                                    array(
+        $response = $s3->get_object($bucket, $this->getNiceFilename(), array(
             'fileDownload' => $file_location . $this->getAudioFile()
                 ));
         if (!$response->isOK())
@@ -274,8 +346,7 @@ class Episode extends BaseEpisode
         if (!$is_remote && $audio_filename)
             $this->deleteLocalFile($audio_filename);
         if ($graphic_filename)
-            $this->deleteLocalFile($graphic_filename,
-                                   ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
+            $this->deleteLocalFile($graphic_filename, ProjectConfiguration::getEpisodeGraphicFileLocalDirectory());
     }
 
     public function getEpisodeAssignments()
@@ -295,6 +366,24 @@ class Episode extends BaseEpisode
 
     public function save(Doctrine_Connection $conn = null)
     {
+        if (!$this->isNew() && !$this->getSkipBackup() && in_array('graphic_file', $this->_modified) && $this->_get('graphic_file')) {
+            $file_location = rtrim(ProjectConfiguration::getEpisodeGraphicFileLocalDirectory(), '/') . '/';
+            $filename = $this->_get('graphic_file');
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $this->saveFileToApplicationBucket($file_location, $filename, 'upload', AmazonS3::ACL_PUBLIC);
+            }
+        }
+
+        if (!$this->isNew() && !$this->getSkipBackup() && in_array('audio_file', $this->_modified) && $this->_get('audio_file')) {
+            $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
+            $filename = $this->_get('audio_file');
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $this->saveFileToApplicationBucket($file_location, $filename, 'audio');
+            }
+        }
+
         if (!$this->isNew() && in_array('is_submitted', $this->_modified) && $this->_get('is_submitted')) {
             /* The episode has been submitted.  We need to send an email about
              * it to the subreddit moderators.
@@ -302,8 +391,7 @@ class Episode extends BaseEpisode
             $types = array(
                 'moderator',
             );
-            $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(),
-                                                                                                               $types);
+            $memberships = sfGuardUserSubredditMembershipTable::getInstance()->getAllBySubredditAndMemberships($this->getSubredditId(), $types);
             $initial_is_submitted = $this->_get('is_submitted');
             $initial_submitted_at = $this->_get('submitted_at');
             foreach ($memberships as $membership) {
@@ -312,8 +400,7 @@ class Episode extends BaseEpisode
                 ProjectConfiguration::registerZend();
 
                 $mail = new Zend_Mail();
-                $mail->addHeader('X-MailGenerator',
-                                 ProjectConfiguration::getApplicationName());
+                $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
                 $parameters = array(
                     'user_id' => $membership->getSfGuardUserId(),
                     'episode_id' => $this->getIncremented(),
@@ -324,18 +411,14 @@ class Episode extends BaseEpisode
                 $name = ($user->getPreferredName() ?
                                 $user->getPreferredName() : $user->getFullName());
 
-                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('EpisodeApprovalPending',
-                                                                                   $user->getPreferredLanguage());
+                $email = EmailTable::getInstance()->getFirstByEmailTypeAndLanguage('EpisodeApprovalPending', $user->getPreferredLanguage());
 
                 $subject = $email->generateSubject($parameters);
                 $body = $email->generateBodyText($parameters, $prefer_html);
 
                 $mail->setBodyText($body);
 
-                $mail->setFrom(sfConfig::get('app_email_address',
-                                             ProjectConfiguration::getApplicationEmailAddress()),
-                                             sfconfig::get('app_email_name',
-                                                           ProjectConfiguration::getApplicationName() . ' Team'));
+                $mail->setFrom(sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . ' Team'));
                 $mail->addTo($address, $name);
                 $mail->setSubject($subject);
                 if (sfConfig::get('sf_environment') == 'prod') {
@@ -385,4 +468,5 @@ class Episode extends BaseEpisode
 
         return null;
     }
+
 }

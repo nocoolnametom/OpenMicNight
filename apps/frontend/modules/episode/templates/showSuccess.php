@@ -42,7 +42,7 @@ echo link_to($subreddit->getName(),
                 <?php if ($episode->getGraphicFile()): ?>
                 <tr>
                     <td>
-                        <?php echo image_tag($graphic_file_web_location . $episode->getGraphicFile()); ?>
+                        <?php echo image_tag($episode->getGraphicUrl()); ?>
                     </td>
                 </tr>
                 <?php endif; ?>

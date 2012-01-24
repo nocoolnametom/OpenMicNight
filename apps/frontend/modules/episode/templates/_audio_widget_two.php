@@ -65,11 +65,13 @@
         });
 
         uploader.bind('FileUploaded', function(up, file) {
+            $.ajax('<?php echo url_for('@episode_backup?id=' . $form->getObject()->getId() . '&which=audio') ?>');
             $('#' + file.id + " b").html("100%");
             $('#audio_uploadfiles_span').html("");
             $('#episode_audio').attr("src", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
             $('#episode_audio_link').attr("href", "<?php echo substr(url_for('@episode_audio?id=' . $form->getObject()->getId() . '&format=mp3'), 0, -3); ?>" + file.name.split('.').pop());
             $('#episode_audio_link').http(file.name);
+            
         });
     });
 </script>
@@ -77,7 +79,7 @@
 <div id="audio_uploader">
     <?php include_partial('episode/html5_audio_player', array(
         'episode' => $form->getObject(),
-        'class' => 'not_full',
+        'class' => 'full',
     )); ?>
     <?php if ($form->getObject()->getAudioFile() && !$form->getObject()->getSubmittedAt() && !$form->getObject()->getApprovedAt()): ?>
         <div id="remove_audio">

@@ -71,13 +71,14 @@
             $('#' + file.id + " b").html("100%");
             $('#graphic_uploadfiles_span').html("");
             $('#uploader_graphic').attr("src", "<?php echo substr(image_path($graphic_file_web_location . $graphic_hash . '.png'), 0, -3); ?>" + file.name.split('.').pop());
+            $.ajax('<?php echo url_for('@episode_backup?id=' . $form->getObject()->getId() . '&which=graphic') ?>');
         });
     });
 </script>
 
 <div id="image_uploader">
     <div id="uploader_graphic_div">
-        <img id="uploader_graphic" src="<?php echo ($form->getObject()->getGraphicFile() ? image_path($graphic_file_web_location . $form->getObject()->getGraphicFile()) : '') ?>" />
+        <img id="uploader_graphic" src="<?php echo ($form->getObject()->getGraphicFile() ? image_path($form->getObject()->getGraphicUrl()) : '') ?>" />
     </div>
     <?php if ($form->getObject()->getGraphicFile()): ?>
         <div id="remove_graphic">

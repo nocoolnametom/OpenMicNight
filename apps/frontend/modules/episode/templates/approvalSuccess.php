@@ -28,7 +28,7 @@
     <thead>
         <?php if ($episode->getGraphicFile()): ?>
             <tr>
-                <th colspan="2" class="graphic"><?php echo image_tag('/uploads/graphics/' . $episode->getGraphicFile()); ?></th>
+                <th colspan="2" class="graphic"><?php echo image_tag($episode->getGraphicUrl()); ?></th>
             </tr>
         <?php endif; ?>
         <tr>

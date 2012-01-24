@@ -29,6 +29,10 @@ episode:
     column:               id
     with_wildcard_routes: true
 
+episode_backup:
+  url:  /episode/:id/backup/:which
+  param: { module: episode, action: backup }
+
 feed:
   class: sfDoctrineRouteCollection
   options:

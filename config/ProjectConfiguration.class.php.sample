@@ -133,7 +133,13 @@ class ProjectConfiguration extends sfProjectConfiguration
     /* You will have to set this one up manually. */
     static public function getApplicationAmazonCloudFrontUrl()
     {
-        return '//d1v6agip99w3iq.cloudfront.net/';
+        return 'https://d1v6agip99w3iq.cloudfront.net/';
+    }
+    
+    /* You will have to set this one up manually. */
+    static public function getApplicationAmazonBucketUrl()
+    {
+        return 'https://s3.amazonaws.com/herdditmainstuff/';
     }
 
     static public function getEpisodeAudioFileLocalDirectory()

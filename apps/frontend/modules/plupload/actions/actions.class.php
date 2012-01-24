@@ -100,6 +100,7 @@ class pluploadActions extends sfActions
                     $this->getUser()->setAttribute('valid_episode_audio_file_hash', $this->generateFilenamehashForAudio($filename));
                     $episode->setAudioFile($this->generateFilenamehashForAudio($filename));
                     $episode->setNiceFilename($filename);
+                    $episode->setSkipBackup(true);
                     $episode->save();
                 }
             }
@@ -137,6 +138,7 @@ class pluploadActions extends sfActions
                     $this->getUser()->setAttribute('valid_episode_user_id', $episode->getEpisodeAssignment()->getSfGuardUserId());
                     $this->getUser()->setAttribute('valid_episode_image_file_hash', $this->generateFilenameHashForImage($filename));
                     $episode->setGraphicFile($this->generateFilenameHashForImage($filename));
+                    $episode->setSkipBackup(true);
                     $episode->save();
                 }
             }
