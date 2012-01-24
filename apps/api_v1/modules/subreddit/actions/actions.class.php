@@ -42,7 +42,7 @@ class subredditActions extends autosubredditActions
      * @param   sfWebRequest   $request a request object
      * @return  string
      */
-    public function executeUploadIntro(sfWebRequest $request)
+    public function executeUpload_intro(sfWebRequest $request)
     {
         // PUT makes more sense, but I am limited currently by my API to POST.
 
@@ -108,7 +108,7 @@ class subredditActions extends autosubredditActions
      * @param   sfWebRequest   $request a request object
      * @return  string
      */
-    public function executeUploadIntro(sfWebRequest $request)
+    public function executeUpload_outro(sfWebRequest $request)
     {
         // PUT makes more sense, but I am limited currently by my API to POST.
 
