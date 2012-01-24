@@ -12,6 +12,17 @@
  */
 class Subreddit extends BaseSubreddit
 {
+    public $_skip_backup = false;
+
+    public function setSkipBackup($value)
+    {
+        $this->_skip_backup = (bool) $value;
+    }
+
+    public function getSkipBackup($value)
+    {
+        return (bool) $this->_skip_backup;
+    }
 
     /**
      * Returns the Subreddit name
@@ -47,6 +58,33 @@ class Subreddit extends BaseSubreddit
                 }
             }
         }
+        
+        if (!$this->isNew() && !$this->getSkipBackup() && in_array('episode_intro', $this->_modified) && $this->_get('episode_intro')) {
+            $file_location = rtrim(ProjectConfiguration::getSubredditAudioFileLocalDirectory(), '/') . '/';
+            $filename = $this->_get('episode_intro');
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $response = $this->saveFileToApplicationBucket($file_location, $filename, 'intro');
+                if ($response->isOK())
+                {
+                    unlink($file_location . $filename);
+                }
+            }
+        }
+        
+        if (!$this->isNew() && !$this->getSkipBackup() && in_array('episode_outro', $this->_modified) && $this->_get('episode_outro')) {
+            $file_location = rtrim(ProjectConfiguration::getSubredditAudioFileLocalDirectory(), '/') . '/';
+            $filename = $this->_get('episode_outro');
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $response = $this->saveFileToApplicationBucket($file_location, $filename, 'outro');
+                if ($response->isOK())
+                {
+                    unlink($file_location . $filename);
+                }
+            }
+        }
+        
         parent::save($conn);
     }
 
