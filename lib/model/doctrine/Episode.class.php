@@ -371,7 +371,11 @@ class Episode extends BaseEpisode
             $filename = $this->_get('graphic_file');
             if (file_exists($file_location . $filename)) {
                 ProjectConfiguration::registerAws();
-                $this->saveFileToApplicationBucket($file_location, $filename, 'upload', AmazonS3::ACL_PUBLIC);
+                $response = $this->saveFileToApplicationBucket($file_location, $filename, 'upload', AmazonS3::ACL_PUBLIC);
+                if ($response->isOK())
+                {
+                    unlink($file_location . $filename);
+                }
             }
         }
 
@@ -380,7 +384,7 @@ class Episode extends BaseEpisode
             $filename = $this->_get('audio_file');
             if (file_exists($file_location . $filename)) {
                 ProjectConfiguration::registerAws();
-                $this->saveFileToApplicationBucket($file_location, $filename, 'audio');
+                $response = $this->saveFileToApplicationBucket($file_location, $filename, 'audio');
             }
         }
 

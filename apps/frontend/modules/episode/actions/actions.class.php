@@ -51,7 +51,10 @@ class episodeActions extends sfActions
             if (file_exists($file_location . $filename)) {
                 ProjectConfiguration::registerAws();
                 $result = $episode->saveFileToApplicationBucket($file_location, $filename, 'upload', AmazonS3::ACL_PUBLIC);
-                die(var_dump($result));
+                if ($result->isOk())
+                {
+                    unlink($file_location . $filename);
+                }
             }
         } elseif ($request->getParameter('which') == 'audio') {
             $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
