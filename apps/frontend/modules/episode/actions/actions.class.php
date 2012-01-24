@@ -362,7 +362,8 @@ class episodeActions extends sfActions
     {
         $auth_key = $this->getUser()->getApiAuthKey();
         $episode_data = Api::getInstance()->setUser($auth_key)->get('episode/' . $request->getParameter('id'), true);
-        $this->episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
+        $this->episode = ApiDoctrine::createQuickObject($episode_data['body']);
+        $this->full_episode = ApiDoctrine::createObject('Episode', $episode_data['body']);
         $this->forward404Unless($this->episode && $this->episode->getId());
         $assignment_data = Api::getInstance()->setUser($auth_key)->get('episodeassignment/' . $this->episode->getEpisodeAssignmentId(), true);
         $this->assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
