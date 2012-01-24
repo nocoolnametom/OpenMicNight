@@ -124,22 +124,18 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     /* Ignores the prefix set above. */
     /* You will have to set this one up manually. */
-
     static public function getApplicationAmazonBucketName()
     {
         return 'herdditmainstuff';
     }
 
-    /* Ignores the prefix set above. */
     /* You will have to set this one up manually. */
-
     static public function getApplicationAmazonCloudFrontUrl()
     {
         return 'https://d1v6agip99w3iq.cloudfront.net/';
     }
 
     /* You will have to set this one up manually. */
-
     static public function getApplicationAmazonBucketUrl()
     {
         return 'https://s3.amazonaws.com/herdditmainstuff/';
@@ -157,7 +153,6 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     /* Please note that this must be less than 10 on a 32-bit system, and less
      * than 18 on a 64-bit system! */
-
     static public function getTropoHashLength()
     {
         return 10;

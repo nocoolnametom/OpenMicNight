@@ -11,6 +11,8 @@ Subreddit:
     bucket_name: { type: string(64) }
     cf_dist_id: { type: string(64) }
     cf_domain_name: { type: string(64) }
+    episode_intro: { type: string(255) }
+    episode_outro: { type: string(255) }
     pending_users_are_full_members: { type: boolean, default: 1 }
   indexes:
     name: { fields: [name], type: unique}
@@ -161,8 +163,8 @@ EpisodeAssignment:
     Episode: { onDelete: CASCADE, local: episode_id, foreign: id, foreignAlias: EpisodeAssignments }
   indexes:
     id_hash: { fields: [id_hash], type: unique}
-#    noMultipleUserAssignmentsPerEpisode: { fields: [sf_guard_user_id, episode_id], type: unique }
-#    noMultipleAuthorTypeAssignmentsPerEpisode: { fields: [author_type_id, episode_id], type: unique }
+    noMultipleUserAssignmentsPerEpisode: { fields: [sf_guard_user_id, episode_id], type: unique }
+    noMultipleAuthorTypeAssignmentsPerEpisode: { fields: [author_type_id, episode_id], type: unique }
 
 Session:
   options:

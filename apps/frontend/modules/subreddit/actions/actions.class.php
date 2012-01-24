@@ -415,7 +415,10 @@ class subredditActions extends sfActions
         if (!$this->getUser()->isSuperAdmin()) {
             unset($this->form['is_active']);
             unset($this->form['bucket_name']);
-            unset($this->form['creation_interval']);
+            unset($this->form['cf_dist_id']);
+            unset($this->form['cf_domain_name']);
+            unset($this->form['episode_intro']);
+            unset($this->form['episode_outro']);
         }
     }
 
@@ -496,6 +499,10 @@ class subredditActions extends sfActions
             unset($this->form['is_active']);
             unset($this->form['bucket_name']);
             unset($this->form['creation_interval']);
+            unset($this->form['cf_dist_id']);
+            unset($this->form['cf_domain_name']);
+            unset($this->form['episode_intro']);
+            unset($this->form['episode_outro']);
         }
 
         $this->processForm($request, $this->form);

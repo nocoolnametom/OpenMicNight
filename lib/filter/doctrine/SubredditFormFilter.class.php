@@ -10,7 +10,14 @@
  */
 class SubredditFormFilter extends BaseSubredditFormFilter
 {
-  public function configure()
-  {
-  }
+
+    public function configure()
+    {
+        unset($this['bucket_name']);
+        unset($this['cf_dist_id']);
+        unset($this['cf_domain_name']);
+        unset($this['episode_intro']);
+        unset($this['episode_outro']);
+    }
+
 }
