@@ -601,4 +601,44 @@ AND episode_assignment.author_type_id = $longest_id;
         }
         $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
     }
+    
+    public function saveFileToApplicationBucket($file_location, $filename, $prefix, $permissions = null)
+    {
+        $permissions = is_null($permissions) ? AmazonS3::ACL_PRIVATE : $permissions;
+        $location = $file_location . $filename;
+        if (!file_exists($location))
+            throw new Exception("No local file to upload!");
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
+        if ($s3->if_bucket_exists($bucket)) {
+            $s3->delete_object($bucket, $prefix . '/' . $filename);
+            $response = $s3->create_object($bucket, $prefix . '/' . $filename, array(
+                'fileUpload' => $location,
+                'acl' => $permissions,
+                    ));
+            if (!$response->isOK()) {
+                throw new Exception("Error uploading file!");
+            }
+        } else {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        return $response;
+    }
+    
+    public function removeFileFromApplicationBucket($filename, $prefix)
+    {
+        ProjectConfiguration::registerAws();
+        $s3 = new AmazonS3;
+        $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
+        if ($s3->if_bucket_exists($bucket)) {
+            $response =$s3->delete_object($bucket, $prefix . '/' . $filename);
+            if (!$response->isOK()) {
+                throw new Exception("Error deleting file!");
+            }
+        } else {
+            throw new Exception("Amazon bucket '$bucket' does not exist!");
+        }
+        return $response;
+    }
 }
