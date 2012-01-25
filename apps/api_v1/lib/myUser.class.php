@@ -99,10 +99,6 @@ class myUser extends sfGuardSecurityUser
 
     public function sendMail($body_function, $additional_params = array())
     {
-        ProjectConfiguration::registerZend();
-        $mail = new Zend_Mail();
-        $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
-
         $user = $this->getGuardUser();
         if (!$user)
             return;
@@ -136,15 +132,9 @@ class myUser extends sfGuardSecurityUser
         $subject = $email->generateSubject($additional_params);
         $body = $email->generateBodyText($additional_params, $prefer_html);
         
-        $mail->setBodyText($body);
-        $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
-        $mail->addTo($address, $name);
-        $mail->setSubject($subject);
-        if (sfConfig::get('sf_environment') == 'prod') {
-            $mail->send(ProjectConfiguration::getSmtpTransport());
-        } else {
-            throw new sfException('Mail sent: ' . $mail->getBodyText());
-        }
+        $from = sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName());
+        
+        AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
     }
 
 }

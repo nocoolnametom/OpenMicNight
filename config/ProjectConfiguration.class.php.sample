@@ -189,6 +189,11 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return 10;
     }
+    
+    static public function sendMailWithAmazon()
+    {
+        return true;
+    }
 
     static public function getSMTPServer()
     {
@@ -209,5 +214,4 @@ class ProjectConfiguration extends sfProjectConfiguration
     {
         return 'Al4CAGhNv0+Ekv+XdWtAcKhZP/7yBdwQOM1yzvL8lvG4';
     }
-
 }

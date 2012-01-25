@@ -91,12 +91,11 @@ class homeActions extends sfActions
 
             $signinUrl = $this->getUser()->getReferer($request->getReferer());
             
-            $mail = new Zend_Mail();
-            $mail->setBodyText($name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl);
-            $mail->setFrom($email, $name);
-            $mail->addTo(ProjectConfiguration::getApplicationEmailAddress());
-            $mail->setSubject($values['subject']);
-            $mail->send(ProjectConfiguration::getSmtpTransport());
+            $message = $name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl;
+            $to = ProjectConfiguration::getApplicationEmailAddress();
+            $subject = $values['subject'];
+            
+            AppMail::sendMail($to, $email, $subject, $message);
 
             $this->getUser()->setFlash('notice', 'Your message has been sent to ' . ProjectConfiguration::getApplicationName() . '.');
             return $this->redirect('' != $signinUrl ? $signinUrl : '@homepage');

@@ -514,11 +514,6 @@ AND episode_assignment.author_type_id = $longest_id;
     public function sendEmailAboutNewAssignment($user_id, $episode_id, $deadline)
     {
         // Send an email to that user telling them their EpisodeAssignment is now valid
-        ProjectConfiguration::registerZend();
-
-        $mail = new Zend_Mail();
-        $mail->addHeader('X-MailGenerator',
-                         ProjectConfiguration::getApplicationName());
         $parameters = array(
             'user_id' => $user_id,
             'episode_id' => $episode_id,
@@ -537,34 +532,17 @@ AND episode_assignment.author_type_id = $longest_id;
         $subject = $email->generateSubject($parameters);
         $body = $email->generateBodyText($parameters, $prefer_html);
 
-        $mail->setBodyText($body);
+        $from = sfConfig::get('app_email_address',
+                                     ProjectConfiguration::getApplicationEmailAddress());
+        
+        AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
 
-        $mail->setFrom(sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress()),
-                                     sfconfig::get('app_email_name',
-                                                   ProjectConfiguration::getApplicationName() . 'Team'));
-        $mail->addTo($address, $name);
-        $mail->setSubject($subject);
-        if (sfConfig::get('sf_environment') == 'prod') {
-            $mail->send(ProjectConfiguration::getSmtpTransport());
-        } else {
-            //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
-            if (sfConfig::get('sf_logging_enabled')) {
-                sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
-            }
-            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
-        }
         $user->addLoginMessage('You have an episode that you can work with!');
     }
 
     public function sendEmailAboutPassedDeadline($user_id, $episode_id)
     {
         // Send an email to that user telling them their EpisodeAssignment is now valid
-        ProjectConfiguration::registerZend();
-
-        $mail = new Zend_Mail();
-        $mail->addHeader('X-MailGenerator',
-                         ProjectConfiguration::getApplicationName());
         $parameters = array(
             'user_id' => $user_id,
             'episode_id' => $episode_id
@@ -582,23 +560,11 @@ AND episode_assignment.author_type_id = $longest_id;
         $subject = $email->generateSubject($parameters);
         $body = $email->generateBodyText($parameters, $prefer_html);
 
-        $mail->setBodyText($body);
-
-        $mail->setFrom(sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress()),
-                                     sfconfig::get('app_email_name',
-                                                   ProjectConfiguration::getApplicationName() . 'Team'));
-        $mail->addTo($address, $name);
-        $mail->setSubject($subject);
-        if (sfConfig::get('sf_environment') == 'prod') {
-            $mail->send(ProjectConfiguration::getSmtpTransport());
-        } else {
-            //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
-            if (sfConfig::get('sf_logging_enabled')) {
-                sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
-            }
-            echo 'Mail sent: ' . $mail->getBodyText()->getRawContent();
-        }
+        $from = sfConfig::get('app_email_address',
+                                     ProjectConfiguration::getApplicationEmailAddress());
+        
+        AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
+        
         $user->addLoginMessage('Your episode passed its release deadline and has been re-assigned.');
     }
     
