@@ -546,7 +546,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $mail->addTo($address, $name);
         $mail->setSubject($subject);
         if (sfConfig::get('sf_environment') == 'prod') {
-            $mail->send();
+            $mail->send(ProjectConfiguration::getSmtpTransport());
         } else {
             //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
             if (sfConfig::get('sf_logging_enabled')) {
@@ -591,7 +591,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $mail->addTo($address, $name);
         $mail->setSubject($subject);
         if (sfConfig::get('sf_environment') == 'prod') {
-            $mail->send();
+            $mail->send(ProjectConfiguration::getSmtpTransport());
         } else {
             //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
             if (sfConfig::get('sf_logging_enabled')) {

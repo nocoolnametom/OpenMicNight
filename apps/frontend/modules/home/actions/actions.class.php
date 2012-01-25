@@ -96,7 +96,7 @@ class homeActions extends sfActions
             $mail->setFrom($email, $name);
             $mail->addTo(ProjectConfiguration::getApplicationEmailAddress());
             $mail->setSubject($values['subject']);
-            $mail->send();
+            $mail->send(ProjectConfiguration::getSmtpTransport());
 
             $this->getUser()->setFlash('notice', 'Your message has been sent to ' . ProjectConfiguration::getApplicationName() . '.');
             return $this->redirect('' != $signinUrl ? $signinUrl : '@homepage');

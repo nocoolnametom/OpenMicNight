@@ -11,6 +11,7 @@ class ProjectConfiguration extends sfProjectConfiguration
     static protected $zendLoaded = false;
     static protected $markdownLoaded = false;
     static protected $tropoLoaded = false;
+    static protected $smtpTransport = null;
 
     public function setup()
     {
@@ -68,6 +69,32 @@ class ProjectConfiguration extends sfProjectConfiguration
         @require_once sfConfig::get('sf_lib_dir') . '/vendor/Zend/Loader/Autoloader.php';
         Zend_Loader_Autoloader::getInstance();
         self::$zendLoaded = true;
+    }
+
+    static public function getSmtpTransport()
+    {
+        if (!is_null(self::$smtpTransport)) {
+            return self::$smtpTransport;
+        }
+
+        if (!self::$zendLoaded) {
+            self::registerZend();
+        }
+
+        require_once 'Zend/Mail.php';
+
+        $config = array(
+            'auth' => 'login',
+            'username' => self::getSMTPUser(),
+            'password' => self::getSMTPPassword(),
+        );
+
+        if (self::getSMTPUseTLS())
+            $config['ssl'] = 'tls';
+
+        self::$smtpTransport = new Zend_Mail_Transport_Smtp(self::getSMTPServer(), $config);
+        
+        return self::$smtpTransport;
     }
 
     static public function registerMarkdown()
