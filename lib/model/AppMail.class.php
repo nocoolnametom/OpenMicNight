@@ -16,6 +16,9 @@ class AppMail
         self::$_subject = $subject;
         self::$_message = $message;
         self::$_html_message = $html_message;
+        
+        // DKIM Signing
+        
 
         if ($force_method)
         {
@@ -31,9 +34,17 @@ class AppMail
                 return self::sendUsingAmazonSES();
                 break;
             }
+        } else {
+            if (ProjectConfiguration::sendMailWithAmazon())
+                return self::sendUsingAmazonSES();
         }
         
         return self::sendUsingZendMail();
+    }
+    
+    protected static function createDKIMSigning()
+    {
+        ;
     }
 
     protected static function sendUsingZendMail($transport = null)
@@ -96,10 +107,10 @@ class AppMail
         );
 
         if (self::$_html_message)
-            $config['Body.Html.Data'] = '';
+            $message['Body.Html.Data'] = self::$_html_message;
 
         $response = $email->send_email(
-                self::$_from, array('ToAddresses' => $to), $message, $opt
+                self::$_from, array('ToAddresses' => self::$_to), $message, $opt
         );
 
         return $response->isOK();
