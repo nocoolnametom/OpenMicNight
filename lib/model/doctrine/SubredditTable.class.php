@@ -45,7 +45,8 @@ class SubredditTable extends Doctrine_Table
                 ->from('Episode')
                 ->leftJoin('Episode.Subreddit Subreddit')
                 ->groupBy('Episode.subreddit_id')
-                ->where('UNIX_TIMESTAMP(Episode.release_date) > (Subreddit.creation_interval + UNIX_TIMESTAMP())')
+                ->where('UNIX_TIMESTAMP(Episode.release_date) > (Subreddit.creation_interval + UNIX_TIMESTAMP())');
+        $subquery = $subquery
                 ->fetchArray();
         $ids = array_map(array('SubredditTable', 'grabSubredditIdFromArray'),
                          $subquery);
