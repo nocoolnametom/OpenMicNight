@@ -212,7 +212,7 @@ class Episode extends BaseEpisode
         $location = $file_location . $filename;
         if (!file_exists($location))
             throw new Exception("No local file to upload!");
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
         if ($s3->if_bucket_exists($bucket)) {
             $s3->delete_object($bucket, $prefix . '/' . $filename);
