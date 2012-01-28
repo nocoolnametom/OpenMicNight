@@ -248,11 +248,9 @@ class Subreddit extends BaseSubreddit
     {
         $original = $this->getCreationInterval();
         $creation_schedule = $this->getCreationScheduleAsCronExpression();
-
-        $start = $creation_schedule->getNextRunDate();
-        $stop = $creation_schedule->getNextRunDate($start);
-
-        $diff = $start->diff($stop, true);
+        
+        $dates = $creation_schedule->getMultipleRunDates(2);
+        $diff = $dates[0]->diff($dates[1], true);
         $seconds_between = ($diff->y * 365 * 24 * 60 * 60) +
                 ($diff->m * 30 * 24 * 60 * 60) +
                 ($diff->d * 24 * 60 * 60) +
