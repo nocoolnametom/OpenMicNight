@@ -55,6 +55,8 @@ class episodeActions extends sfActions
                 {
                     unlink($file_location . $filename);
                 }
+            } else {
+                echo $file_location . $filename;
             }
         } elseif ($request->getParameter('which') == 'audio') {
             $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
