@@ -133,6 +133,20 @@ class homeActions extends sfActions
     {
         ;
     }
+    
+    public function executeTest(sfWebRequest $request)
+    {
+        
+        $to = 'nocoolnametom@gmail.com';
+        $from = 'do-not-reply@herddit.net';
+        $subject = 'Test Message';
+        $html_message = 'This is a <strong>test</strong> message.';
+        $message = strip_tags($html_message);
+        
+        $result = AppMail::sendMail($to, $from, $subject, $message, $html_message);
+        
+        die(var_dump($result));
+    }
 
     protected function getIndexEpisodes()
     {
