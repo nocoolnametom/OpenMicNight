@@ -132,7 +132,7 @@ class myUser extends sfGuardSecurityUser
         $subject = $email->generateSubject($additional_params);
         $body = $email->generateBodyText($additional_params, $prefer_html);
         
-        $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress());
+        $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
     }

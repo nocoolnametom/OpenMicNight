@@ -416,7 +416,7 @@ class Episode extends BaseEpisode
                 $subject = $email->generateSubject($parameters);
                 $body = $email->generateBodyText($parameters, $prefer_html);
 
-                $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress());
+                $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
                 
                 AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
                 

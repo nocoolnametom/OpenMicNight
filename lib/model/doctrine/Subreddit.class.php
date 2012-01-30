@@ -531,7 +531,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
 
@@ -559,7 +559,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
         
