@@ -59,9 +59,6 @@ class Message extends BaseMessage
             if ( !$recipient || !$recipient->getReceiveNotificationOfPrivateMessages())
                 return parent::save($conn);;
 
-            ProjectConfiguration::registerZend();
-            $mail = new Zend_Mail();
-            $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
             $parameters = array(
                 'user_id' => $this->getRecipientId(),
                 'message_id' => $this->getIncremented(),
@@ -77,19 +74,9 @@ class Message extends BaseMessage
             $subject = $email->generateSubject($parameters);
             $body = $email->generateBodyText($parameters, $prefer_html);
 
-            $mail->setBodyText($body);
-
-            $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
-            $mail->addTo($address, $name);
-            $mail->setSubject($subject);
-            if (sfConfig::get('sf_environment') == 'prod') {
-                $mail->send(ProjectConfiguration::getSmtpTransport());
-            } else {
-                //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
-                if (sfConfig::get('sf_logging_enabled')) {
-                    sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
-                }
-            }
+            $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress());
+            
+            AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
         }
     }
 

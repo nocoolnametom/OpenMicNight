@@ -33,9 +33,6 @@ class sfGuardUser extends PluginsfGuardUser
              * Reddit validation key by username or password.  We need to send
              * them an email about it.
              */
-            ProjectConfiguration::registerZend();
-            $mail = new Zend_Mail();
-            $mail->addHeader('X-MailGenerator', ProjectConfiguration::getApplicationName());
             $parameters = array(
                 'user_id' => $this->getIncremented(),
             );
@@ -50,19 +47,10 @@ class sfGuardUser extends PluginsfGuardUser
             $subject = $email->generateSubject($parameters);
             $body = $email->generateBodyText($parameters, $prefer_html);
 
-            $mail->setBodyText($body);
-
-            $mail->setFrom(sfConfig::get('app_email_address', 'donotreply@' . ProjectConfiguration::getApplicationName()), sfconfig::get('app_email_name', ProjectConfiguration::getApplicationName() . 'Team'));
-            $mail->addTo($address, $name);
-            $mail->setSubject($subject);
-            if (sfConfig::get('sf_environment') == 'prod') {
-                $mail->send(ProjectConfiguration::getSmtpTransport());
-            } else {
-                //throw new sfException('Mail sent: ' . $mail->getBodyText()->getRawContent());
-                if (sfConfig::get('sf_logging_enabled')) {
-                    sfContext::getInstance()->getLogger()->info('Mail sent: ' . $mail->getBodyText()->getRawContent());
-                }
-            }
+            $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress());
+            
+            AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
+            
             $this->addLoginMessage('You have changed information relating to your Reddit user and will need to validate your Reddit username again.  Please see your email for more information.');
         }
         parent::save($conn);
