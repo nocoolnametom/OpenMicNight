@@ -44,23 +44,25 @@ class episodeActions extends sfActions
         $assignment = ApiDoctrine::createQuickObject($assignment_data['body']);
         $this->forward404Unless($permission || ($assignment && $assignment->getSfGuardUserId() == $this->getUser()->getApiUserId()));
         $this->setLayout(false);
+        
+        ProjectConfiguration::registerAws();
 
         if ($request->getParameter('which') == 'graphic') {
             $file_location = rtrim(ProjectConfiguration::getEpisodeGraphicFileLocalDirectory(), '/') . '/';
             $filename = $episode->getGraphicFile();
             if (file_exists($file_location . $filename)) {
-                ProjectConfiguration::registerAws();
                 $result = $episode->saveFileToApplicationBucket($file_location, $filename, 'upload', AmazonS3::ACL_PUBLIC);
                 if ($result->isOk())
                 {
                     unlink($file_location . $filename);
                 }
+            } else {
+                echo $file_location . $filename;
             }
         } elseif ($request->getParameter('which') == 'audio') {
             $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
             $filename = $episode->getAudioFile();
             if (file_exists($file_location . $filename)) {
-                ProjectConfiguration::registerAws();
                 $episode->saveFileToApplicationBucket($file_location, $filename, 'audio');
             }
         }

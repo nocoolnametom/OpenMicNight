@@ -147,6 +147,8 @@ Episode:
     sfGuardUser: { onDelete: SET NULL, local: approved_by, foreign: id, foreignAlias: ApprovedEpisodes }
     Subreddit: { onDelete: CASCADE, local: subreddit_id, foreign: id, foreignAlias: Episodes }
     EpisodeAssignment: { onDelete: CASCADE, local: episode_assignment_id, foreign: id, foreignAlias: Episodes }
+  indexes:
+    oneEpisodePerTimestampPerSubreddit: { fields: [subreddit_id, release_date], type: unique }
 
 EpisodeAssignment:
   actAs:

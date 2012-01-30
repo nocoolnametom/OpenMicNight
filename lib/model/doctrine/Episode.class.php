@@ -207,12 +207,12 @@ class Episode extends BaseEpisode
 
     public function saveFileToApplicationBucket($file_location, $filename, $prefix, $permissions = null)
     {
+        ProjectConfiguration::registerAws();
         $permissions = is_null($permissions) ? AmazonS3::ACL_PRIVATE : $permissions;
         $location = $file_location . $filename;
         if (!file_exists($location))
             throw new Exception("No local file to upload!");
-        ProjectConfiguration::registerAws();
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
         if ($s3->if_bucket_exists($bucket)) {
             $s3->delete_object($bucket, $prefix . '/' . $filename);

@@ -26,6 +26,42 @@ class subredditActions extends sfActions
         }
     }
 
+    public function executeBackup(sfWebRequest $request)
+    {
+        $this->redirectUnless($this->getUser()->isAuthenticated() && $this->getUser()->getApiUserId(), '@sf_guard_signin');
+
+        $auth_key = $this->getUser()->getApiAuthKey();
+        $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit/' . $request->getParameter('id'), true);
+        $subreddit = ApiDoctrine::createObject('Subreddit', $subreddit_data['body']);
+        $quick_subreddit = ApiDoctrine::createQuickObject($subreddit_data['body']);
+        $this->forward404Unless($subreddit && $subreddit->getId());
+        $this->setLayout(false);
+
+        if ($request->getParameter('which') == 'intro') {
+            $file_location = rtrim(ProjectConfiguration::getSubredditAudioFileLocalDirectory(), '/') . '/';
+            $filename = $subreddit->getEpisodeIntro();
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $response = $subreddit->saveFileToApplicationBucket($file_location, $filename, 'intro');
+                if ($response->isOK())
+                {
+                    unlink($file_location . $filename);
+                }
+            }
+        } elseif ($request->getParameter('which') == 'outro') {
+            $file_location = rtrim(ProjectConfiguration::getSubredditAudioFileLocalDirectory(), '/') . '/';
+            $filename = $subreddit->getEpisodeOutro();
+            if (file_exists($file_location . $filename)) {
+                ProjectConfiguration::registerAws();
+                $response = $subreddit->saveFileToApplicationBucket($file_location, $filename, 'outro');
+                if ($response->isOK())
+                {
+                    unlink($file_location . $filename);
+                }
+            }
+        }
+    }
+
     protected function getSubredditId(sfWebRequest $request)
     {
         $this->forward404Unless($request->getParameter('id') || $request->getParameter('domain'));
@@ -57,13 +93,6 @@ class subredditActions extends sfActions
         //$this->getResponse()->setHttpHeader('Content-Type', 'text/plain');
 
         ProjectConfiguration::registerTropo();
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "http://api.openmicnight/v1/api_v1_dev.php/episodeassignment/validhash?subreddit_id=2&id_hash=32");
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = json_decode(curl_exec($ch), true);
-        curl_close($ch);
-        $is_valid = $output['is_valid'];
     }
 
     public function executeUsers(sfWebRequest $request)

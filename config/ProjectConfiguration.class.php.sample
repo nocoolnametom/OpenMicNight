@@ -197,7 +197,7 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static public function getSMTPServer()
     {
-        return 'email-smtp.us-east-1.amazonaws.com:465';
+        return 'smtp.google.com';
     }
     
     static public function getSMTPUseTLS()
@@ -207,11 +207,11 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static public function getSMTPUser()
     {
-        return'AKIAJWH7ZH22N4U2HKMA';
+        return'herddit@herddit.net';
     }
 
     static public function getSMTPPassword()
     {
-        return 'Al4CAGhNv0+Ekv+XdWtAcKhZP/7yBdwQOM1yzvL8lvG4';
+        return 'yoursmtppassword';
     }
 }

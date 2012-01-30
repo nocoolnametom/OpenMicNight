@@ -20,10 +20,10 @@
     <div class="subreddit_episode_signup_link">
         <?php echo link_to('Signup for Upcoming Episodes', 'subreddit/signup?domain=' . $subreddit->getDomain()); ?>
     </div>
+    <div class="subreddit_episode_signup_link">
+        <?php echo link_to('Deadlines', 'subreddit/deadlines?domain=' . $subreddit->getDomain()); ?>
+    </div>
 <?php endif; ?>
-        <div class="subreddit_episode_signup_link">
-            <?php echo link_to('Deadlines', 'subreddit/deadlines?domain=' . $subreddit->getDomain()); ?>
-        </div>
 
 <?php if (count($episodes)): ?>
 <h3>Released Episodes</h3>

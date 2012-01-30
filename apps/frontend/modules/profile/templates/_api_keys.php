@@ -1,5 +1,5 @@
 <?php if (count($auth_tokens)):?>
-<h2>API Auth Tokens</h2>
+<h3>API Auth Tokens</h3>
 <table>
     <thead>
         <tr>
