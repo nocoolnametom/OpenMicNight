@@ -384,7 +384,7 @@ class feedActions extends sfActions
         $itunes_explicit = $doc->createElement('itunes:explicit',
                                                $feedArray["is_nsfw"]);
         $itunes_summary = $doc->createElement('itunes:summary',
-                                              substr($feedArray['description'], 3999));
+                                              substr($feedArray['description'], 0, 3999));
         $itunes_category = $doc->createElement('itunes:category');
         $itunes_category->setAttribute('text', 'Technology');
         $itunes_subcategory = $doc->createElement('itunes:category');
@@ -465,7 +465,7 @@ class feedActions extends sfActions
             $i_itunes_author = $doc->createElement('itunes:author',
                                                    $entry['author']['name']);
             $i_itunes_summary = $doc->createElement('itunes:summary',
-                                                    substr(strip_tags($entry['description']), 3999));
+                                                    substr(strip_tags($entry['description']), 0, 3999));
             $i_itunes_explicit = $doc->createElement('itunes:explicit',
                                                      $entry['is_nsfw']);
 
@@ -542,7 +542,7 @@ class feedActions extends sfActions
         $itunes_explicit = $doc->createElement('itunes:explicit',
                                                $feedArray["is_nsfw"]);
         $itunes_summary = $doc->createElement('itunes:summary',
-                                              substr($feedArray['description'], 3999));
+                                              substr($feedArray['description'], 0, 3999));
         $itunes_category = $doc->createElement('itunes:category');
         $itunes_category->setAttribute('text', 'Technology');
         $itunes_subcategory = $doc->createElement('itunes:category');
@@ -622,7 +622,7 @@ class feedActions extends sfActions
             $i_itunes_author = $doc->createElement('itunes:author',
                                                    $entry['author']['name']);
             $i_itunes_summary = $doc->createElement('itunes:summary',
-                                                    substr(strip_tags($entry['description']), 3999));
+                                                    substr(strip_tags($entry['description']), 0, 3999));
             $i_itunes_explicit = $doc->createElement('itunes:explicit',
                                                      $entry['is_nsfw']);
             $fentry->appendChild($i_itunes_author);
