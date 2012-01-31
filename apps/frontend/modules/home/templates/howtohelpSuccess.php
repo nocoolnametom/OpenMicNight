@@ -1,6 +1,6 @@
 <h2 class="orangeredbar">How to Help</h2>
-<p>The beta will begin in a few months and will be open to all Subreddits to
-    participate in. Until that time there's a number of things that need
+<p>The beta will be for a few months and will be open to all Subreddits to
+    participate in. During that time there's a number of things that need
     help.</p>
 <h3>Template Assistance</h3>
 <p>I'm a programmer, not a designer.  While I think the current look and feel
@@ -16,7 +16,7 @@
     will be the first thing many people see when they arrive at the site.  They
     need to understand the concept of scheduled and organized podcasts centered
     around subreddit communities and to know why they would enjoy participating.
-    If you want suggestions for improvement to the copy of the site, please
+    If you have suggestions for improvement to the copy of the site, please
     <?php include_partial('global/feedback_link', array('feedback_text' => 'let me know')) ?>.</p>
 <h3>Legal Assistance</h3>
 <p>Since we're dealing with audio files that can be shared with thousands of
@@ -29,22 +29,20 @@
     want to offer advice or suggestions, please
     <?php include_partial('global/feedback_link', array('feedback_text' => 'let me know')) ?>.</p>
 <h3>The Name</h3>
-<p>Yeah, I'm aware that the subdomain of the site is currently "openmicnight"
-    and that the name is currently displayed as "Herddit".  I'm not very good
-    with names; OpenMicNight was the first name I came up with, and I thought
-    that Herddit was a fun play on the name "Reddit".  However, I may not have a
-    good grasp on such things.  If you have a suggestion for a good name for the
-    site, even if it's one of those crazy off-the-wall Web 2.0 type names so
-    popular nowadays, please
+<p> I'm not very good with names; OpenMicNight was the first name I came up
+    with, and I thought that Herddit was a fun play on the name "Reddit".
+    However, I may not have a good grasp on such things.  If you have a
+    suggestion for a good name for the site, even if it's one of those crazy
+    off-the-wall Web 2.0 type names so popular nowadays, please
     <?php include_partial('global/feedback_link', array('feedback_text' => 'suggest a name')) ?>,
     making sure to explain why you think the name is good.</p>
 <h3>A Job</h3>
-pdiv>Finally, I'd like to think that I'm a pretty good backend web programmer.
+<p>Finally, I'd like to think that I'm a pretty good backend web programmer.
     I'm proficient in PHP, good with C#, comfortable with Java and Python, and
     prefer Linux.  I'm always on the lookout for a good job where I can work a
     good 40 hours but still have a life outside of work with my family.  And
     anything that is available outside of Utah would be nice, too.  I know it's
     probably a long shot, but if you have any openings or know of any openings
-    for a web programmer please
+    for a good web programmer please
     <?php include_partial('global/feedback_link', array('feedback_text' => 'send me a note')) ?>.
 </p>
