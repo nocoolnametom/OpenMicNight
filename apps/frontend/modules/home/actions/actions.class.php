@@ -90,7 +90,7 @@ class homeActions extends sfActions
             $message = $name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl;
             $to = ProjectConfiguration::getApplicationFeedbackAddress();
             $subjects = sfConfig::get('app_feedback_subjects', array());
-            $subject = (array_key_exists($values['subject'], $subjects) ? $subjects[$values['subject']] : $values['subject']);
+            $subject = ProjectConfiguration::getApplicationName() . ': ' . (array_key_exists($values['subject'], $subjects) ? $subjects[$values['subject']] : $values['subject']);
             
             $from_address = ($name ? "$name <$email>" : $email);
             
