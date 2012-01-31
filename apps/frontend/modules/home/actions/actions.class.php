@@ -149,13 +149,11 @@ class homeActions extends sfActions
     {
         $subreddit_ids = array();
 
-        if (count($subreddits)) {
-            $subreddit_data = Api::getInstance()->get('subreddit/defaultfeed', true);
-            $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
-            foreach ($subreddits as $subreddit) {
-                if (!in_array($subreddit->getIncremented(), $subreddit_ids))
-                    $subreddit_ids[] = $subreddit->getIncremented();
-            }
+        $subreddit_data = Api::getInstance()->get('subreddit/defaultfeed', true);
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        foreach ($subreddits as $subreddit) {
+            if (!in_array($subreddit->getIncremented(), $subreddit_ids))
+                $subreddit_ids[] = $subreddit->getIncremented();
         }
 
         $episodes = array();
