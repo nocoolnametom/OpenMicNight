@@ -27,7 +27,7 @@ class feedActions extends sfActions
                                          $request->getParameter('sf_format',
                                                                 'rss'));
 
-        header('content-type: text/xml');
+        header('content-type: text/xml; charset=utf-8');
         if (function_exists('apc_fetch'))
             $output = apc_fetch('index_feed_' . $format, $success);
         else
@@ -67,7 +67,7 @@ class feedActions extends sfActions
                                          $request->getParameter('sf_format',
                                                                 'rss'));
 
-        header('content-type: text/xml');
+        header('content-type: text/xml; charset=utf-8');
         $reddit_key = $request->getParameter('reddit_validation_key');
         $this->forward404Unless($reddit_key);
         if (function_exists('apc_fetch'))
@@ -121,7 +121,7 @@ class feedActions extends sfActions
                                          $request->getParameter('sf_format',
                                                                 'rss'));
 
-        header('content-type: text/xml');
+        header('content-type: text/xml; charset=utf-8');
         $domain = $request->getParameter('domain');
         $this->forward404Unless($domain);
         if (function_exists('apc_fetch'))
