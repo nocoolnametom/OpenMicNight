@@ -364,7 +364,7 @@ class feedActions extends sfActions
             if ($episode->getGraphicFile())
             {
                 $subreddit = 
-                $new_entry['thumbnail'] = 'http://' . $this->_subreddits[$episode->getSubredditId()]->getCfDomainName() . '/' . $this->getGraphicFile();
+                $new_entry['thumbnail'] = 'http://' . $this->_subreddits[$episode->getSubredditId()]->getCfDomainName() . '/' . $episode->getGraphicFile();
             }
             $feedArray['entries'][] = $new_entry;
         }
