@@ -338,13 +338,7 @@ class feedActions extends sfActions
                 'is_nsfw' => ($episode->getIsNsfw() ? 'yes' : 'no'),
             );
             if ($episode->getGraphicFile())
-                $new_entry['thumbnail'] = str_replace('frontend_dev.php/', '',
-                                                      $this->getController()->genUrl('@homepage',
-                                                                                     true))
-                        . trim(str_replace(sfConfig::get('sf_web_dir'), '',
-                                                         ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()),
-                                                         '/') . '/'
-                        . $episode->getGraphicFile();
+                $new_entry['thumbnail'] = $episode->getGraphicUrl();
             $feedArray['entries'][] = $new_entry;
         }
 
