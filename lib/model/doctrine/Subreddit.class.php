@@ -43,11 +43,11 @@ class Subreddit extends BaseSubreddit
 
     public function save(Doctrine_Connection $conn = null)
     {
-        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('name',
-                                                                                      $this->_modified) && $this->_get('name')))) {
+        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('domain',
+                                                                                      $this->_modified) && $this->_get('domain')))) {
             if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
                 $bucket_name = $this->createAmazonBucketName(
-                        ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
+                        ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('domain'));
                 $this->setBucketName($bucket_name);
             }
             if ($this->getBucketName() && (!$this->getCfDistId() || strlen($this->getCfDistId() == 0))) {
