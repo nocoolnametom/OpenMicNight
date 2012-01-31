@@ -11,6 +11,7 @@
 class feedActions extends sfActions
 {
     protected $_users = array();
+    protected $_subreddits = array();
     protected $_assignments = array();
     protected $_episode_location = 'episode/released';
     //protected $_episode_location = 'episode';
@@ -180,13 +181,16 @@ class feedActions extends sfActions
         if (count($subreddit_ids)) {
             $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
-            $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
+            $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
 
         $assignment_ids = array();
+        $subreddit_ids = array();
         foreach ($episodes as $episode) {
             if (!in_array($episode->getEpisodeAssignmentId(), $assignment_ids))
                 $assignment_ids[] = $episode->getEpisodeAssignmentId();
+            if (!in_array($episode->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $episode->getSubredditId();
         }
         $assignment_data = Api::getInstance()->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
@@ -207,6 +211,13 @@ class feedActions extends sfActions
         $this->_users = array();
         foreach ($users as $user) {
             $this->_users[$user->getIncremented()] = $user;
+        }
+        
+        $subreddit_data = Api::getInstance()->get('subreddit/id=' . implode(',', $subreddit_ids), true);
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        foreach ($subreddits as $subreddit) {
+            if (!array_key_exists($subreddit->getIncremented(), $this->_subreddits))
+                $this->_subreddits[$subreddit->getIncremented()] = $subreddit;
         }
 
         return $episodes;
@@ -216,12 +227,15 @@ class feedActions extends sfActions
     {
         $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                 . $subreddit_id, true);
-        $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
+        $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
 
         $assignment_ids = array();
+        $subreddit_ids = array();
         foreach ($episodes as $episode) {
             if (!in_array($episode->getEpisodeAssignmentId(), $assignment_ids))
                 $assignment_ids[] = $episode->getEpisodeAssignmentId();
+            if (!in_array($episode->getSubredditId(), $subreddit_ids))
+                $subreddit_ids[] = $episode->getSubredditId();
         }
         $assignment_data = Api::getInstance()->get('episodeassignment?id='
                 . implode(',', $assignment_ids), true);
@@ -242,6 +256,13 @@ class feedActions extends sfActions
         $this->_users = array();
         foreach ($users as $user) {
             $this->_users[$user->getIncremented()] = $user;
+        }
+
+        $subreddit_data = Api::getInstance()->get('subreddit/id=' . implode(',', $subreddit_ids), true);
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        foreach ($subreddits as $subreddit) {
+            if (!array_key_exists($subreddit->getIncremented(), $this->_subreddits))
+                $this->_subreddits[$subreddit->getIncremented()] = $subreddit;
         }
 
         return $episodes;
@@ -255,13 +276,15 @@ class feedActions extends sfActions
         foreach ($subreddits as $subreddit) {
             if (!in_array($subreddit->getIncremented(), $subreddit_ids))
                 $subreddit_ids[] = $subreddit->getIncremented();
+            if (!array_key_exists($subreddit->getIncremented(), $this->_subreddits))
+                $this->_subreddits[$subreddit->getIncremented()] = $subreddit;
         }
 
         $episodes = array();
         if (count($subreddit_ids)) {
             $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
-            $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
+            $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
         }
 
         $assignment_ids = array();
@@ -297,6 +320,7 @@ class feedActions extends sfActions
                                        $atom_link, $description,
                                        $is_nsfw = false)
     {
+        $subreddit_domains = array();
         $feedArray = array(
             'title' => ProjectConfiguration::getApplicationName() . ' - ' . $title,
             'link' => $link,
@@ -338,7 +362,10 @@ class feedActions extends sfActions
                 'is_nsfw' => ($episode->getIsNsfw() ? 'yes' : 'no'),
             );
             if ($episode->getGraphicFile())
-                $new_entry['thumbnail'] = $episode->getGraphicUrl();
+            {
+                $subreddit = 
+                $new_entry['thumbnail'] = 'http://' . $this->_subreddits[$episode->getSubredditId()]->getCfDomainName() . '/' . $this->getGraphicFile();
+            }
             $feedArray['entries'][] = $new_entry;
         }
 
