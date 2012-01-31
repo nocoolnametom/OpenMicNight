@@ -180,7 +180,7 @@ class feedActions extends sfActions
         if (count($subreddit_ids)) {
             $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
-            $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
+            $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
         }
 
         $assignment_ids = array();
@@ -216,7 +216,7 @@ class feedActions extends sfActions
     {
         $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                 . $subreddit_id, true);
-        $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
+        $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
 
         $assignment_ids = array();
         foreach ($episodes as $episode) {
@@ -261,7 +261,7 @@ class feedActions extends sfActions
         if (count($subreddit_ids)) {
             $episode_data = Api::getInstance()->get($this->_episode_location . '?subreddit_id='
                     . implode(',', $subreddit_ids), true);
-            $episodes = ApiDoctrine::createQuickObjectArray($episode_data['body']);
+            $episodes = ApiDoctrine::createObjectArray('Episode', $episode_data['body']);
         }
 
         $assignment_ids = array();
