@@ -174,6 +174,8 @@ class subredditActions extends sfActions
         $page = $this->page = (int) $request->getParameter('page', 1);
         $this->forward404Unless(is_integer($page));
         $page = ($page == 1 || $page == 0) ? '' : '?page=' . $page;
+        $page .= ((strpos($page, '?') !== false) ? '&' : '?');
+        $page .= 'sort_by=domain,asc';
         $subreddit_data = Api::getInstance()->setUser($auth_key)->get('subreddit' . $page, true);
         $this->subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
     }
