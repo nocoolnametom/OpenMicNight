@@ -134,7 +134,7 @@ Episode:
     graphic_file: { type: string(255) }
     is_nsfw: { type: boolean, default: 0 }
     title: { type: string(255) }
-    description: { type: string(4000) }
+    description: { type: string(10000) }
     is_submitted: { type: boolean, default: 0 }
     submitted_at: { type: timestamp }
     is_approved: { type: boolean, default: 0 }
