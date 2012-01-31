@@ -35,12 +35,13 @@
 </div>
 <div class="clear_columns">&nbsp;</div>
 <div id="home_page_alert">
-    <h3>We are in Alpha</h3>
-    <p>This is the alpha version of
+    <h3>We are in Beta</h3>
+    <p>This is the beta version of
     <?php echo ProjectConfiguration::getApplicationName() ?>.  I can't vouch for
     performance issues, and it's currently hosted on my own Linux node server.
     I'd like to move everything to Amazon, but first I'd just like to get things
     moving.  Please register your user and begin sharing episodes.  However, be
-    aware that we probably won't be moving old episodes from this alpha version
-    to the upcoming beta.</p>
+    aware that we probably won't be moving old episodes from this beta version
+    to the upcoming release, so hold onto your episodes in case you need to
+    re-release them again.</p>
 </div>

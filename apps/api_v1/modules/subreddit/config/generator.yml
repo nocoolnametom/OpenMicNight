@@ -29,6 +29,7 @@ generator:
 # the default number of items in a page
         pagination_page_size:          50
 #        sort_custom:                   false   # set to true to allow the client to pass a sort_by and a sort_order parameter
-#        sort_default:                  []      # set to [column, asc|desc] in order to sort on a column
+# set to [column, asc|desc] in order to sort on a column
+        sort_default:                  [domain,asc]
         filters:
           domain:                       { multiple: true }

@@ -271,6 +271,11 @@ class Episode extends BaseEpisode
         $s3 = new AmazonS3();
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
+            $nice_filename = $this->getNiceFilename();
+            while ($s3->if_object_exists($bucket, $nice_filename)) {
+                $nice_filename = $nice_filename . rand(0,1000);
+                $this->setNiceFilename($nice_filename);
+            }
             $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
                 'fileUpload' => $file_location . $this->getAudioFile(),
                 'acl' => AmazonS3::ACL_PUBLIC,
@@ -416,7 +421,7 @@ class Episode extends BaseEpisode
                 $subject = $email->generateSubject($parameters);
                 $body = $email->generateBodyText($parameters, $prefer_html);
 
-                $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationEmailAddress());
+                $from = sfConfig::get('app_email_address', ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
                 
                 AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
                 

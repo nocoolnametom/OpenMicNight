@@ -5,7 +5,6 @@
 all:
   # If you're using nginx, please make sure you have XSendfile installed. See
   # the README for more info.
-  email_address:              donotreply@herddit.com
   enable_slow_audio_download: false
   sf_guard_plugin:
     only_login_with_email:    true

@@ -43,15 +43,15 @@ class Subreddit extends BaseSubreddit
 
     public function save(Doctrine_Connection $conn = null)
     {
-        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('name',
-                                                                                      $this->_modified) && $this->_get('name')))) {
+        if (sfConfig::get('sf_environment') != 'test' && ($this->isNew() || (in_array('domain',
+                                                                                      $this->_modified) && $this->_get('domain')))) {
             if (!$this->getBucketName() || strlen($this->getBucketName()) == 0) {
                 $bucket_name = $this->createAmazonBucketName(
-                        ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('name'));
+                        ProjectConfiguration::getAmazonBucketPrefix() . $this->_get('domain'));
                 $this->setBucketName($bucket_name);
             }
             if ($this->getBucketName() && (!$this->getCfDistId() || strlen($this->getCfDistId() == 0))) {
-                $results = $this->createAmazonDistribution($this->getBucketName());
+                $results = $this->createAmazonDistribution($bucket_name);
                 if ($results !== false) {
                     $this->setCfDistId($results['dist_id']);
                     $this->setCfDomainName($results['domain_name']);
@@ -90,6 +90,7 @@ class Subreddit extends BaseSubreddit
 
     public function createAmazonBucketName($name)
     {
+        $name = strtolower($name);
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
@@ -531,7 +532,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
 
@@ -559,7 +560,7 @@ AND episode_assignment.author_type_id = $longest_id;
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
         

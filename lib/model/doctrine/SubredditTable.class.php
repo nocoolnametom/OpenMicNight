@@ -269,7 +269,7 @@ class SubredditTable extends Doctrine_Table
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
 
@@ -297,7 +297,7 @@ class SubredditTable extends Doctrine_Table
         $body = $email->generateBodyText($parameters, $prefer_html);
 
         $from = sfConfig::get('app_email_address',
-                                     ProjectConfiguration::getApplicationEmailAddress());
+                                     ProjectConfiguration::getApplicationName() . ' <' .ProjectConfiguration::getApplicationEmailAddress() . '>');
         
         AppMail::sendMail($address, $from, $subject, $body, $prefer_html ? $body : null);
         
