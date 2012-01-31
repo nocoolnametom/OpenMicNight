@@ -7,6 +7,6 @@
         <li>| <?php echo link_to('How to Use ' . ProjectConfiguration::getApplicationName(), '@how_to_use') ?></li>
         <li>| <?php include_partial('global/feedback_link', array('feedback_text' => 'Offer Feedback')) ?></li>
         <li>| <?php echo link_to('Roadmap', '@roadmap') ?></li>
-        <li>| <?php echo link_to('Blog', '@blog') ?></li>
+        <li>| <?php echo link_to('Blog', 'http://herddit.blogspot.com/') ?></li>
     </ul>
 </div>
