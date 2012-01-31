@@ -338,7 +338,7 @@ class feedActions extends sfActions
                 'is_nsfw' => ($episode->getIsNsfw() ? 'yes' : 'no'),
             );
             if ($episode->getGraphicFile())
-                $new_entry['thumbnail'] = 'http://' . rtrim (ProjectConfiguration::getApplicationAmazonCloudFrontUrl(), '/') . '/upload/' . $episode->getGraphicFile();
+                $new_entry['thumbnail'] = rtrim (ProjectConfiguration::getApplicationAmazonCloudFrontUrl(), '/') . '/upload/' . $episode->getGraphicFile();
             $feedArray['entries'][] = $new_entry;
         }
 
