@@ -90,6 +90,7 @@ class Subreddit extends BaseSubreddit
 
     public function createAmazonBucketName($name)
     {
+        $name = strtolower($name);
         ProjectConfiguration::registerAws();
         $s3 = new AmazonS3();
         if (!$s3->if_bucket_exists($name)) {
