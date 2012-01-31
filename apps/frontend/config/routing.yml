@@ -128,8 +128,8 @@ how_to_help:
 how_to_use:
   url:   /how_to_use
 #  Ideally you'd have an example episode that explains how to use the app.
-#  param: { module: episode, action: show, id: 1 }
-  param: { module: home, action: howtouse }
+  param: { module: episode, action: show, id: 22 }
+#  param: { module: home, action: howtouse }
 
 roadmap:
   url:   /roadmap
