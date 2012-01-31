@@ -92,7 +92,7 @@ class homeActions extends sfActions
             $subjects = sfConfig::get('app_feedback_subjects', array());
             $subject = ProjectConfiguration::getApplicationName() . ': ' . (array_key_exists($values['subject'], $subjects) ? $subjects[$values['subject']] : $values['subject']);
             
-            $from_address = ($name ? "$name <$email>" : $email);
+            $from_address = ($this->getUser()->getApiUserId() ? "$name <$email>" : ProjectConfiguration::getApplicationEmailAddress());
             
             AppMail::sendMail($to, $from_address, $subject, $message);
 
