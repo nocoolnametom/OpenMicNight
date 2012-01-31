@@ -65,6 +65,6 @@ echo link_to($subreddit->getName(),
         </div>
     </div>
     <?php if ($episode->getRedditPostUrl()): ?>
-        <div id="reddit_post"><?php link_to('View this on Reddit', $episode->getRedditPostUrl()); ?></div>
+        <div id="reddit_post"><?php echo link_to('View this on Reddit', $episode->getRedditPostUrl()); ?></div>
     <?php endif; ?>
 </div>
