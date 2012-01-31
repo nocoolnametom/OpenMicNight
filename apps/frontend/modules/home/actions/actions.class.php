@@ -83,12 +83,15 @@ class homeActions extends sfActions
 
             $name = $this->getUser()->getApiUserId() ? ($user->getPreferredName() ? $user->getPreferredName() : $user->getFullName()) : $this->form->getValue('name');
             $email = $this->getUser()->getApiUserId() ? $user->getEmailAddress() : $this->form->getValue('email');
+            
+            $email = ($name ? $name . ' <' . $email . '>' : $email);
 
             $signinUrl = $this->getUser()->getReferer($request->getReferer());
             
             $message = $name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl;
             $to = ProjectConfiguration::getApplicationFeedbackAddress();
-            $subject = $values['subject'];
+            $subjects = sfConfig::get('app_feedback_subjects', array());
+            $subject = (array_key_exists($values['subject'], $subjects) ? $subjects[$values['subject']] : $values['subject']);
             
             AppMail::sendMail($to, $email, $subject, $message);
 
