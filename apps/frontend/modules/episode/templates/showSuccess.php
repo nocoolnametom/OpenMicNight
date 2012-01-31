@@ -64,5 +64,7 @@ echo link_to($subreddit->getName(),
             <?php echo html_entity_decode($sf_user->formatMarkdown($episode->getDescription())); ?>
         </div>
     </div>
-    <div id="reddit_post"><?php echo '';//link_to('View this on Reddit', 'http://www.reddit.com/'); ?></div>
+    <?php if ($episode->getRedditPostUrl()): ?>
+        <div id="reddit_post"><?php link_to('View this on Reddit', $episode->getRedditPostUrl()); ?></div>
+    <?php endif; ?>
 </div>
