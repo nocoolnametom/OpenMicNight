@@ -81,15 +81,13 @@ class homeActions extends sfActions
 
             $values = $this->form->getValues();
 
-            ProjectConfiguration::registerZend();
-
             $name = $this->getUser()->getApiUserId() ? ($user->getPreferredName() ? $user->getPreferredName() : $user->getFullName()) : $this->form->getValue('name');
             $email = $this->getUser()->getApiUserId() ? $user->getEmailAddress() : $this->form->getValue('email');
 
             $signinUrl = $this->getUser()->getReferer($request->getReferer());
             
             $message = $name . ' ' . $email . "\n" . $values['message'] . "\nReferer:" . $signinUrl;
-            $to = ProjectConfiguration::getApplicationEmailAddress();
+            $to = ProjectConfiguration::getApplicationFeedbackAddress();
             $subject = $values['subject'];
             
             AppMail::sendMail($to, $email, $subject, $message);

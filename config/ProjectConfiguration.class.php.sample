@@ -131,6 +131,11 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static public function getApplicationEmailAddress()
     {
+        return 'do-not-reply@herddit.com';
+    }
+    
+    static public function getApplicationFeedbackAddress()
+    {
         return 'webmaster@herddit.com';
     }
 
