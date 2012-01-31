@@ -233,7 +233,7 @@ class Episode extends BaseEpisode
     {
         ProjectConfiguration::registerAws();
         $file_location = rtrim(ProjectConfiguration::getEpisodeAudioFileLocalDirectory(), '/') . '/';
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = ProjectConfiguration::getApplicationAmazonBucketName();
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
@@ -268,7 +268,7 @@ class Episode extends BaseEpisode
         if (!file_exists($filename))
             throw new Exception("No local file to upload!");
         ProjectConfiguration::registerAws();
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = $this->getSubreddit()->getBucketName();
         if ($s3->if_bucket_exists($bucket)) {
             $response = $s3->create_object($bucket, $this->getNiceFilename(), array(
@@ -294,7 +294,7 @@ class Episode extends BaseEpisode
     {
         ProjectConfiguration::registerAws();
         $file_location = ProjectConfiguration::getEpisodeAudioFileLocalDirectory();
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = $this->getSubreddit()->getBucketName();
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");
@@ -322,7 +322,7 @@ class Episode extends BaseEpisode
     public function deleteEpisodeFileFromAmazon($filename = null, $bucket = null)
     {
         ProjectConfiguration::registerAws();
-        $s3 = new AmazonS3;
+        $s3 = new AmazonS3();
         $bucket = (is_null($bucket) ? $this->getSubreddit()->getBucketName() : $bucket);
         if (!$s3->if_bucket_exists($bucket)) {
             throw new Exception("Amazon bucket '$bucket' does not exist!");

@@ -10,7 +10,6 @@
  */
 class feedActions extends sfActions
 {
-
     protected $_users = array();
     protected $_assignments = array();
     protected $_episode_location = 'episode/released';
@@ -24,7 +23,9 @@ class feedActions extends sfActions
      */
     public function executeIndex(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
+        $format = $request->getParameter('format',
+                                         $request->getParameter('sf_format',
+                                                                'rss'));
 
         header('content-type: text/xml');
         if (function_exists('apc_fetch'))
@@ -36,7 +37,11 @@ class feedActions extends sfActions
             $episodes = $this->getIndexEpisodes();
 
             $feedArray = $this->createFeedArray(
-                    $episodes, 'Main Feed', $this->generateUrl('homepage', array(), true), $this->getController()->genUrl('@feed_index_' . $format, true), ProjectConfiguration::getApplicationName() . ' is a collection'
+                    $episodes, 'Main Feed',
+                    $this->generateUrl('homepage', array(), true),
+                                       $this->getController()->genUrl('@feed_index_' . $format,
+                                                                      true),
+                                                                      ProjectConfiguration::getApplicationName() . ' is a collection'
                     . ' of user-submitted audio episodes that cover an incredibly'
                     . ' wide variety of topics, organized around Reddit communities.'
                     . '  You can customize your own personal feed by registering a'
@@ -58,20 +63,24 @@ class feedActions extends sfActions
      */
     public function executeUser(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
+        $format = $request->getParameter('format',
+                                         $request->getParameter('sf_format',
+                                                                'rss'));
 
         header('content-type: text/xml');
         $reddit_key = $request->getParameter('reddit_validation_key');
         $this->forward404Unless($reddit_key);
         if (function_exists('apc_fetch'))
-            $output = apc_fetch('user_feed_' . $reddit_key . '_' . $format, $success);
+            $output = apc_fetch('user_feed_' . $reddit_key . '_' . $format,
+                                $success);
         else
             $success = false;
         if (!$success) {
 
             $user_data = Api::getInstance()->get('user?reddit_validation_key='
                     . $reddit_key, true);
-            $users = ApiDoctrine::createObjectArray('sfGuardUser', $user_data['body']);
+            $users = ApiDoctrine::createObjectArray('sfGuardUser',
+                                                    $user_data['body']);
 
             $user = (count($users) ? $users[0] : null);
 
@@ -80,7 +89,11 @@ class feedActions extends sfActions
             $episodes = $this->getUserEpisodes($user->getIncremented());
 
             $feedArray = $this->createFeedArray(
-                    $episodes, $user->getUsername(), $this->getController()->genUrl('@profile', true), $this->getController()->genUrl('@feed_user_' . $format . '?reddit_validation_key=' . $user->getRedditValidationKey(), true), ProjectConfiguration::getApplicationName() . ' is a collection'
+                    $episodes, $user->getUsername(),
+                    $this->getController()->genUrl('@profile', true),
+                                                   $this->getController()->genUrl('@feed_user_' . $format . '?reddit_validation_key=' . $user->getRedditValidationKey(),
+                                                                                  true),
+                                                                                  ProjectConfiguration::getApplicationName() . ' is a collection'
                     . ' of user-submitted audio episodes that cover an incredibly'
                     . ' wide variety of topics, organized around Reddit communities.'
                     . '  This is the customized feed for ' . $user->getUsername()
@@ -90,7 +103,8 @@ class feedActions extends sfActions
 
             $output = $this->produceFeed($feedArray, $format);
             if (function_exists('apc_add'))
-                apc_add('user_feed_' . $reddit_key . '_' . $format, $output, $this->_time_to_cache);
+                apc_add('user_feed_' . $reddit_key . '_' . $format, $output,
+                        $this->_time_to_cache);
         }
         echo $output;
         throw new sfStopException();
@@ -103,13 +117,16 @@ class feedActions extends sfActions
      */
     public function executeSubreddit(sfWebRequest $request)
     {
-        $format = $request->getParameter('format', $request->getParameter('sf_format', 'rss'));
+        $format = $request->getParameter('format',
+                                         $request->getParameter('sf_format',
+                                                                'rss'));
 
         header('content-type: text/xml');
         $domain = $request->getParameter('domain');
         $this->forward404Unless($domain);
         if (function_exists('apc_fetch'))
-            $output = apc_fetch('subreddit_feed' . $domain . '_' . $format, $success);
+            $output = apc_fetch('subreddit_feed' . $domain . '_' . $format,
+                                $success);
         else
             $success = false;
         if (!$success) {
@@ -124,9 +141,12 @@ class feedActions extends sfActions
             $episodes = $this->getSubredditEpisodes($subreddit->getIncremented());
 
             $feedArray = $this->createFeedArray(
-                    $episodes, $subreddit->getName(), $this->getController()->genUrl('@subreddit_index?domain='
-                            . $subreddit->getDomain(), true), $this->getController()->genUrl('@feed_subreddit_' . $format . '?domain='
-                            . $subreddit->getDomain(), true), ProjectConfiguration::getApplicationName() . ' is a collection'
+                    $episodes, $subreddit->getName(),
+                    $this->getController()->genUrl('@subreddit_index?domain='
+                            . $subreddit->getDomain(), true),
+                                                   $this->getController()->genUrl('@feed_subreddit_' . $format . '?domain='
+                            . $subreddit->getDomain(), true),
+                                                                                  ProjectConfiguration::getApplicationName() . ' is a collection'
                     . ' of user-submitted audio episodes that cover an incredibly'
                     . ' wide variety of topics, organized around Reddit communities.'
                     . '  This is the customized feed for the '
@@ -135,7 +155,8 @@ class feedActions extends sfActions
 
             $output = $this->produceFeed($feedArray, $format);
             if (function_exists('apc_add'))
-                apc_add('subreddit_feed' . $domain . '_' . $format, $output, $this->_time_to_cache);
+                apc_add('subreddit_feed' . $domain . '_' . $format, $output,
+                        $this->_time_to_cache);
         }
         echo $output;
         throw new sfStopException();
@@ -148,7 +169,8 @@ class feedActions extends sfActions
         $membership_data = Api::getInstance()->get('membershiptype?'
                 . 'sf_guard_user_id=' . $user_id
                 . '&type=admin,moderator,user', true);
-        $memberships = ApiDoctrine::createObjectArray('sfGuardUserSubredditMembership', $membership_data['body']);
+        $memberships = ApiDoctrine::createObjectArray('sfGuardUserSubredditMembership',
+                                                      $membership_data['body']);
         foreach ($memberships as $membership) {
             if (!in_array($membership->getSubredditId(), $subreddit_ids))
                 $subreddit_ids[] = $membership->getSubredditId();
@@ -228,16 +250,11 @@ class feedActions extends sfActions
     protected function getIndexEpisodes()
     {
         $subreddit_ids = array();
-
-        $subreddits = sfConfig::get('app_web_app_feed_default_subreddits');
-        if (count($subreddits)) {
-            $subreddit_data = Api::getInstance()->get('subreddit?domain='
-                    . implode(',', $subreddits), true);
-            $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
-            foreach ($subreddits as $subreddit) {
-                if (!in_array($subreddit->getIncremented(), $subreddit_ids))
-                    $subreddit_ids[] = $subreddit->getIncremented();
-            }
+        $subreddit_data = Api::getInstance()->get('subreddit/defaultfeed', true);
+        $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
+        foreach ($subreddits as $subreddit) {
+            if (!in_array($subreddit->getIncremented(), $subreddit_ids))
+                $subreddit_ids[] = $subreddit->getIncremented();
         }
 
         $episodes = array();
@@ -276,7 +293,9 @@ class feedActions extends sfActions
         return $episodes;
     }
 
-    protected function createFeedArray($episode_array, $title, $link, $atom_link, $description, $is_nsfw = false)
+    protected function createFeedArray($episode_array, $title, $link,
+                                       $atom_link, $description,
+                                       $is_nsfw = false)
     {
         $feedArray = array(
             'title' => ProjectConfiguration::getApplicationName() . ' - ' . $title,
@@ -309,16 +328,22 @@ class feedActions extends sfActions
                     'email' => $this->_users[$this->_assignments[$episode->getEpisodeAssignmentId()]->getSfGuardUserId()]->getEmailAddress(),
                     'uri' => $this->getController()->genUrl('@homepage', true),
                 ),
-                'audio_location' => ($episode->getFileIsRemote() ? $episode->getRemoteUrl() : $this->getController()->genUrl('@episode_audio?id='
+                'audio_location' => ($episode->getFileIsRemote() ? $episode->getRemoteUrl()
+                            : $this->getController()->genUrl('@episode_audio?id='
                                 . $episode->getId() . '&format='
                                 . substr($episode->getAudioFile(), -3, 3), true)),
                 'thumbnail' => '',
-                'reddit_post_url' => ($episode->getRedditPostUrl() ? $episode->getRedditPostUrl() : ''),
+                'reddit_post_url' => ($episode->getRedditPostUrl() ? $episode->getRedditPostUrl()
+                            : ''),
                 'is_nsfw' => ($episode->getIsNsfw() ? 'yes' : 'no'),
             );
             if ($episode->getGraphicFile())
-                $new_entry['thumbnail'] = str_replace('frontend_dev.php/', '', $this->getController()->genUrl('@homepage', true))
-                        . trim(str_replace(sfConfig::get('sf_web_dir'), '', ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()), '/') . '/'
+                $new_entry['thumbnail'] = str_replace('frontend_dev.php/', '',
+                                                      $this->getController()->genUrl('@homepage',
+                                                                                     true))
+                        . trim(str_replace(sfConfig::get('sf_web_dir'), '',
+                                                         ProjectConfiguration::getEpisodeGraphicFileLocalDirectory()),
+                                                         '/') . '/'
                         . $episode->getGraphicFile();
             $feedArray['entries'][] = $new_entry;
         }
@@ -335,9 +360,11 @@ class feedActions extends sfActions
         $rss = $doc->createElement('rss');
         $rss->setAttribute('version', '2.0');
         $rss->setAttribute('xmlns:dc', 'http://purl.org/dc/elements/1.1/');
-        $rss->setAttribute('xmlns:itunes', 'http://www.itunes.com/dtds/podcast-1.0.dtd');
+        $rss->setAttribute('xmlns:itunes',
+                           'http://www.itunes.com/dtds/podcast-1.0.dtd');
         $rss->setAttribute('xmlns:atom', 'http://www.w3.org/2005/Atom');
-        $rss->setAttribute('xmlns:content', 'http://purl.org/rss/1.0/modules/content/');
+        $rss->setAttribute('xmlns:content',
+                           'http://purl.org/rss/1.0/modules/content/');
         $doc->appendChild($rss);
 
         $channel = $doc->createElement('channel');
@@ -345,27 +372,35 @@ class feedActions extends sfActions
 
         $c_language = $doc->createElement('language', $feedArray['language']);
         $c_title = $doc->createElement('title', $feedArray['title']);
-        $c_description = $doc->createElement('description', $feedArray['description']);
+        $c_description = $doc->createElement('description',
+                                             $feedArray['description']);
         $c_pubdate = $doc->createElement('pubDate', date('D, j M Y H:i:s O'));
-        $c_generator = $doc->createElement('generator', ProjectConfiguration::getApplicationName() . ' Feed Module');
+        $c_generator = $doc->createElement('generator',
+                                           ProjectConfiguration::getApplicationName() . ' Feed Module');
         $c_link = $doc->createElement('link', $feedArray['link']);
-        $c_dc_creator = $doc->createElement('dc:creator', ProjectConfiguration::getApplicationName());
+        $c_dc_creator = $doc->createElement('dc:creator',
+                                            ProjectConfiguration::getApplicationName());
         $c_atom_link = $doc->createElement('atom:link');
         $c_atom_link->setAttribute('rel', 'self');
         $c_atom_link->setAttribute('type', 'application/atom+xml');
         $c_atom_link->setAttribute('href', $feedArray['atom_link']);
 
-        $itunes_author = $doc->createElement('itunes:author', ProjectConfiguration::getApplicationName());
-        $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
-        $itunes_summary = $doc->createElement('itunes:summary', $feedArray['description']);
+        $itunes_author = $doc->createElement('itunes:author',
+                                             ProjectConfiguration::getApplicationName());
+        $itunes_explicit = $doc->createElement('itunes:explicit',
+                                               $feedArray["is_nsfw"]);
+        $itunes_summary = $doc->createElement('itunes:summary',
+                                              $feedArray['description']);
         $itunes_category = $doc->createElement('itunes:category');
         $itunes_category->setAttribute('text', 'Technology');
         $itunes_subcategory = $doc->createElement('itunes:category');
         $itunes_subcategory->setAttribute('text', 'Podcasting');
         $itunes_category->appendChild($itunes_subcategory);
         $itunes_owner = $doc->createElement('itunes:owner');
-        $itunes_name = $doc->createElement('itunes:name', ProjectConfiguration::getApplicationName());
-        $itunes_email = $doc->createElement('itunes:email', ProjectConfiguration::getApplicationEmailAddress());
+        $itunes_name = $doc->createElement('itunes:name',
+                                           ProjectConfiguration::getApplicationName());
+        $itunes_email = $doc->createElement('itunes:email',
+                                            ProjectConfiguration::getApplicationEmailAddress());
         $itunes_owner->appendChild($itunes_name);
         $itunes_owner->appendChild($itunes_email);
 
@@ -387,15 +422,21 @@ class feedActions extends sfActions
         foreach ($feedArray['entries'] as $entry) {
             $item = $doc->createElement('item');
             $i_title = $doc->createElement('title', $entry['title']);
-            $thumbnail_tag = $entry['thumbnail'] ? '<p><img src="' . $entry['thumbnail'] . '"/></p>' : '';
+            $thumbnail_tag = $entry['thumbnail'] ? '<p><img src="' . $entry['thumbnail'] . '"/></p>'
+                        : '';
             $i_description = $doc->createElement('description');
-            $cdata_description = $doc->createCDATASection($thumbnail_tag . substr($entry['description'], 0, 500));
+            $cdata_description = $doc->createCDATASection($thumbnail_tag . substr($entry['description'],
+                                                                                  0,
+                                                                                  500));
             $i_description->appendChild($cdata_description);
-            $i_pubdate = $doc->createElement('pubDate', date('D, j M Y H:i:s O', $entry['released']));
+            $i_pubdate = $doc->createElement('pubDate',
+                                             date('D, j M Y H:i:s O',
+                                                  $entry['released']));
             $i_link = $doc->createElement('link', $entry['link']);
             $i_guid = $doc->createElement('guid', $entry['link']);
             $i_author = $doc->createElement('author', $entry['author']['name']);
-            $i_dc_creator = $doc->createElement('dc:creator', $entry['author']['name']);
+            $i_dc_creator = $doc->createElement('dc:creator',
+                                                $entry['author']['name']);
             $i_content = $doc->createElement('content:encoded');
             if ($entry['thumbnail']) {
                 $i_image = $doc->createElement('image');
@@ -413,20 +454,26 @@ class feedActions extends sfActions
                 //$item->appendChild($i_media_content);
             }
             if ($entry['reddit_post_url']) {
-                $e_comments = $doc->createElement('comments', $entry['reddit_post_url']);
+                $e_comments = $doc->createElement('comments',
+                                                  $entry['reddit_post_url']);
                 $item->appendChild($e_comments);
             }
             $cdata_content = $doc->createCDATASection($thumbnail_tag . $entry['description']);
             $i_content->appendChild($cdata_content);
             $i_enclosure = $doc->createElement('enclosure');
-            $i_enclosure->setAttribute('url', str_replace('https://', 'http://', $entry['audio_location']));
+            $i_enclosure->setAttribute('url',
+                                       str_replace('https://', 'http://',
+                                                   $entry['audio_location']));
             $audio_info = $this->getRemoteInfo($entry['audio_location']);
             $i_enclosure->setAttribute('type', $audio_info['type']);
             $i_enclosure->setAttribute('length', $audio_info['length']);
 
-            $i_itunes_author = $doc->createElement('itunes:author', $entry['author']['name']);
-            $i_itunes_summary = $doc->createElement('itunes:summary', strip_tags($entry['description']));
-            $i_itunes_explicit = $doc->createElement('itunes:explicit', $entry['is_nsfw']);
+            $i_itunes_author = $doc->createElement('itunes:author',
+                                                   $entry['author']['name']);
+            $i_itunes_summary = $doc->createElement('itunes:summary',
+                                                    strip_tags($entry['description']));
+            $i_itunes_explicit = $doc->createElement('itunes:explicit',
+                                                     $entry['is_nsfw']);
 
             $item->appendChild($i_title);
             $item->appendChild($i_description);
@@ -455,7 +502,8 @@ class feedActions extends sfActions
         $doc = new DomDocument('1.0', 'utf-8');
 
         $feed = $doc->createElement('feed');
-        $feed->setAttribute('xmlns:itunes', 'http://www.itunes.com/dtds/podcast-1.0.dtd');
+        $feed->setAttribute('xmlns:itunes',
+                            'http://www.itunes.com/dtds/podcast-1.0.dtd');
         $feed->setAttribute('xmlns', 'http://www.w3.org/2005/Atom');
         $feed->setAttribute('xml:lang', $feedArray['language']);
         $doc->appendChild($feed);
@@ -465,7 +513,8 @@ class feedActions extends sfActions
         $subtitle = $doc->createElement('subtitle', $feedArray['description']);
         $subtitle->setAttribute('type', 'text');
         $updated = $doc->createElement('updated', date('Y-m-d\TH:i:sP'));
-        $generator = $doc->createElement('generator', ProjectConfiguration::getApplicationName() . ' Feed Module');
+        $generator = $doc->createElement('generator',
+                                         ProjectConfiguration::getApplicationName() . ' Feed Module');
         $link_alternate = $doc->createElement('link');
         $link_alternate->setAttribute('rel', 'alternate');
         $link_alternate->setAttribute('type', 'text/html');
@@ -475,11 +524,14 @@ class feedActions extends sfActions
         $link_self->setAttribute('type', 'application/atom+xml');
         $link_self->setAttribute('href', $feedArray['atom_link']);
         $id = $doc->createElement('id', $feedArray['link']);
-        $author = $doc->createElement('author');
-        {
-            $a_name = $doc->createElement('name', ProjectConfiguration::getApplicationName());
-            $a_email = $doc->createElement('email', ProjectConfiguration::getApplicationEmailAddress());
-            $a_uri = $doc->createElement('uri', $this->getController()->genUrl('@homepage', true));
+        $author = $doc->createElement('author'); {
+            $a_name = $doc->createElement('name',
+                                          ProjectConfiguration::getApplicationName());
+            $a_email = $doc->createElement('email',
+                                           ProjectConfiguration::getApplicationEmailAddress());
+            $a_uri = $doc->createElement('uri',
+                                         $this->getController()->genUrl('@homepage',
+                                                                        true));
             $author->appendChild($a_name);
             $author->appendChild($a_email);
             $author->appendChild($a_uri);
@@ -493,8 +545,10 @@ class feedActions extends sfActions
         $feed->appendChild($id);
         $feed->appendChild($author);
 
-        $itunes_explicit = $doc->createElement('itunes:explicit', $feedArray["is_nsfw"]);
-        $itunes_summary = $doc->createElement('itunes:summary', $feedArray['description']);
+        $itunes_explicit = $doc->createElement('itunes:explicit',
+                                               $feedArray["is_nsfw"]);
+        $itunes_summary = $doc->createElement('itunes:summary',
+                                              $feedArray['description']);
         $itunes_category = $doc->createElement('itunes:category');
         $itunes_category->setAttribute('text', 'Technology');
         $itunes_subcategory = $doc->createElement('itunes:category');
@@ -512,20 +566,27 @@ class feedActions extends sfActions
             $e_title->setAttribute('type', 'html');
             $cdata_title = $doc->createCDATASection($entry['title']);
             $e_title->appendChild($cdata_title);
-            $thumbnail_tag = $entry['thumbnail'] ? '<p><img src="' . $entry['thumbnail'] . '"/></p>' : '';
+            $thumbnail_tag = $entry['thumbnail'] ? '<p><img src="' . $entry['thumbnail'] . '"/></p>'
+                        : '';
             $e_summary = $doc->createElement('summary');
             $e_summary->setAttribute('type', 'html');
-            $cdata_summary = $doc->createCDATASection($thumbnail_tag . substr($entry['description'], 0, 500));
+            $cdata_summary = $doc->createCDATASection($thumbnail_tag . substr($entry['description'],
+                                                                              0,
+                                                                              500));
             $e_summary->appendChild($cdata_summary);
-            $e_published = $doc->createElement('published', date('Y-m-d\TH:i:sP', $entry['released']));
-            $e_updated = $doc->createElement('updated', date('Y-m-d\TH:i:sP', ($entry['modified'] > $entry['released'] ? $entry['modified'] : $entry['released'])));
+            $e_published = $doc->createElement('published',
+                                               date('Y-m-d\TH:i:sP',
+                                                    $entry['released']));
+            $e_updated = $doc->createElement('updated',
+                                             date('Y-m-d\TH:i:sP',
+                                                  ($entry['modified'] > $entry['released']
+                                        ? $entry['modified'] : $entry['released'])));
             $e_link = $doc->createElement('link');
             $e_link->setAttribute('rel', 'alternate');
             $e_link->setAttribute('type', 'text/html');
             $e_link->setAttribute('href', $entry['link']);
             $e_id = $doc->createElement('id', $entry['link']);
-            $e_author = $doc->createElement('author');
-            {
+            $e_author = $doc->createElement('author'); {
                 $ea_name = $doc->createElement('name', $entry['author']['name']);
                 $e_author->appendChild($ea_name);
             }
@@ -539,7 +600,8 @@ class feedActions extends sfActions
             $e_content = $doc->createElement('content');
             //$e_content->setAttribute('xmlns:xhtml',
             //                         'http://www.w3.org/1999/xhtml');
-            $e_content->setAttribute('type', 'xhtml'); {
+            $e_content->setAttribute('type', 'xhtml');
+            {
                 $fragment = $doc->createDocumentFragment();
                 $fragment->appendXML($thumbnail_tag . $entry['content']);
                 $e_div = $doc->createElement('div');
@@ -563,9 +625,12 @@ class feedActions extends sfActions
             $fentry->appendChild($e_enclosure);
             $fentry->appendChild($e_content);
 
-            $i_itunes_author = $doc->createElement('itunes:author', $entry['author']['name']);
-            $i_itunes_summary = $doc->createElement('itunes:summary', strip_tags($entry['description']));
-            $i_itunes_explicit = $doc->createElement('itunes:explicit', $entry['is_nsfw']);
+            $i_itunes_author = $doc->createElement('itunes:author',
+                                                   $entry['author']['name']);
+            $i_itunes_summary = $doc->createElement('itunes:summary',
+                                                    strip_tags($entry['description']));
+            $i_itunes_explicit = $doc->createElement('itunes:explicit',
+                                                     $entry['is_nsfw']);
             $fentry->appendChild($i_itunes_author);
             $fentry->appendChild($i_itunes_summary);
             $fentry->appendChild($i_itunes_explicit);
@@ -580,7 +645,8 @@ class feedActions extends sfActions
 
     protected function produceFeed($feedArray, $format = 'atom')
     {
-        switch ($format) {
+        switch ($format)
+        {
             case 'rss':
                 return $this->produceRss($feedArray);
                 break;
@@ -601,7 +667,8 @@ class feedActions extends sfActions
         );
         foreach ($response['wrapper_data'] as $header) {
             if (strpos($header, 'Content-Length') !== false) {
-                $return['length'] = (int) str_replace('Content-Length: ', '', $header);
+                $return['length'] = (int) str_replace('Content-Length: ', '',
+                                                      $header);
             }
             if (strpos($header, 'Content-Type') !== false) {
                 $return['type'] = str_replace('Content-Type: ', '', $header);
@@ -609,5 +676,4 @@ class feedActions extends sfActions
         }
         return $return;
     }
-
 }

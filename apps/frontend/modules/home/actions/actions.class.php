@@ -24,15 +24,12 @@ class homeActions extends sfActions
 
         $this->episodes = $this->getIndexEpisodes();
 
-        $subreddits = sfConfig::get('app_web_app_feed_default_subreddits');
-        if (count($subreddits)) {
-            $subreddit_data = Api::getInstance()->get('subreddit?domain='
-                    . implode(',', $subreddits), true);
+
+            $subreddit_data = Api::getInstance()->get('subreddit/defaultfeed', true);
             $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
             foreach ($subreddits as $subreddit) {
                 $this->subreddits[$subreddit->getIncremented()] = $subreddit;
             }
-        }
     }
 
     public function executeFeedback(sfWebRequest $request)
