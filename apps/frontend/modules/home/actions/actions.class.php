@@ -149,9 +149,8 @@ class homeActions extends sfActions
     {
         $subreddit_ids = array();
 
-        sfConfig::set('default_subreddits', $subreddits);
         if (count($subreddits)) {
-            $subreddit_data = Api::getInstance()->get('subreddit?defaultfeed', true);
+            $subreddit_data = Api::getInstance()->get('subreddit/defaultfeed', true);
             $subreddits = ApiDoctrine::createQuickObjectArray($subreddit_data['body']);
             foreach ($subreddits as $subreddit) {
                 if (!in_array($subreddit->getIncremented(), $subreddit_ids))
