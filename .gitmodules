@@ -25,3 +25,6 @@
 [submodule "plugins/sfHadoriThemePlugin"]
 	path = plugins/sfHadoriThemePlugin
 	url = git://github.com/bshaffer/sfHadoriThemePlugin.git
+[submodule "lib/vendor/AWS-SDK"]
+	path = lib/vendor/AWS-SDK
+	url = git://github.com/amazonwebservices/aws-sdk-for-php.git
