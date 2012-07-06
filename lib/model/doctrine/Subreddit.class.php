@@ -51,7 +51,7 @@ class Subreddit extends BaseSubreddit
                 $this->setBucketName($bucket_name);
             }
             if ($this->getBucketName() && (!$this->getCfDistId() || strlen($this->getCfDistId() == 0))) {
-                if (!$bucket_name) {
+                if (!isset($bucket_name) || !$bucket_name) {
                     $bucket_name = $this->getBucketName();
                 }
                 $results = $this->createAmazonDistribution($bucket_name);
