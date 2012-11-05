@@ -212,7 +212,7 @@ class ProjectConfiguration extends sfProjectConfiguration
 
     static public function getSMTPUser()
     {
-        return'herddit@herddit.net';
+        return 'herddit@herddit.net';
     }
 
     static public function getSMTPPassword()

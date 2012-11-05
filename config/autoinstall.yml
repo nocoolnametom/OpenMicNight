@@ -1,0 +1,67 @@
+# Basic Data for Auto-Installation of OpenMicNight
+# This is data that is set into application config files during installation
+# To change these values after installation, change them in their respective
+# config files within the application, or "re-install" the configuration.
+
+# Amazon AWS-SDK key information. Required.
+amazon:
+  dev:
+    key:                     AMAZONKEY
+    secret:                  AMAZONSECRET
+  prod:
+    key:                     AMAZONKEY
+    secret:                  AMAZONSECRET
+#
+# Google reCAPTCHA key information. Required.
+recaptcha:
+  publickey:                 foo
+  privatekey:                bar
+  mailhide:
+    publickey:               foo
+    privatekey:              bar
+#
+shared_data:
+# The following hashes MUST be changed and must be the same across all servers used. Required.
+  web_app_api_key:           75d32b53a0ccf8b92d7513c548351261d8d5cafe
+  web_app_api_shared_secret: dbc39c8cecb3dda2146ae9ba0f0bdb0879755180
+  web_app_image_hash_salt:   b00ee53725416c87d7a84df7cfc28dac853b4283
+  web_app_audio_hash_salt:   3afb1b9abd1a8638e0dc0b376b63a394832cdaeb
+# The following URLs helps keep multiple servers in sync when serving the same app. Required.
+  web_app_api_location:
+    dev:                     http://api.openmicnight/v1/api_v1_dev.php/
+    prod:                    http://api.openmicnight/v1/
+  web_frontend_location:     http://openmicnight/
+# The following are just internal data regarding the web app's use of the API. Optional to change.
+  web_app_api_name:          The Web App
+  web_app_developer:         Tom Doggett
+  web_app_email:             nocoolnametom@gmail.com
+# This is the list of default subreddits used in the default feed and list view. Optional to change.
+  default_subreddits:        [ programming ]
+# 
+# The following is the database access information.  Must be valid for the app to function.
+databases:
+  dsn:                       mysql:host=localhost;dbname=openmicnight
+  username:                  openmicnight
+  password:                  xEPPfVDaXRCtD6Ax
+#
+project_configuration:
+# This location must be valid for the app to function.
+  autoload_location:         dirname(__FILE__).'/../lib/vendor/symfony/lib/autoload/sfCoreAutoload.class.php'
+# Everything else below is optional.
+  app_name:                  Herddit
+  app_subname:               alpha
+  app_email_address:         do-not-reply@herddit.com
+  app_feedback_address:      webmaster@herddit.com
+  default_subreddit_address: http://www.reddit.com/r/secretsanta
+  amazon_bucket_prefix:      herddit-
+  amazon_app_bucket:         herdditmainstuff
+  amazon_cloudfront_url:     https://s3.amazonaws.com/herdditmainstuff/
+  audio_file_local_dir:      sfConfig::get('sf_data_dir').'/temp/'
+  image_file_local_dir:      sfConfig::get('sf_web_dir').'/uploads/graphics/'
+  subreddit_local_dir:	     sfConfig::get('sf_data_dir').'/subreddit/'
+  tropo_hash_length:         10
+  use_ses_for_email:         true
+  smtp_server:               smtp.google.com
+  smtp_use_tls:              true
+  smtp_user:                 herddit@herddit.net
+  smtp_password:             yoursmtppassword
