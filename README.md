@@ -16,7 +16,7 @@ would also be the publicly-facing side of the podcast, and voting and comments
 can be placed on the site.  Obviously, we’d try and get an automatic posting
 back to the subreddit when a new episode is released.
 
-It’s open mic night!
+It’s OpenMicNight!
 
 
 ## Requirements
